@@ -8,9 +8,9 @@ import classes from './App.module.css';
 import '../src/css/globals.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import AlertModal from './components/Modal';
-import NavBar from './components/NavBar';
+//import NavBar from './components/NavBar';
 import NetworkAlert from './components/NetworkAlert';
-import Footer from './components/Footer';
+//import Footer from './components/Footer';
 import AuctionPage from './pages/Auction';
 import GovernancePage from './pages/Governance';
 import CreateProposalPage from './pages/CreateProposal';
@@ -51,9 +51,8 @@ function App() {
           provider={chainId === ChainId.Mainnet ? library : undefined}
           batchLookups={true}
         >
-          <NavBar />
           <Switch>
-            <Route exact path="/" component={AuctionPage} />
+            <Route exact path="/" component={ComposerPage} />
             <Redirect from="/auction/:id" to="/noun/:id" />
             <Route
               exact
@@ -68,7 +67,10 @@ function App() {
             <Route exact path="/composer" component={ComposerPage} />
             <Route component={NotFoundPage} />
           </Switch>
-          <Footer />
+          <p>
+          	&nbsp;
+          </p>
+
         </AvatarProvider>
       </BrowserRouter>
     </div>
