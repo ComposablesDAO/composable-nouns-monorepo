@@ -8,6 +8,7 @@ import {
 } from 'react-bootstrap';
 
 import Noun from '../../components/Noun';
+import Link from '../../components/Link';
 import { ImageData, getNounData, getRandomNounSeed } from '@nouns/assets';
 import { DecodedImage } from '@nouns/sdk';
 import { INounSeed } from '../../wrappers/nounToken';
@@ -218,6 +219,22 @@ interface DroppableItemSet {
   items: DroppableItem[];
 }
 
+const composableDocLink = (
+  <Link
+    text="Composable Nouns Framework"
+    url="https://hackmd.io/@jhernanx/B1AoPVcR5"
+    leavesPage={true}
+  />
+);
+
+const nounsDiscordLink = (
+  <Link
+    text="Nouns Discord"
+    url="http://discord.gg/nouns"
+    leavesPage={true}
+  />
+);
+
 const ComposerPage = () => {
 
   const [stateItemsArray, setStateItemsArray] = useState<DroppableItemSet[]>([]);
@@ -366,7 +383,7 @@ const ComposerPage = () => {
   return (
       <Container fluid="lg">
         <Row>
-          <Col lg={10} className={classes.headerRow}>
+          <Col lg={12} className={classes.headerRow}>
             <span>
               <Trans>Build</Trans>
             </span>
@@ -374,9 +391,26 @@ const ComposerPage = () => {
               <Trans>Composer</Trans>
             </h1>
             <p>
-                Try out different combinations in the Composer,
-                and when you're ready, you can commit it on-chain.
+            	More than just a Playground, the Composer allows you to take your Noun on-chain and add on top of it with different traits and layer options.
+                Try out different combinations and when you're ready, you'll be able to commit your changes on-chain. 
+			</p>
+            <p>
+                How does this happen? It's magic!
+                No, it's actually just the {composableDocLink}. The framework allows you upgrade your Noun on-chain in exciting new ways! 
+                You can add unique visual layers to enhance your Noun's appearance, 
+                dynamically update the on-chain metadata for use in games and other websites, 
+                and a whole lot more with Composable Nouns.
             </p>
+            <p>
+                Interested in learning more and being one of the first to play with Composable Nouns live? 
+                Let us know in the {nounsDiscordLink}!
+            </p>
+            <p>
+                Are you a Noundry artist or an extension creator? We'd love to add your creations to the Composables marketplace!
+            </p>
+            <p style={{ fontStyle: 'italic', fontSize: 'small' }}>
+            	Note: During this demo, the Noun presented is randomly generated. The traits in your Inventory are pulled from the recent Noundry competition.
+			</p>
           </Col>
         </Row>
 		<DragDropContext onDragEnd={(result: any) => {onDragEnd(result);}}>

@@ -1,5 +1,6 @@
 .headerRow {
   margin: 2rem 0;
+  margin-bottom: 0;
 }
 .headerRow span {
   color: #8c8d92;
@@ -13,6 +14,7 @@
 }
 .headerRow p {
   color: #14161b;
+  padding-top: 0;
 }
 
 .categoryHeader  {
