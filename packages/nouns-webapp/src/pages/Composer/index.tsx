@@ -385,7 +385,7 @@ const ComposerPage = () => {
         <Row>
           <Col lg={12} className={classes.headerRow}>
             <span>
-              <Trans>Build</Trans>
+              <Trans>Pre-Alpha</Trans>
             </span>
             <h1>
               <Trans>Composer</Trans>
