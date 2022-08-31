@@ -160,13 +160,13 @@ const DroppableControl: React.FC<{ droppableId: string; droppableItems: Droppabl
   
   const styleJustify = (itemLimit === 1) ? 'center' : 'left';
   const styleOverflow = (itemLimit === 1) ? 'visible' : 'auto';
+  const direction = (itemLimit > 10) ? 'vertical' : 'horizontal';
   const isDropDisabled = (droppableItems.length === itemLimit) ? true : false;
-  console.log('drop', droppableItems.length, itemLimit, isDropDisabled);
     
   return (
     <>
     <strong>{droppableId}</strong>
-    <Droppable droppableId={droppableId} direction="horizontal" isDropDisabled={isDropDisabled}>
+    <Droppable droppableId={droppableId} direction={direction} isDropDisabled={isDropDisabled}>
         {(provided: any, snapshot: any) => (
             <div
                 ref={provided.innerRef}
