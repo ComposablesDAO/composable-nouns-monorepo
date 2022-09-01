@@ -144,6 +144,7 @@ const getListStyle = (isDraggingOver: boolean, styleJustify: string, styleOverfl
   padding: 8,
   overflow: styleOverflow,
   minHeight: '140px',
+  maxHeight: '525px',
   justifyContent: styleJustify,
   borderRadius: '16px',
 });
