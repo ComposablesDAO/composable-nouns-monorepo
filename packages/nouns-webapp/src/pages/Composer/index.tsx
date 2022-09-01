@@ -1,24 +1,33 @@
 //import React from 'react';
-import React, { useEffect, useState } from 'react';
+import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 import classes from './Composer.module.css';
 import {
   Container,
   Col,
-  Row
+  Button,
+  Image,
+  Row,
+  Form,
+  OverlayTrigger,
+  Popover,
 } from 'react-bootstrap';
 
 import Noun from '../../components/Noun';
 import Link from '../../components/Link';
 import { ImageData, getNounData, getRandomNounSeed } from '@nouns/assets';
-import { DecodedImage } from '@nouns/sdk';
+import { DecodedImage, EncodedImage, PNGCollectionEncoder } from '@nouns/sdk';
+
 import { INounSeed } from '../../wrappers/nounToken';
 import { default as ComposablesImageData } from '../../libs/image-data/image-data-composables.json';
-
+import InfoIcon from '../../assets/icons/Info.svg';
+import { PNG } from 'pngjs';
 
 import { Trans } from '@lingui/macro';
 
 // @ts-ignore
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+
+/* start SVG */
 
 const decodeImage = (image: string): DecodedImage => {
   const data = image.replace(/^0x/, '');
@@ -94,6 +103,10 @@ const buildSVG = (
   return `${svgWithoutEndTag}</svg>`;
 };
 
+/* end SVG */
+
+/* start drag and drop */
+
 // a little function to help us with reordering the result
 const reorder = (list: DroppableItem[], startIndex: any, endIndex: any) => {
   const result = Array.from(list);
@@ -144,17 +157,10 @@ const getListStyle = (isDraggingOver: boolean, styleJustify: string, styleOverfl
   padding: 8,
   overflow: styleOverflow,
   minHeight: '140px',
-  maxHeight: '525px',
+  maxHeight: '400px',
   justifyContent: styleJustify,
   borderRadius: '16px',
 });
-
-const shortName = (name: string) => {
-  if (name.length < 21) {
-    return name;
-  }
-  return [name.substr(0, 7), name.substr(name.length - 11, 11)].join('...');
-};
 
 const DroppableControl: React.FC<{ droppableId: string; droppableItems: DroppableItem[]; itemLimit: number; }> = props => {
   const { droppableId, droppableItems, itemLimit } = props;
@@ -212,13 +218,23 @@ interface DroppableItem {
   svg: string;
   id: string;
   content: string;
-  palette: string[];
+  palette: string[] | null;
 }  	
 
 interface DroppableItemSet {
   id: string;
   items: DroppableItem[];
 }
+
+/* end drag and drop */
+
+
+const shortName = (name: string) => {
+  if (name.length < 21) {
+    return name;
+  }
+  return [name.substr(0, 7), name.substr(name.length - 11, 11)].join('...');
+};
 
 const composableDocLink = (
   <Link
@@ -236,14 +252,29 @@ const nounsDiscordLink = (
   />
 );
 
+interface PendingCustomTrait {
+  type: string;
+  data: string;
+  filename: string;
+}
+
+const DEFAULT_TRAIT_TYPE = 'heads';
+
+const encoder = new PNGCollectionEncoder(ImageData.palette);
+
 const ComposerPage = () => {
 
   const [stateItemsArray, setStateItemsArray] = useState<DroppableItemSet[]>([]);
 
   const [seed, setSeed] = useState<INounSeed>();
-  const [nounSVG, setNounSVG] = useState<string>();
-    
+  const [nounSVG, setNounSVG] = useState<string>();    
   const [initLoad, setInitLoad] = useState<boolean>(true);
+
+  const [pendingTrait, setPendingTrait] = useState<PendingCustomTrait>();
+  const [isPendingTraitValid, setPendingTraitValid] = useState<boolean>();
+
+  const customTraitFileRef = useRef<HTMLInputElement>(null);
+
 
   useEffect(() => {
     if (initLoad) {
@@ -380,6 +411,118 @@ const ComposerPage = () => {
 	        );			
         }
     };  
+
+  const resetTraitFileUpload = () => {
+    if (customTraitFileRef.current) {
+      customTraitFileRef.current.value = '';
+    }
+  };
+
+  let pendingTraitErrorTimeout: NodeJS.Timeout;
+  const setPendingTraitInvalid = () => {
+    setPendingTraitValid(false);
+    resetTraitFileUpload();
+    pendingTraitErrorTimeout = setTimeout(() => {
+      setPendingTraitValid(undefined);
+    }, 5_000);
+  };
+
+  const validateAndSetCustomTrait = (file: File | undefined) => {
+    if (pendingTraitErrorTimeout) {
+      clearTimeout(pendingTraitErrorTimeout);
+    }
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const buffer = Buffer.from(e?.target?.result!);
+        const png = PNG.sync.read(buffer);
+        if (png.width !== 32 || png.height !== 32) {
+          throw new Error('Image must be 32x32');
+        }
+        const filename = file.name?.replace('.png', '') || 'custom';
+        const data = encoder.encodeImage(filename, {
+          width: png.width,
+          height: png.height,
+          rgbaAt: (x: number, y: number) => {
+            const idx = (png.width * y + x) << 2;
+            const [r, g, b, a] = [
+              png.data[idx],
+              png.data[idx + 1],
+              png.data[idx + 2],
+              png.data[idx + 3],
+            ];
+            return {
+              r,
+              g,
+              b,
+              a,
+            };
+          },
+        });
+        setPendingTrait({
+          data,
+          filename,
+          type: DEFAULT_TRAIT_TYPE,
+        });
+        setPendingTraitValid(true);
+      } catch (error) {
+        setPendingTraitInvalid();
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
+  const uploadCustomTrait = () => {
+    const { type, data, filename } = pendingTrait || {};
+    if (type && data && filename) {
+      const images = ImageData.images as Record<string, EncodedImage[]>;
+      images[type].unshift({
+        filename,
+        data,
+      });
+      
+      const droppableId = 'Inventory';
+      const items = getList(droppableId);
+
+      const part = {
+        "filename": filename,
+        "data": data,
+      };
+      const parts = [ part ];
+      const svg = buildSVG(parts, ImageData.palette, 'fff');      
+      
+      items.unshift({filename, data, svg, id: filename, content: filename, palette: null});
+
+	  setStateItemsArray(
+        stateItemsArray.map((droppables) =>
+            droppables.id === droppableId
+                ? { ...droppables, items: items }
+                : { ...droppables }
+        )
+      );
+
+      /*
+      const title = traitKeyToTitle[type];
+      const trait = traits?.find(t => t.title === title);
+      */
+
+      resetTraitFileUpload();
+      setPendingTrait(undefined);
+      setPendingTraitValid(undefined);
+      /*
+      traitButtonHandler(trait!, 0);
+      setSelectIndexes({
+        ...selectIndexes,
+        [title]: 0,
+      });
+      */
+    }
+  };
+
   
   return (
       <Container fluid="lg">
@@ -456,6 +599,51 @@ const ComposerPage = () => {
           	  <Col lg={12}>
 				<DroppableControl droppableId="Inventory" droppableItems={getList('Inventory')} itemLimit={1000} />          
           	  </Col>
+
+          	  <Col lg={3}>
+
+	            <label style={{ margin: '1rem 0 .25rem 0' }} htmlFor="custom-trait-upload">
+	              <Trans>Upload Custom Trait</Trans>
+	              <OverlayTrigger
+	                trigger="hover"
+	                placement="top"
+	                overlay={
+	                  <Popover>
+	                    <div style={{ padding: '0.25rem' }}>
+	                      <Trans>Only 32x32 PNG images are accepted</Trans>
+	                    </div>
+	                  </Popover>
+	                }
+	              >
+	                <Image
+	                  style={{ margin: '0 0 .25rem .25rem' }}
+	                  src={InfoIcon}
+	                  className={classes.voteIcon}
+	                />
+	              </OverlayTrigger>
+	            </label>
+	            <Form.Control
+	              type="file"
+	              id="custom-trait-upload"
+	              accept="image/PNG"
+	              isValid={isPendingTraitValid}
+	              isInvalid={isPendingTraitValid === false}
+	              ref={customTraitFileRef}
+	              className={classes.fileUpload}
+	              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+	                validateAndSetCustomTrait(e.target.files?.[0])
+	              }
+	            />
+	            {pendingTrait && (
+	              <>
+	                <Button onClick={() => uploadCustomTrait()} className={classes.primaryBtn}>
+	                  <Trans>Upload</Trans>
+	                </Button>
+	              </>
+	            )}
+
+          	  </Col>
+          	  
         	</Row>
 		</DragDropContext>
       </Container>
