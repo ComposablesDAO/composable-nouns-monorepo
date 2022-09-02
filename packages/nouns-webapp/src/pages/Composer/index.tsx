@@ -403,7 +403,7 @@ const ComposerPage = () => {
     const { type, data, filename } = pendingTrait || {};
     if (type && data && filename) {
       const images = ImageData.images as Record<string, EncodedImage[]>;
-      images[type].unshift({
+      images[type].push({
         filename,
         data,
       });
