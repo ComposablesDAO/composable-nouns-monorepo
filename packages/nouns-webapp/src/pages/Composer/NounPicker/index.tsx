@@ -81,7 +81,7 @@ const NounPicker: React.FC<{ onSelect: (extensionName: string | undefined, seed:
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [svg]);
-  
+    
   return (
     <>
       {ReactDOM.createPortal(
@@ -94,10 +94,21 @@ const NounPicker: React.FC<{ onSelect: (extensionName: string | undefined, seed:
       )}
       {ReactDOM.createPortal(
         <div className={classes.modal}>
-          Select a Noun to use in the Composer
+          Select a Noun to use in the Composer:
 
 	      <Container fluid="lg" className={classes.nounContainer}>
 	        <Row>
+	        
+		      {activeAccount === undefined && (
+		      	<p style={{textAlign: 'center', color: 'red'}}>		      	
+		        Please connect your wallet first
+    			</p>
+		      )}	        
+		      {activeAccount !== undefined && nounNfts && nounNfts.data && nounNfts.data.ownedNfts.length === 0 && (
+		      	<p style={{textAlign: 'center', color: 'red'}}>		      	
+		        No Nouns found in your wallet!
+    			</p>
+		      )}	        
 
 	          {nounNfts && nounNfts.data && nounNfts.data.ownedNfts &&
 	            nounNfts.data.ownedNfts.map((nft: any, i: any) => {

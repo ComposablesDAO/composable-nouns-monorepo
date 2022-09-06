@@ -221,8 +221,11 @@ const ComposerPage = () => {
   }
 
   const generateRandomSeed = () => {
-  	const seed = getRandomNounSeed(getImageData(nounExtensionName));
-  	setNounExtensionName('Nouns');
+  	const randomIndex = Math.floor(Math.random() * nounExtensions.length);
+  	const randomExtension = nounExtensions[randomIndex];
+  	
+  	const seed = getRandomNounSeed(getImageData(randomExtension.name));
+  	setNounExtensionName(randomExtension.name);
 	setSeed(seed);
   };
 
@@ -239,7 +242,6 @@ const ComposerPage = () => {
 		  }		  
 		  
 		  setNounExtensions(extensions);
-		  console.log('Loading up fetched extension image data');
 	    };
 
 	    setNounExtensions(config.composables.extensions);
