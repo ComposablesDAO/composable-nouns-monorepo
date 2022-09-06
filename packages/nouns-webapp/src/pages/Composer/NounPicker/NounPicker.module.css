@@ -1,0 +1,65 @@
+.modal {
+  position: fixed;
+  top: 10vh;
+  z-index: 100;
+  padding: 1rem;
+  text-align: center;
+  border-radius: 12px;
+  left: calc(50% - 15rem);
+  width: 30rem;
+  
+  height: 500px;
+  background: white;
+  overflow-y: auto;
+  font-weight: bold;
+}
+
+.displayNounFooter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.displayNounFooter span {
+  color: white;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+.displayNounFooter button {
+  width: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  border: none;
+}
+
+.displayNounFooter button:hover,
+.displayNounFooter button:active,
+.displayNounFooter button:focus {
+  background: rgba(255, 255, 255, 0.4) !important;
+  box-shadow: none !important;
+}
+
+.nounContainer {
+  margin-top: 10px;
+}
+
+.nounImg {
+  border-radius: 16px;
+}
+.nounWrapper {
+  margin-bottom: 0.1rem;
+}
+.nounOuterWrapper {
+  font-size: small;
+  margin-bottom: 0.5rem;
+}
+
+.nounImg:hover {
+  cursor: pointer;
+  transform: scale(1.01);
+}
+
+@media (max-width: 992px) {
+  .modal {
+    width: 80% !important;
+    left: 10% !important;
+  }
+}

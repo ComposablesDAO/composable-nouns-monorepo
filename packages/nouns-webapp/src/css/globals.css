@@ -10,3 +10,280 @@
 body {
   overflow-x: hidden;
 }
+
+/* stylelint-disable selector-max-id */
+
+#shepherdModalOverlayContainer {
+  -ms-filter: "progid:dximagetransform.microsoft.gradient.alpha(Opacity=50)";
+  filter: alpha(opacity=50);
+  height: 100%;
+  left: 0;
+  opacity: 0.5;
+  position: fixed;
+  top: 0;
+  -webkit-transition: all 0.3s ease-out;
+  transition: all 0.3s ease-out;
+  width: 100%;
+  z-index: 9997;
+}
+
+.shepherd-modal.shepherd-enabled {
+  position: relative;
+  z-index: 9998;
+}
+
+/**
+ * Block clicks except for those that would occur
+ * on Shepherd elements or on the target element.
+*/
+
+.shepherd-active.shepherd-modal-is-visible :not(.shepherd-target) {
+  pointer-events: none;
+}
+
+.shepherd-active.shepherd-modal-is-visible .shepherd-target, .shepherd-active.shepherd-modal-is-visible .shepherd-cancel-link, .shepherd-active.shepherd-modal-is-visible .shepherd-button {
+  pointer-events: auto;
+}
+
+/* stylelint-enable */
+
+/**
+ * Styles to support usage of Tippy.js tooltips (https://atomiks.github.io/tippyjs)
+ */
+
+/**
+ * Tippy tooltips have the following base structure:
+ *
+ * <div class="tippy-popper" x-placement="top">
+ *   <div class="tippy-tooltip">
+ *     <div class="tippy-content">
+ *       [[ Content Here ]]
+ *     </div>
+ *   </div>
+ * </div>
+ */
+
+.tippy-popper {
+  z-index: 9999;
+}
+
+.tippy-popper .tippy-arrow {
+  border: 16px solid transparent;
+  content: '';
+  display: block;
+  height: 0;
+  pointer-events: none;
+  position: absolute;
+  width: 0;
+}
+
+.tippy-popper[x-placement^='top'] {
+  margin-bottom: 16px;
+}
+
+.tippy-popper[x-placement^='top'] .tippy-arrow {
+  border-bottom: 0;
+  border-top-color: #ffffff;
+  left: calc(50% - 16px);
+}
+
+.tippy-popper[x-placement^='bottom'] {
+  margin-top: 16px;
+}
+
+.tippy-popper[x-placement^='bottom'] .tippy-arrow {
+  border-bottom-color: #eeeeee;
+  border-top: 0;
+  left: calc(50% - 16px);
+}
+
+.tippy-popper[x-placement^='left'] {
+  margin-right: 16px;
+}
+
+.tippy-popper[x-placement^='left'] .tippy-arrow {
+  border-left-color: #ffffff;
+  border-right: 0;
+  margin-top: -16px;
+  top: calc(50% - 16px);
+}
+
+.tippy-popper[x-placement^='right'] {
+  margin-left: 16px;
+}
+
+.tippy-popper[x-placement^='right'] .tippy-arrow {
+  border-left: 0;
+  border-right-color: #ffffff;
+  top: calc(50% - 16px);
+}
+
+.tippy-popper .tippy-tooltip {
+  background-color: rgba(0, 0, 0, 0);
+  max-height: 100%;
+  max-width: 100%;
+  padding: 0;
+  width: 420px;
+}
+
+.shepherd-element, .shepherd-element:after, .shepherd-element:before, .shepherd-element *, .shepherd-element *:after, .shepherd-element *:before {
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+.shepherd-element {
+  -webkit-filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.2));
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.2));
+}
+
+.shepherd-element.shepherd-has-title .shepherd-content header {
+  background: #eeeeee;
+  padding: 1em;
+}
+
+.shepherd-element .shepherd-content {
+  background: #ffffff;
+  font-size: inherit;
+  padding: 0;
+}
+
+.shepherd-element .shepherd-content header {
+  *zoom: 1;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: flex-end;
+  line-height: 2em;
+  padding: 0.75em 0.75em 0;
+}
+
+.shepherd-element .shepherd-content header:after {
+  clear: both;
+  content: '';
+  display: table;
+}
+
+.shepherd-element .shepherd-content header .shepherd-title, .shepherd-element .shepherd-content header .shepherd-cancel-link {
+  font-weight: normal;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  vertical-align: middle;
+}
+
+.shepherd-element .shepherd-content header .shepherd-title {
+  color: rgba(0, 0, 0, 0.75);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-flex: 1;
+  -ms-flex: 1 0 auto;
+  flex: 1 0 auto;
+  font-size: 1.1em;
+}
+
+.shepherd-element .shepherd-content header .shepherd-cancel-link {
+  color: rgba(179, 179, 179, 0.75);
+  font-size: 2em;
+  margin-left: auto;
+  text-decoration: none;
+  -webkit-transition: color 0.5s ease;
+  transition: color 0.5s ease;
+}
+
+.shepherd-element .shepherd-content header .shepherd-cancel-link:before {
+  content: '\00d7';
+}
+
+.shepherd-element .shepherd-content header .shepherd-cancel-link:hover {
+  color: rgba(0, 0, 0, 0.75);
+}
+
+.shepherd-element .shepherd-content .shepherd-text {
+  color: rgba(0, 0, 0, 0.75);
+  line-height: 1.3em;
+  padding: 0.75em;
+}
+
+.shepherd-element .shepherd-content .shepherd-text a, .shepherd-element .shepherd-content .shepherd-text a:visited, .shepherd-element .shepherd-content .shepherd-text a:active {
+  border-bottom: 1px dotted;
+  border-bottom-color: rgba(0, 0, 0, 0.75);
+  color: rgba(0, 0, 0, 0.75);
+  text-decoration: none;
+}
+
+.shepherd-element .shepherd-content .shepherd-text a:hover, .shepherd-element .shepherd-content .shepherd-text a:visited:hover, .shepherd-element .shepherd-content .shepherd-text a:active:hover {
+  border-bottom-style: solid;
+}
+
+.shepherd-element .shepherd-content .shepherd-text p {
+  margin-top: 0;
+}
+
+.shepherd-element .shepherd-content .shepherd-text p:last-child {
+  margin-bottom: 0;
+}
+
+.shepherd-element .shepherd-content footer {
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  padding: 0 0.75em 0.75em;
+}
+
+.shepherd-element .shepherd-content footer .shepherd-buttons {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  text-align: right;
+}
+
+.shepherd-element .shepherd-content footer .shepherd-buttons li {
+  display: inline;
+  margin: 0 0.5em 0 0;
+}
+
+.shepherd-element .shepherd-content footer .shepherd-buttons li:last-child {
+  margin-right: 0;
+}
+
+.shepherd-element .shepherd-content footer .shepherd-buttons li .shepherd-button {
+  display: inline-block;
+  *display: inline;
+  vertical-align: middle;
+  *vertical-align: auto;
+  *zoom: 1;
+  background: #557ca8;
+  border: 0;
+  border-radius: 3px;
+  color: rgba(255, 255, 255, 0.75);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.8em;
+  letter-spacing: 0.1em;
+  line-height: 1em;
+  padding: 0.75em 2em;
+  text-transform: uppercase;
+  -webkit-transition: all 0.5s ease;
+  transition: all 0.5s ease;
+}
+
+.shepherd-element .shepherd-content footer .shepherd-buttons li .shepherd-button:hover {
+  background: #0a1632;
+}
+
+.shepherd-element .shepherd-content footer .shepherd-buttons li .shepherd-button.shepherd-button-secondary {
+  background: #e5e5e5;
+  color: rgba(0, 0, 0, 0.75);
+}
+
+.shepherd-element .shepherd-content footer .shepherd-buttons li .shepherd-button.shepherd-button-secondary:hover {
+  background: #cbcbcb;
+  color: rgba(0, 0, 0, 0.75);
+}

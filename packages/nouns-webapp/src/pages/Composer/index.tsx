@@ -14,19 +14,26 @@ import {
 
 import Noun from '../../components/Noun';
 import Link from '../../components/Link';
-import { ImageData, getNounData, getRandomNounSeed } from '@nouns/assets';
+import { ImageData } from '@nouns/assets';
 import { EncodedImage, PNGCollectionEncoder } from '@nouns/sdk';
-import { buildSVG } from '../../utils/composables-svg-builder';
+import { buildSVG } from '../../utils/composables/nounsSDK';
+import { getNounData, getRandomNounSeed } from '../../utils/composables/nounsAssets';
 
 import { INounSeed } from '../../wrappers/nounToken';
 import { default as ComposablesImageData } from '../../libs/image-data/image-data-composables.json';
 import InfoIcon from '../../assets/icons/Info.svg';
 import { PNG } from 'pngjs';
+import NounModal from './NounModal';
+import NounPicker from './NounPicker';
+
+import config from '../../config';
 
 import { Trans } from '@lingui/macro';
 
 // @ts-ignore
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import { ShepherdTour, ShepherdOptionsWithType } from 'react-shepherd'
+import 'shepherd.js/dist/css/shepherd.css';
 
 /* start drag and drop */
 
@@ -183,27 +190,61 @@ interface PendingCustomTrait {
 
 const DEFAULT_TRAIT_TYPE = 'heads';
 
-const encoder = new PNGCollectionEncoder(ImageData.palette);
+//TODO: remove encoder dependency on singular image data, have each uploaded item stand on its own
+let encoder = new PNGCollectionEncoder(ImageData.palette);
 
 const ComposerPage = () => {
 
   const [stateItemsArray, setStateItemsArray] = useState<DroppableItemSet[]>([]);
+  const [nounExtensionName, setNounExtensionName] = useState<string>('Nouns');    
+  const [nounExtensions, setNounExtensions] = useState<any[]>([]);
 
   const [seed, setSeed] = useState<INounSeed>();
   const [nounSVG, setNounSVG] = useState<string>();    
   const [initLoad, setInitLoad] = useState<boolean>(true);
+  const [initLoadTour, setInitLoadTour] = useState<boolean>(true);
+  const [displayNoun, setDisplayNoun] = useState<boolean>(false);
+  const [displayNounPicker, setDisplayNounPicker] = useState<boolean>(false);
 
   const [pendingTrait, setPendingTrait] = useState<PendingCustomTrait>();
   const [isPendingTraitValid, setPendingTraitValid] = useState<boolean>();
 
   const customTraitFileRef = useRef<HTMLInputElement>(null);
+  
+  const getImageData = (name: string) => {
+	  for (const extension of nounExtensions) {
+	  	if (extension.name === name) {
+	  		return extension.imageData;	  		
+	  	}
+	  }	  
+	  return ImageData;	    
+  }
 
+  const generateRandomSeed = () => {
+  	const seed = getRandomNounSeed(getImageData(nounExtensionName));
+  	setNounExtensionName('Nouns');
+	setSeed(seed);
+  };
 
   useEffect(() => {
     if (initLoad) {
-	  	const seed = getRandomNounSeed();
-	  	setSeed(seed);
-	
+
+	    const loadExtensions = async () => {
+
+		  const extensions = config.composables.extensions;		  
+		  for (const extension of extensions) {
+			    const response = await fetch(extension.imageDataUri);
+			    const data = await response.json();			    
+			    extension.imageData = data;
+		  }		  
+		  
+		  setNounExtensions(extensions);
+		  console.log('Loading up fetched extension image data');
+	    };
+
+	    setNounExtensions(config.composables.extensions);
+	    loadExtensions();
+    	
 		const dragItems: DroppableItem[] = [];
 		ComposablesImageData.images.composables.forEach(({filename, data}) => {		
 			//const tempItem = new ComposableDragItem({filename, data});
@@ -240,11 +281,11 @@ const ComposerPage = () => {
   }, [/*generateNounSvg,*/ initLoad]);
 
   useEffect(() => {
-  	//const seed = getRandomNounSeed();
   	if (!seed) {
   		return;
   	}
-  	const { parts, background } = getNounData(seed);
+  	const imageData = getImageData(nounExtensionName);
+  	const { parts, background } = getNounData(seed, imageData);
   	  		
 	const itemsBackground = getList('Background');
 	const itemsBody = getList('Body');
@@ -270,12 +311,11 @@ const ComposerPage = () => {
 	partsComposed[14] = itemsForeground[2];
 	partsComposed[15] = itemsForeground[3];
 	
-	const svg = buildSVG(partsComposed.filter(part => part != null), encoder.data.palette, background);
+	const svg = buildSVG(partsComposed.filter(part => part != null), imageData.palette, background);
 	setNounSVG(svg);
 	
   	// eslint-disable-next-line react-hooks/exhaustive-deps
   }, [/*generateNounSvg,*/ seed, stateItemsArray]);
-
 
   const getList = (listId: string) => {
   	var items: DroppableItem[] = [];
@@ -402,7 +442,8 @@ const ComposerPage = () => {
   const uploadCustomTrait = () => {
     const { type, data, filename } = pendingTrait || {};
     if (type && data && filename) {
-      const images = ImageData.images as Record<string, EncodedImage[]>;
+      const imageData = getImageData(nounExtensionName);
+      const images = imageData.images as Record<string, EncodedImage[]>;
       images[type].push({
         filename,
         data,
@@ -446,8 +487,108 @@ const ComposerPage = () => {
     }
   };
 
+
+const tourOptions = {
+  defaultStepOptions: {
+    cancelIcon: {
+      enabled: true
+    }
+  },
+  useModalOverlay: true
+};
+
+function TourButton() {
+  //const tour = useContext(ShepherdTourContext);
+  
+  if (initLoadTour) {
+	  //tour!.start();
+	  setInitLoadTour(false);
+  }
+  
+  return null;
+  /*
+  return (
+    <button className="button dark" onClick={tour!.start}>
+      Start Tour
+    </button>
+  );
+  */
+}
+
+const steps: ShepherdOptionsWithType[] = [
+  {
+    id: 'intro',
+    attachTo: { element: '.hero-welcome', on: 'bottom' },
+    /*
+    beforeShowPromise: function () {
+      return new Promise(function (resolve) {
+        setTimeout(function () {
+          window.scrollTo(0, 0);
+          resolve();
+        }, 500);
+      });
+    },
+    */
+    buttons: [
+      {
+        classes: 'shepherd-button-secondary',
+        text: 'Exit',
+        type: 'cancel'
+      },
+      {
+        classes: 'shepherd-button-primary',
+        text: 'Back',
+        type: 'back'
+      },
+      {
+        classes: 'shepherd-button-primary',
+        text: 'Next',
+        type: 'next'
+      }
+    ],
+    classes: 'custom-class-name-1 custom-class-name-2',
+    highlightClass: 'highlight',
+    scrollTo: true,
+    cancelIcon: {
+      enabled: true,
+    },
+    title: 'Pick your Noun from your wallet',
+    text: ['First, pick your Noun that supports composability from your wallet.'],
+    when: {
+      show: () => {
+        console.log('show step');
+      },
+      hide: () => {
+        console.log('hide step');
+      }
+    }
+  },
+];
   
   return (
+    <>
+      {displayNoun && nounSVG && (
+        <NounModal
+          onDismiss={() => {
+            setDisplayNoun(false);
+          }}
+          svg={nounSVG}
+        />
+      )}
+      {displayNounPicker && (
+        <NounPicker
+          onSelect={(extensionName: string | undefined, seed: INounSeed | undefined) => {
+          	//check if none selected, then just close modal
+          	if (extensionName !== undefined && seed !== undefined) {
+	          	setNounExtensionName(extensionName);
+	          	setSeed(seed);
+	        }
+          	
+            setDisplayNounPicker(false);
+          }}
+        />
+      )}
+  	
       <Container fluid="lg">
         <Row>
           <Col lg={12} className={classes.headerRow}>
@@ -475,102 +616,122 @@ const ComposerPage = () => {
             <p>
                 Are you a Noundry artist or an extension creator? We'd love to add your creations to the Composables marketplace!
             </p>
-            <p style={{ fontStyle: 'italic', fontSize: 'small' }}>
-            	Note: During this demo, the Noun presented is randomly generated. The traits in your Inventory are pulled from the recent Noundry competition.
-			</p>
+
+        <ShepherdTour steps={steps} tourOptions={tourOptions}>
+          <TourButton />
+        </ShepherdTour>
+
+            <Button onClick={() => setDisplayNounPicker(true)} className={classes.primaryBtn} style={{ maxWidth: '200px' }}>
+              Select Noun
+            </Button>			
+			&nbsp;&nbsp;&nbsp;
+            <Button onClick={() => generateRandomSeed()} className={classes.primaryBtn} style={{ maxWidth: '200px' }}>
+              Random Noun
+            </Button>			
+        			
           </Col>
         </Row>
-		<DragDropContext onDragEnd={(result: any) => {onDragEnd(result);}}>
-        	<Row>
-	          <Col lg={6}>
-				{nounSVG && (
-					<Noun
-	                  imgPath={`data:image/svg+xml;base64,${btoa(nounSVG)}`}
-	                  alt="Noun"
-	                  className={classes.nounImg}
-	                  wrapperClassName={classes.nounWrapper}
-	                />				
-				)}
-			  </Col>
-	          <Col lg={6}>
+
+        {nounSVG && (
+			<DragDropContext onDragEnd={(result: any) => {onDragEnd(result);}}>
+	        	<Row>
+		          <Col lg={6} className="hero-welcome">
+					{nounSVG && (
+	                  <div
+	                    onClick={() => {
+	                      setDisplayNoun(true);
+	                    }}
+	                  >
+						<Noun
+		                  imgPath={`data:image/svg+xml;base64,${btoa(nounSVG)}`}
+		                  alt="Noun"
+		                  className={classes.nounImg}
+		                  wrapperClassName={classes.nounWrapper}
+		                />				
+		              </div>
+					)}
+				  </Col>
+		          <Col lg={6}>
+		
+						<Row style={{marginBottom: 25}}>
+							<Col lg={12}>
+								<DroppableControl droppableId="Foreground" droppableItems={getList('Foreground')} itemLimit={4} />
+							</Col>
+						</Row>
+						<Row style={{marginBottom: 25}}>
+							<Col lg={3}>
+								<DroppableControl droppableId="Body" droppableItems={getList('Body')} itemLimit={1} />
+							</Col>
+							<Col lg={3}>
+								<DroppableControl droppableId="Accessory" droppableItems={getList('Accessory')} itemLimit={1} />
+							</Col>
+							<Col lg={3}>
+								<DroppableControl droppableId="Head" droppableItems={getList('Head')} itemLimit={1} />
+							</Col>
+							<Col lg={3}>
+								<DroppableControl droppableId="Glasses" droppableItems={getList('Glasses')} itemLimit={1} />
+							</Col>
+						</Row>
+						<Row>
+							<Col lg={12}>
+								<DroppableControl droppableId="Background" droppableItems={getList('Background')} itemLimit={4} />
+							</Col>
+						</Row>
+				  </Col>
+	          	  <Col lg={12}>
+					<DroppableControl droppableId="Inventory" droppableItems={getList('Inventory')} itemLimit={1000} />          
+	          	  </Col>
 	
-					<Row style={{marginBottom: 25}}>
-						<Col lg={12}>
-							<DroppableControl droppableId="Foreground" droppableItems={getList('Foreground')} itemLimit={4} />
-						</Col>
-					</Row>
-					<Row style={{marginBottom: 25}}>
-						<Col lg={3}>
-							<DroppableControl droppableId="Body" droppableItems={getList('Body')} itemLimit={1} />
-						</Col>
-						<Col lg={3}>
-							<DroppableControl droppableId="Accessory" droppableItems={getList('Accessory')} itemLimit={1} />
-						</Col>
-						<Col lg={3}>
-							<DroppableControl droppableId="Head" droppableItems={getList('Head')} itemLimit={1} />
-						</Col>
-						<Col lg={3}>
-							<DroppableControl droppableId="Glasses" droppableItems={getList('Glasses')} itemLimit={1} />
-						</Col>
-					</Row>
-					<Row>
-						<Col lg={12}>
-							<DroppableControl droppableId="Background" droppableItems={getList('Background')} itemLimit={4} />
-						</Col>
-					</Row>
-			  </Col>
-          	  <Col lg={12}>
-				<DroppableControl droppableId="Inventory" droppableItems={getList('Inventory')} itemLimit={1000} />          
-          	  </Col>
-
-          	  <Col lg={3}>
-
-	            <label style={{ margin: '1rem 0 .25rem 0' }} htmlFor="custom-trait-upload">
-	              <Trans>Upload Custom Trait</Trans>
-	              <OverlayTrigger
-	                trigger="hover"
-	                placement="top"
-	                overlay={
-	                  <Popover>
-	                    <div style={{ padding: '0.25rem' }}>
-	                      <Trans>Only 32x32 PNG images are accepted</Trans>
-	                    </div>
-	                  </Popover>
-	                }
-	              >
-	                <Image
-	                  style={{ margin: '0 0 .25rem .25rem' }}
-	                  src={InfoIcon}
-	                  className={classes.voteIcon}
-	                />
-	              </OverlayTrigger>
-	            </label>
-	            <Form.Control
-	              type="file"
-	              id="custom-trait-upload"
-	              accept="image/PNG"
-	              isValid={isPendingTraitValid}
-	              isInvalid={isPendingTraitValid === false}
-	              ref={customTraitFileRef}
-	              className={classes.fileUpload}
-	              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-	                validateAndSetCustomTrait(e.target.files?.[0])
-	              }
-	            />
-	            {pendingTrait && (
-	              <>
-	              	<br />
-	                <Button onClick={() => uploadCustomTrait()} className={classes.primaryBtn}>
-	                  <Trans>Upload</Trans>
-	                </Button>
-	              </>
-	            )}
-
-          	  </Col>
-          	  
-        	</Row>
-		</DragDropContext>
+	          	  <Col lg={3}>
+	
+		            <label style={{ margin: '1rem 0 .25rem 0' }} htmlFor="custom-trait-upload">
+		              <Trans>Upload Custom Trait</Trans>
+		              <OverlayTrigger
+		                trigger={["hover", "hover"]}
+		                placement="top"
+		                overlay={
+		                  <Popover>
+		                    <div style={{ padding: '0.25rem' }}>
+		                      <Trans>Only 32x32 PNG images are accepted</Trans>
+		                    </div>
+		                  </Popover>
+		                }
+		              >
+		                <Image
+		                  style={{ margin: '0 0 .25rem .25rem' }}
+		                  src={InfoIcon}
+		                  className={classes.voteIcon}
+		                />
+		              </OverlayTrigger>
+		            </label>
+		            <Form.Control
+		              type="file"
+		              id="custom-trait-upload"
+		              accept="image/PNG"
+		              isValid={isPendingTraitValid}
+		              isInvalid={isPendingTraitValid === false}
+		              ref={customTraitFileRef}
+		              className={classes.fileUpload}
+		              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+		                validateAndSetCustomTrait(e.target.files?.[0])
+		              }
+		            />
+		            {pendingTrait && (
+		              <>
+		              	<br />
+		                <Button onClick={() => uploadCustomTrait()} className={classes.primaryBtn}>
+		                  <Trans>Upload</Trans>
+		                </Button>
+		              </>
+		            )}
+	
+	          	  </Col>
+	          	  
+	        	</Row>
+			</DragDropContext>
+		)}
       </Container>
+    </>
   );
 };
 
