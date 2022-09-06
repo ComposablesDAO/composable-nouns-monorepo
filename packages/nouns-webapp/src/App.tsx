@@ -8,7 +8,7 @@ import classes from './App.module.css';
 import '../src/css/globals.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import AlertModal from './components/Modal';
-//import NavBar from './components/NavBar';
+import NavBar from './components/NavBar';
 import NetworkAlert from './components/NetworkAlert';
 //import Footer from './components/Footer';
 import AuctionPage from './pages/Auction';
@@ -51,6 +51,7 @@ function App() {
           provider={chainId === ChainId.Mainnet ? library : undefined}
           batchLookups={true}
         >
+          <NavBar />
           <Switch>
             <Route exact path="/" component={ComposerPage} />
             <Redirect from="/auction/:id" to="/noun/:id" />

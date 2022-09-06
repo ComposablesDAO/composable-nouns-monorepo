@@ -35,7 +35,7 @@ const NavBar = () => {
   const [isNavExpanded, setIsNavExpanded] = useState(false);
 
   const useStateBg =
-    history.location.pathname === '/' ||
+    //history.location.pathname === '/' ||
     history.location.pathname.includes('/noun/') ||
     history.location.pathname.includes('/auction/');
 
@@ -66,7 +66,7 @@ const NavBar = () => {
                 TESTNET
               </Nav.Item>
             )}
-            <Nav.Item>
+            <Nav.Item style={{display: 'none', visibility: 'hidden'}}>
               {treasuryBalance && (
                 <Nav.Link
                   href={daoEtherscanLink}
@@ -88,7 +88,7 @@ const NavBar = () => {
             onClick={() => setIsNavExpanded(!isNavExpanded)}
           />
           <Navbar.Collapse className="justify-content-end">
-            <Nav.Link as={Link} to="/vote" className={classes.nounsNavLink} onClick={closeNav}>
+            <Nav.Link as={Link} to="/vote" className={classes.nounsNavLink} onClick={closeNav} style={{display: 'none', visibility: 'hidden'}}>
               <NavBarButton
                 buttonText={<Trans>DAO</Trans>}
                 buttonIcon={<FontAwesomeIcon icon={faUsers} />}
@@ -96,7 +96,7 @@ const NavBar = () => {
               />
             </Nav.Link>
             <Nav.Link
-              href={externalURL(ExternalURL.notion)}
+              href={"https://hackmd.io/@jhernanx/B1AoPVcR5"}
               className={classes.nounsNavLink}
               target="_blank"
               rel="noreferrer"
@@ -114,6 +114,7 @@ const NavBar = () => {
               target="_blank"
               rel="noreferrer"
               onClick={closeNav}
+              style={{display: 'none', visibility: 'hidden'}}
             >
               <NavBarButton
                 buttonText={<Trans>Discourse</Trans>}
@@ -126,6 +127,7 @@ const NavBar = () => {
               to="/playground"
               className={classes.nounsNavLink}
               onClick={closeNav}
+              style={{display: 'none', visibility: 'hidden'}}
             >
               <NavBarButton
                 buttonText={<Trans>Playground</Trans>}
@@ -133,7 +135,7 @@ const NavBar = () => {
                 buttonStyle={nonWalletButtonStyle}
               />
             </Nav.Link>
-            <NavLocaleSwitcher buttonStyle={nonWalletButtonStyle} />
+            <NavLocaleSwitcher buttonStyle={nonWalletButtonStyle}  />
             <NavWallet address={activeAccount || '0'} buttonStyle={nonWalletButtonStyle} />{' '}
           </Navbar.Collapse>
         </Container>
