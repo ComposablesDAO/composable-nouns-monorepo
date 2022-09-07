@@ -17,6 +17,7 @@ import { faBookOpen } from '@fortawesome/free-solid-svg-icons';
 import { faUsers } from '@fortawesome/free-solid-svg-icons';
 import { faComments } from '@fortawesome/free-solid-svg-icons';
 import { faPlay } from '@fortawesome/free-solid-svg-icons';
+import { faStore } from '@fortawesome/free-solid-svg-icons';
 import NavBarTreasury from '../NavBarTreasury';
 import NavWallet from '../NavWallet';
 import { Trans } from '@lingui/macro';
@@ -105,6 +106,20 @@ const NavBar = () => {
               <NavBarButton
                 buttonText={<Trans>Docs</Trans>}
                 buttonIcon={<FontAwesomeIcon icon={faBookOpen} />}
+                buttonStyle={nonWalletButtonStyle}
+              />
+            </Nav.Link>
+            <Nav.Link
+              href={"#"}
+              className={classes.nounsNavLink}
+              target="_blank"
+              rel="noreferrer"
+              onClick={closeNav}
+              disabled={true}
+            >
+              <NavBarButton
+                buttonText="Market"
+                buttonIcon={<FontAwesomeIcon icon={faStore} />}
                 buttonStyle={nonWalletButtonStyle}
               />
             </Nav.Link>
