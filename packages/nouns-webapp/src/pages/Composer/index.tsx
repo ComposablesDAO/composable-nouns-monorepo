@@ -591,9 +591,6 @@ const steps: ShepherdOptionsWithType[] = [
                 update the metadata for games and other platforms, 
                 and a whole lot more.
             </p>
-            <p style={{ fontStyle: 'italic' }}>
-                Are you a Noundry artist or an extension creator? We'd love to add your creations to the Composables marketplace!
-            </p>
             <p>
                 To get started with the Composer tool, please select a Noun from your wallet, or generate a random Noun:
             </p>
@@ -661,6 +658,8 @@ const steps: ShepherdOptionsWithType[] = [
 				  </Col>
 	          	  <Col lg={12}>
 					<DroppableControl droppableId="Inventory" droppableItems={getList('Inventory')} itemLimit={1000} />          
+					
+					<hr style={{ marginBottom: 0 }} />
 	          	  </Col>
 	
 	          	  <Col lg={3}>
@@ -707,6 +706,13 @@ const steps: ShepherdOptionsWithType[] = [
 		            )}
 	
 	          	  </Col>
+	          	  <Col lg={9}>
+
+		            <p style={{ fontStyle: 'italic' }}>
+		                Are you a Noundry artist or an extension creator? We'd love to add your creations to the Composables marketplace!
+		            </p>
+
+				  </Col>
 	          	  
 	        	</Row>
 			</DragDropContext>
