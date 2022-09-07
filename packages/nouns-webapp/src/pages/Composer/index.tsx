@@ -168,13 +168,11 @@ const shortName = (name: string) => {
 interface PendingCustomTrait {
   type: string;
   data: string;
+  palette: string[];
   filename: string;
 }
 
 const DEFAULT_TRAIT_TYPE = 'heads';
-
-//TODO: remove encoder dependency on singular image data, have each uploaded item stand on its own
-let encoder = new PNGCollectionEncoder(ImageData.palette);
 
 const ComposerPage = () => {
 
@@ -392,6 +390,7 @@ const ComposerPage = () => {
           throw new Error('Image must be 32x32');
         }
         const filename = file.name?.replace('.png', '') || 'custom';
+        const encoder = new PNGCollectionEncoder([]); //empty palette
         const data = encoder.encodeImage(filename, {
           width: png.width,
           height: png.height,
@@ -413,6 +412,7 @@ const ComposerPage = () => {
         });
         setPendingTrait({
           data,
+          palette: encoder.data.palette,
           filename,
           type: DEFAULT_TRAIT_TYPE,
         });
@@ -425,8 +425,8 @@ const ComposerPage = () => {
   };
 
   const uploadCustomTrait = () => {
-    const { type, data, filename } = pendingTrait || {};
-    if (type && data && filename) {
+    const { type, data, palette, filename } = pendingTrait || {};
+    if (type && data && palette && filename) {
       const imageData = getImageData(nounExtensionName);
       const images = imageData.images as Record<string, EncodedImage[]>;
       images[type].push({
@@ -442,9 +442,9 @@ const ComposerPage = () => {
         "data": data,
       };
       const parts = [ part ];
-      const svg = buildSVG(parts, encoder.data.palette, 'fff');      
+      const svg = buildSVG(parts, palette, 'fff');      
       
-      items.unshift({filename, data, svg, id: filename, content: filename, palette: null});
+      items.unshift({filename, data, svg, id: filename, content: filename, palette: palette});
 
 	  setStateItemsArray(
         stateItemsArray.map((droppables) =>
