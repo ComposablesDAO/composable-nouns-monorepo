@@ -13,7 +13,6 @@ import {
 } from 'react-bootstrap';
 
 import Noun from '../../components/Noun';
-import Link from '../../components/Link';
 import { ImageData } from '@nouns/assets';
 import { EncodedImage, PNGCollectionEncoder } from '@nouns/sdk';
 import { buildSVG } from '../../utils/composables/nounsSDK';
@@ -165,22 +164,6 @@ const shortName = (name: string) => {
   }
   return [name.substr(0, 7), name.substr(name.length - 11, 11)].join('...');
 };
-
-const composableDocLink = (
-  <Link
-    text="Composable Nouns Framework"
-    url="https://hackmd.io/@jhernanx/B1AoPVcR5"
-    leavesPage={true}
-  />
-);
-
-const nounsDiscordLink = (
-  <Link
-    text="Nouns Discord"
-    url="http://discord.gg/nouns"
-    leavesPage={true}
-  />
-);
 
 interface PendingCustomTrait {
   type: string;
@@ -601,22 +584,18 @@ const steps: ShepherdOptionsWithType[] = [
               <Trans>Composer</Trans>
             </h1>
             <p>
-            	More than just a Playground, the Composer allows you to take your Noun on-chain and add on top of it with different traits and layer options.
-                Try out different combinations and when you're ready, you'll be able to commit your changes on-chain. 
-			</p>
-            <p>
-                How does this happen? It's magic!
-                No, it's actually just the {composableDocLink}. The framework allows you upgrade your Noun on-chain in exciting new ways! 
-                You can add unique visual layers to enhance your Noun's appearance, 
-                dynamically update the on-chain metadata for use in games and other websites, 
-                and a whole lot more with Composable Nouns.
+            	Composables allows for the Nouns community to expand their digital identity in new and creative ways.
+
+            	More than just a Playground, you can now personalize your Noun on-chain and make it your own.
+                Add unique visual layers to enhance your avatar, 
+                update the metadata for games and other platforms, 
+                and a whole lot more.
             </p>
-            <p>
-                Interested in learning more and being one of the first to play with Composable Nouns live? 
-                Let us know in the {nounsDiscordLink}!
-            </p>
-            <p>
+            <p style={{ fontStyle: 'italic' }}>
                 Are you a Noundry artist or an extension creator? We'd love to add your creations to the Composables marketplace!
+            </p>
+            <p>
+                To get started with the Composer tool, please select a Noun from your wallet, or generate a random Noun:
             </p>
 
         <ShepherdTour steps={steps} tourOptions={tourOptions}>
