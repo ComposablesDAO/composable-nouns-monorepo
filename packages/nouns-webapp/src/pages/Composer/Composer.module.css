@@ -105,12 +105,6 @@
 }
 
 
-.primaryBtnTour {
-  background-color: var(--brand-dark-red) !important;
-  border: var(--brand-dark-red) !important;
-
-}
-
 .primaryBtn, .primaryBtnSelecter, .primaryBtnSaver, .primaryBtnUploader {
   width: 50%;
   height: 2.5rem;
@@ -128,8 +122,6 @@
 .primaryBtnSaver:hover,
 .primaryBtnUploader:focus,
 .primaryBtnUploader:hover
-.primaryBtnTour:focus,
-.primaryBtnTour:hover
  {
   background-color: var(--brand-dark-red) !important;
   box-shadow: 0 0 0 0.2rem rgb(214, 60, 94, 0.75);
@@ -138,8 +130,7 @@
 .primaryBtn:active,
 .primaryBtnSelecter:active,
 .primaryBtnSaver:active,
-.primaryBtnUploader:active,
-.primaryBtnTour:active {
+.primaryBtnUploader:active {
   background-color: var(--brand-dark-red) !important;
 }
 

@@ -1,0 +1,27 @@
+.primaryBtnTour {
+  background-color: var(--brand-dark-red) !important;
+  border: var(--brand-dark-red) !important;
+  font-weight: bold;
+  color: #fff !important;
+  border-radius: 12px !important;
+}
+
+.secondaryBtnTour {
+  color: var(--brand-gray-dark-text) !important;
+  background-color: var(--brand-gray-background) !important;
+  border-color: var(--brand-gray-border) !important;  
+  border-style: solid !important;
+  border-width: thin !important;
+  border-radius: 12px !important;
+}
+
+.primaryBtnTour:focus,
+.primaryBtnTour:hover
+ {
+  background-color: var(--brand-dark-red) !important;
+  box-shadow: 0 0 0 0.2rem rgb(214, 60, 94, 0.75);
+}
+
+.primaryBtnTour:active {
+  background-color: var(--brand-dark-red) !important;
+}
