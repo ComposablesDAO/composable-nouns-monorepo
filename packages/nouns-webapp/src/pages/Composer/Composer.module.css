@@ -92,26 +92,65 @@
     font-size: 1rem;
 }
 
-.primaryBtnSearch {
-  width: 90% !important;	
+.primaryBtnSelecter {
+  margin-bottom: 0.5rem;	
 }
 
-.primaryBtn, .primaryBtnSearch {
+.primaryBtnSaver {
+  margin-top: 0.5rem;	
+}
+
+.primaryBtnUploader {
+  margin-top: 0.5rem;	
+}
+
+
+.primaryBtnTour {
+  background-color: var(--brand-dark-red) !important;
+  border: var(--brand-dark-red) !important;
+
+}
+
+.primaryBtn, .primaryBtnSelecter, .primaryBtnSaver, .primaryBtnUploader {
   width: 50%;
-  height: 3rem;
+  height: 2.5rem;
   font-weight: bold;
-  margin-bottom: 0.5rem;
   border-radius: 12px;
   background-color: var(--brand-dark-red);
   border: var(--brand-dark-red);
+  max-width: 150px;
 }
 .primaryBtn:focus,
-.primaryBtn:hover {
+.primaryBtn:hover,
+.primaryBtnSelecter:focus,
+.primaryBtnSelecter:hover,
+.primaryBtnSaver:focus,
+.primaryBtnSaver:hover,
+.primaryBtnUploader:focus,
+.primaryBtnUploader:hover
+.primaryBtnTour:focus,
+.primaryBtnTour:hover
+ {
   background-color: var(--brand-dark-red) !important;
   box-shadow: 0 0 0 0.2rem rgb(214, 60, 94, 0.75);
 }
-.primaryBtn:active {
+
+.primaryBtn:active,
+.primaryBtnSelecter:active,
+.primaryBtnSaver:active,
+.primaryBtnUploader:active,
+.primaryBtnTour:active {
   background-color: var(--brand-dark-red) !important;
+}
+
+.primaryBtn:disabled,
+.primaryBtnSelecter:disabled,
+.primaryBtnSaver:disabled,
+.primaryBtnUploader:disabled {
+  color: var(--brand-gray-dark-text) !important;
+  background-color: var(--brand-gray-background) !important;
+  border-color: var(--brand-gray-border) !important;  
+  border-style: solid;
 }
 
 .traitForm {

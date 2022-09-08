@@ -187,6 +187,7 @@ body {
   -ms-flex: 1 0 auto;
   flex: 1 0 auto;
   font-size: 1.1em;
+  font-weight: bold;
 }
 
 .shepherd-element .shepherd-content header .shepherd-cancel-link {

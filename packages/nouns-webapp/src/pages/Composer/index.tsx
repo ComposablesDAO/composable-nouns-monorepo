@@ -1,5 +1,5 @@
 //import React from 'react';
-import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
+import React, { ChangeEvent, useEffect, useRef, useState, useContext } from 'react';
 import classes from './Composer.module.css';
 import {
   Container,
@@ -31,7 +31,7 @@ import { Trans } from '@lingui/macro';
 
 // @ts-ignore
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { ShepherdTour, ShepherdOptionsWithType } from 'react-shepherd'
+import { ShepherdTour, ShepherdTourContext, ShepherdOptionsWithType } from 'react-shepherd'
 import 'shepherd.js/dist/css/shepherd.css';
 
 /* start drag and drop */
@@ -522,43 +522,34 @@ const tourOptions = {
   defaultStepOptions: {
     cancelIcon: {
       enabled: true
-    }
+    },
   },
   useModalOverlay: true
 };
 
-function TourButton() {
-  //const tour = useContext(ShepherdTourContext);
+function TourLoader() {
+  const tour = useContext(ShepherdTourContext);
   
-  if (initLoadTour) {
-	  //tour!.start();
+  if (initLoadTour && tour) {
+	  tour.start();
 	  setInitLoadTour(false);
   }
   
-  return null;
-  /*
-  return (
-    <button className="button dark" onClick={tour!.start}>
-      Start Tour
-    </button>
-  );
-  */
+  return <></>;
 }
 
 const steps: ShepherdOptionsWithType[] = [
   {
-    id: 'intro',
-    attachTo: { element: '.hero-welcome', on: 'bottom' },
-    /*
+    id: 'composer-selecter',
+    attachTo: { element: '.composer-selecter', on: 'bottom' },
     beforeShowPromise: function () {
-      return new Promise(function (resolve) {
+      return new Promise<void>(function (resolve) {
         setTimeout(function () {
           window.scrollTo(0, 0);
           resolve();
         }, 500);
       });
     },
-    */
     buttons: [
       {
         classes: 'shepherd-button-secondary',
@@ -566,30 +557,85 @@ const steps: ShepherdOptionsWithType[] = [
         type: 'cancel'
       },
       {
-        classes: 'shepherd-button-primary',
-        text: 'Back',
-        type: 'back'
-      },
-      {
-        classes: 'shepherd-button-primary',
+        classes: classes.primaryBtnTour,
         text: 'Next',
         type: 'next'
       }
     ],
-    classes: 'custom-class-name-1 custom-class-name-2',
     highlightClass: 'highlight',
     scrollTo: true,
     cancelIcon: {
       enabled: true,
     },
-    title: 'Pick your Noun from your wallet',
-    text: ['First, pick your Noun that supports composability from your wallet.'],
+    title: 'Customize your Noun',
+    text: ['Drag-and-drop the custom traits onto the empty boxes to see the changes take effect right away.'],
     when: {
       show: () => {
-        console.log('show step');
       },
       hide: () => {
-        console.log('hide step');
+      }
+    }
+  },
+  {
+    id: 'composer-saver',
+    attachTo: { element: '.composer-saver', on: 'bottom' },
+    buttons: [
+      {
+        classes: 'shepherd-button-secondary',
+        text: 'Exit',
+        type: 'cancel'
+      },
+      {
+        classes: classes.primaryBtnTour,
+        text: 'Back',
+        type: 'back'
+      },
+      {
+        classes: classes.primaryBtnTour,
+        text: 'Next',
+        type: 'next'
+      }
+    ],
+    highlightClass: 'highlight',
+    scrollTo: true,
+    cancelIcon: {
+      enabled: true,
+    },
+    title: 'Save your Noun',
+    text: ['You can commit the changes to your Noun on-chain, or simply download the image to use right away.'],
+    when: {
+      show: () => {
+      },
+      hide: () => {
+      }
+    }
+  },  
+  {
+    id: 'composer-uploader',
+    attachTo: { element: '.composer-uploader', on: 'bottom' },
+    buttons: [
+      {
+        classes: 'shepherd-button-secondary',
+        text: 'Exit',
+        type: 'cancel'
+      },
+      {
+        classes: classes.primaryBtnTour,
+        text: 'Back',
+        type: 'back'
+      },
+    ],
+    highlightClass: 'highlight',
+    scrollTo: true,
+    cancelIcon: {
+      enabled: true,
+    },
+    title: 'Upload custom traits',
+    text: ['You can even upload custom traits to use with your Noun. Give it a try!'],
+    when: {
+      show: () => {
+      },
+      hide: () => {
       }
     }
   },
@@ -617,8 +663,7 @@ const steps: ShepherdOptionsWithType[] = [
             setDisplayNounPicker(false);
           }}
         />
-      )}
-  	
+      )}  	
       <Container fluid="lg">
         <Row>
           <Col lg={12} className={classes.headerRow}>
@@ -640,25 +685,21 @@ const steps: ShepherdOptionsWithType[] = [
                 To start, please select a Noun from your wallet, or generate a random Noun:
             </p>
 
-        <ShepherdTour steps={steps} tourOptions={tourOptions}>
-          <TourButton />
-        </ShepherdTour>
-
-            <Button onClick={() => setDisplayNounPicker(true)} className={classes.primaryBtn} style={{ maxWidth: '200px' }}>
+            <Button onClick={() => setDisplayNounPicker(true)} className={classes.primaryBtnSelecter}>
               Select Noun
             </Button>			
 			&nbsp;&nbsp;&nbsp;
-            <Button onClick={() => generateRandomSeed()} className={classes.primaryBtn} style={{ maxWidth: '200px' }}>
+            <Button onClick={() => generateRandomSeed()} className={classes.primaryBtnSelecter}>
               Random Noun
             </Button>			
         			
           </Col>
         </Row>
-
+		<Row className="composer-selecter">
         {nounSVG && (
 			<DragDropContext onDragEnd={(results: any) => {onDragEnd(results);}}>
 	        	<Row>
-		          <Col lg={6} xs={12} className="hero-welcome">
+		          <Col lg={6} xs={12}>
 					{nounSVG && (
 	                  <div
 	                    onClick={() => {
@@ -670,8 +711,10 @@ const steps: ShepherdOptionsWithType[] = [
 		                  alt="Noun"
 		                  className={classes.nounImg}
 		                  wrapperClassName={classes.nounWrapper}
-		                />				
-		              </div>
+		                />	
+
+
+		              </div>		              
 					)}
 				  </Col>
 		          <Col lg={6} xs={12}>
@@ -702,8 +745,32 @@ const steps: ShepherdOptionsWithType[] = [
 						</Row>
 				  </Col>
 	          	  <Col lg={12}>
-					<DroppableControl droppableId="Inventory" droppableItems={getList('Inventory')} itemLimit={1000} />          
-					
+					<DroppableControl droppableId="Inventory" droppableItems={getList('Inventory')} itemLimit={1000} />          					
+	          	  </Col>
+	        	</Row>
+			</DragDropContext>
+		)}
+		</Row>
+		<Row className="composer-saver">
+        {nounSVG && (
+        	<Row>
+        		<Col lg={12}>
+		            <Button onClick={() => setDisplayNoun(true)} className={classes.primaryBtnSaver}>
+		              Download
+		            </Button>			
+					&nbsp;&nbsp;&nbsp;
+		            <Button className={classes.primaryBtnSaver} disabled={true}>
+		              Save On-Chain
+		            </Button>			
+        		
+	         	</Col>
+	        </Row>
+		)}
+		</Row>		
+		<Row className="composer-uploader">
+        {nounSVG && (
+        	<Row>
+	          	  <Col lg={12}>					
 					<hr style={{ marginBottom: 0 }} />
 	          	  </Col>
 	
@@ -744,7 +811,7 @@ const steps: ShepherdOptionsWithType[] = [
 		            {pendingTrait && (
 		              <>
 		              	<br />
-		                <Button onClick={() => uploadCustomTrait()} className={classes.primaryBtn}>
+		                <Button onClick={() => uploadCustomTrait()} className={classes.primaryBtnUploader}>
 		                  <Trans>Upload</Trans>
 		                </Button>
 		              </>
@@ -760,9 +827,14 @@ const steps: ShepherdOptionsWithType[] = [
 				  </Col>
 	          	  
 	        	</Row>
-			</DragDropContext>
-		)}
+		)}		
+		</Row>
       </Container>
+      {nounSVG && (
+        <ShepherdTour steps={steps} tourOptions={tourOptions}>
+          <TourLoader />
+        </ShepherdTour>
+      )}      
     </>
   );
 };
