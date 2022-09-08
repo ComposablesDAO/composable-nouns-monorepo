@@ -36,6 +36,7 @@ import 'shepherd.js/dist/css/shepherd.css';
 
 /* start drag and drop */
 
+//TODO: Move DND to its own component/file
 // a little function to help us with reordering the result
 const reorder = (list: DroppableItem[], startIndex: any, endIndex: any) => {
   const result = Array.from(list);
@@ -95,9 +96,10 @@ const DroppableControl: React.FC<{ droppableId: string; droppableItems: Droppabl
   const { droppableId, droppableItems, itemLimit } = props;
   
   const styleJustify = (itemLimit === 1) ? 'center' : 'left';
-  const styleOverflow = (itemLimit === 1) ? 'visible' : 'auto';
+  const styleOverflow = (itemLimit > 10) ? 'auto' : 'hidden';
   const direction = (itemLimit > 10) ? 'vertical' : 'horizontal';
-  const isDropDisabled = (droppableItems.length === itemLimit) ? true : false;
+  const baseClassName = (itemLimit > 10) ? classes.dropList : '';
+  const isDropDisabled = false;//(droppableItems.length === itemLimit) ? true : false;
     
   return (
     <>
@@ -106,7 +108,7 @@ const DroppableControl: React.FC<{ droppableId: string; droppableItems: Droppabl
         {(provided: any, snapshot: any) => (
             <div
                 ref={provided.innerRef}
-                className={classes.dropList}
+                className={baseClassName}
                 style={getListStyle(snapshot.isDraggingOver, styleJustify, styleOverflow)}>
                 {droppableItems.map((item, index) => (
                     <Draggable
@@ -312,8 +314,8 @@ const ComposerPage = () => {
   	return items;
   }
     
-  const onDragEnd = (result: any) => {
-        const { source, destination } = result;
+  const onDragEnd = (results: any) => {  		
+        const { source, destination } = results;
 
         // dropped outside the list
         if (!destination) {
@@ -335,18 +337,61 @@ const ComposerPage = () => {
 	            )
 	        );
         } else {
+        	
+        	const sourceList = getList(source.droppableId);
+        	const destinationList = getList(destination.droppableId);
+        	
+        	//TODO: clean this up, make it configurable via params
+        	var itemLimit = 1000;
+        	if (destination.droppableId === "Background" || destination.droppableId === "Foreground") {
+        		itemLimit = 4;
+        	}
+        	if (destination.droppableId === "Body" || destination.droppableId === "Accessory" 
+        		|| destination.droppableId === "Head" || destination.droppableId === "Glasses") {
+        		itemLimit = 1;
+        	}
+
+  			const replace = (destinationList.length === itemLimit);
+        	
+        	var replacedItem = undefined;
+        	if (replace) {
+        		//remove an item from the array
+        		if (destination.index === itemLimit) {
+        			replacedItem = destinationList.shift();
+        		} else {
+        			replacedItem = destinationList.pop();		
+        		}
+        		        		
+        		//also subtract one from destination index
+        		if (destination.index > 0) {
+					//destination.index--;
+        		}
+        	}
+        	
             const result = move(
-                getList(source.droppableId),
-                getList(destination.droppableId),
+                sourceList,
+                destinationList,
                 source,
                 destination
             );
 			
-            const tempItems = stateItemsArray.map((droppables) =>
+            var tempItems = stateItemsArray.map((droppables) =>
                 droppables.id === source.droppableId
                     ? { ...droppables, items: result.source }
                     : { ...droppables }
            	);
+           	
+           	if (replace && replacedItem !== undefined) {           		
+           		const droppableId = 'Inventory';
+		      	const items = (source.droppableId === droppableId) ? result.source : getList(droppableId);
+      			items.unshift(replacedItem);
+           		
+           		tempItems = tempItems.map((droppables) =>
+	                droppables.id === droppableId
+	                    ? { ...droppables, items: items }
+	                    : { ...droppables }
+	           );
+           	}
 
 			setStateItemsArray(
 	            tempItems.map((droppables) =>
@@ -584,7 +629,7 @@ const steps: ShepherdOptionsWithType[] = [
               <Trans>Composer</Trans>
             </h1>
             <p>
-            	Composables allows for the Nouns community to expand their digital identity in new and creative ways.
+            	Composables allow for the Nouns community to expand their digital identity in new and creative ways.
 
             	More than just a Playground, you can now personalize your Noun on-chain and make it your own.
                 Add unique visual layers to enhance your avatar, 
@@ -592,7 +637,7 @@ const steps: ShepherdOptionsWithType[] = [
                 and a whole lot more.
             </p>
             <p>
-                To get started with the Composer tool, please select a Noun from your wallet, or generate a random Noun:
+                To start, please select a Noun from your wallet, or generate a random Noun:
             </p>
 
         <ShepherdTour steps={steps} tourOptions={tourOptions}>
@@ -611,7 +656,7 @@ const steps: ShepherdOptionsWithType[] = [
         </Row>
 
         {nounSVG && (
-			<DragDropContext onDragEnd={(result: any) => {onDragEnd(result);}}>
+			<DragDropContext onDragEnd={(results: any) => {onDragEnd(results);}}>
 	        	<Row>
 		          <Col lg={6} className="hero-welcome">
 					{nounSVG && (
