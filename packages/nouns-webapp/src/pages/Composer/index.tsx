@@ -658,7 +658,7 @@ const steps: ShepherdOptionsWithType[] = [
         {nounSVG && (
 			<DragDropContext onDragEnd={(results: any) => {onDragEnd(results);}}>
 	        	<Row>
-		          <Col lg={6} className="hero-welcome">
+		          <Col lg={6} xs={12} className="hero-welcome">
 					{nounSVG && (
 	                  <div
 	                    onClick={() => {
@@ -674,29 +674,29 @@ const steps: ShepherdOptionsWithType[] = [
 		              </div>
 					)}
 				  </Col>
-		          <Col lg={6}>
+		          <Col lg={6} xs={12}>
 		
 						<Row style={{marginBottom: 25}}>
-							<Col lg={12}>
+							<Col lg={12} xs={12}>
 								<DroppableControl droppableId="Foreground" droppableItems={getList('Foreground')} itemLimit={4} />
 							</Col>
 						</Row>
 						<Row style={{marginBottom: 25}}>
-							<Col lg={3}>
+							<Col lg={3} xs={3}>
 								<DroppableControl droppableId="Body" droppableItems={getList('Body')} itemLimit={1} />
 							</Col>
-							<Col lg={3}>
+							<Col lg={3} xs={3}>
 								<DroppableControl droppableId="Accessory" droppableItems={getList('Accessory')} itemLimit={1} />
 							</Col>
-							<Col lg={3}>
+							<Col lg={3} xs={3}>
 								<DroppableControl droppableId="Head" droppableItems={getList('Head')} itemLimit={1} />
 							</Col>
-							<Col lg={3}>
+							<Col lg={3} xs={3}>
 								<DroppableControl droppableId="Glasses" droppableItems={getList('Glasses')} itemLimit={1} />
 							</Col>
 						</Row>
 						<Row>
-							<Col lg={12}>
+							<Col lg={12} xs={12}>
 								<DroppableControl droppableId="Background" droppableItems={getList('Background')} itemLimit={4} />
 							</Col>
 						</Row>
