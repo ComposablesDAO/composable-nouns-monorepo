@@ -1,5 +1,5 @@
 //import React from 'react';
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import classes from './Market.module.css';
 import {
   Container,
@@ -15,7 +15,7 @@ import { faUser } from '@fortawesome/free-solid-svg-icons';
 
 import { EncodedImage } from '@nouns/sdk';
 
-import { ImageData } from '@nouns/assets';
+//import { ImageData } from '@nouns/assets';
 import { default as ComposablesImageData } from '../../libs/image-data/image-data-composables.json';
 import { buildSVG } from '../../utils/composables/nounsSDK';
 
@@ -134,24 +134,11 @@ const traitKeyToTitle: Record<string, string> = {
 };
 */
 
-const traitKeyToLocalizedTraitKeyFirstLetterCapitalized = (s: string): ReactNode => {
-  const traitMap = new Map([
-    ['background', <Trans>Category</Trans>],
-    ['body', <Trans>Creator</Trans>],
-    ['accessory', <Trans>Price</Trans>],
-    ['head', <Trans>Head</Trans>],
-    ['glasses', <Trans>Glasses</Trans>],
-  ]);
-
-  return traitMap.get(s);
-};
-
 const MarketPage = () => {
     
   const [traits, setTraits] = useState<Trait[]>();
   const [initLoad, setInitLoad] = useState<boolean>(true);
   const [selectIndexes, setSelectIndexes] = useState<Record<string, number>>({});
-  const [modSeed, setModSeed] = useState<{ [key: string]: number }>();
   
   useEffect(() => {
 
