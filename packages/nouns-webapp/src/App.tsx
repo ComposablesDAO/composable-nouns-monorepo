@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { ChainId, useEthers } from '@usedapp/core';
 import { useAppDispatch, useAppSelector } from './hooks';
 import { setActiveAccount } from './state/slices/account';
-import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
+import { BrowserRouter, Switch, Route } from 'react-router-dom';
 import { setAlertModal } from './state/slices/application';
 import classes from './App.module.css';
 import '../src/css/globals.css';
@@ -11,7 +11,7 @@ import AlertModal from './components/Modal';
 import NavBar from './components/NavBar';
 import NetworkAlert from './components/NetworkAlert';
 //import Footer from './components/Footer';
-import AuctionPage from './pages/Auction';
+//import AuctionPage from './pages/Auction';
 import GovernancePage from './pages/Governance';
 import CreateProposalPage from './pages/CreateProposal';
 import VotePage from './pages/Vote';
@@ -19,6 +19,7 @@ import NoundersPage from './pages/Nounders';
 import NotFoundPage from './pages/NotFound';
 import Playground from './pages/Playground';
 import ComposerPage from './pages/Composer';
+import MarketPage from './pages/Market';
 import { CHAIN_ID } from './config';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { AvatarProvider } from '@davatar/react';
@@ -54,18 +55,13 @@ function App() {
           <NavBar />
           <Switch>
             <Route exact path="/" component={ComposerPage} />
-            <Redirect from="/auction/:id" to="/noun/:id" />
-            <Route
-              exact
-              path="/noun/:id"
-              render={props => <AuctionPage initialAuctionId={Number(props.match.params.id)} />}
-            />
             <Route exact path="/nounders" component={NoundersPage} />
             <Route exact path="/create-proposal" component={CreateProposalPage} />
             <Route exact path="/vote" component={GovernancePage} />
             <Route exact path="/vote/:id" component={VotePage} />
             <Route exact path="/playground" component={Playground} />
             <Route exact path="/composer" component={ComposerPage} />
+            <Route exact path="/market" component={MarketPage} />
             <Route component={NotFoundPage} />
           </Switch>
           <p>

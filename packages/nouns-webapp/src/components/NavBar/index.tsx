@@ -110,15 +110,13 @@ const NavBar = () => {
               />
             </Nav.Link>
             <Nav.Link
-              href={"#"}
+              as={Link}
+              to="/market"
               className={classes.nounsNavLink}
-              target="_blank"
-              rel="noreferrer"
               onClick={closeNav}
-              disabled={true}
             >
               <NavBarButton
-                buttonText="Market"
+                buttonText={<Trans>Market</Trans>}
                 buttonIcon={<FontAwesomeIcon icon={faStore} />}
                 buttonStyle={nonWalletButtonStyle}
               />
