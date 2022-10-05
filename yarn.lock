@@ -4028,6 +4028,11 @@
   resolved "https://registry.yarnpkg.com/@pedrouid/environment/-/environment-1.0.1.tgz#858f0f8a057340e0b250398b75ead77d6f4342ec"
   integrity sha512-HaW78NszGzRZd9SeoI3JD11JqY+lubnaOx7Pewj5pfjqWXOEATpeKIFb9Z4t2WBUK2iryiXX3lzWwmYWgUL0Ug==
 
+"@planetscale/database@^1.4.0":
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@planetscale/database/-/database-1.4.0.tgz#75f16b96729397510a47623ce36dc5d410d6bdbc"
+  integrity sha512-lva57Z/Nz57ocB3dwaWPDGMbb+dj5HtooVB9c0DPcAF9SHbQyfovDyGK5bDgcmCMVoonfblcYv7fr+WBLc3xNw==
+
 "@pmmmwh/react-refresh-webpack-plugin@0.4.3":
   version "0.4.3"
   resolved "https://registry.yarnpkg.com/@pmmmwh/react-refresh-webpack-plugin/-/react-refresh-webpack-plugin-0.4.3.tgz#1eec460596d200c0236bf195b078a5d1df89b766"
