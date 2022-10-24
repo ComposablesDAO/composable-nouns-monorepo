@@ -24,6 +24,7 @@ import { CHAIN_ID } from './config';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { AvatarProvider } from '@davatar/react';
 import dayjs from 'dayjs';
+import DelegatePage from './pages/DelegatePage';
 
 function App() {
   const { account, chainId, library } = useEthers();
@@ -60,6 +61,7 @@ function App() {
             <Route exact path="/vote" component={GovernancePage} />
             <Route exact path="/vote/:id" component={VotePage} />
             <Route exact path="/playground" component={Playground} />
+            <Route exact path="/delegate" component={DelegatePage} />
             <Route exact path="/composer" component={ComposerPage} />
             <Route exact path="/market" component={MarketPage} />
             <Route component={NotFoundPage} />
