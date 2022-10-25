@@ -1,29 +1,30 @@
 //import React from 'react';
-import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
+import React, { ChangeEvent, useEffect, useRef, useState, useCallback } from 'react';
 import classes from './Composer.module.css';
-import {
-  Container,
-  Col,
-  Button,
-  Image,
-  Row,
-  Form,
-  OverlayTrigger,
-  Popover,
-} from 'react-bootstrap';
+import { Container, Row, Col, Button, Image, Form, OverlayTrigger, Popover } from 'react-bootstrap';
+
+import { ComposableItemCollection, getComposableItemCollections, 
+	TokenItem, getTokenHoldings, filterComposableItem, filterTokenItem,
+	ComposableEncodedImage, ComposableItem, getComposableItems } from '../../utils/composables/composablesWrapper';
+//	ComposablesMarketListing, getComposablesMarketListings,
+import BigNumber from 'bignumber.js';
+	
+import { useAppSelector } from '../../hooks';
 
 import Noun from '../../components/Noun';
 import { ImageData } from '@nouns/assets';
 import { EncodedImage, PNGCollectionEncoder } from '@nouns/sdk';
 import { buildSVG } from '../../utils/composables/nounsSDK';
 import { getNounData, getRandomNounSeed } from '../../utils/composables/nounsAssets';
+import { useAppDispatch } from '../../hooks';
+import { AlertModal, setAlertModal } from '../../state/slices/application';
 
 import { INounSeed } from '../../wrappers/nounToken';
-import { default as ComposablesImageData } from '../../libs/image-data/image-data-composables.json';
 import InfoIcon from '../../assets/icons/Info.svg';
 import { PNG } from 'pngjs';
 import NounModal from './NounModal';
 import NounPicker from './NounPicker';
+import SaveModal from './SaveModal';
 import ComposerTour from './ComposerTour';
 
 import config from '../../config';
@@ -37,7 +38,7 @@ import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 //TODO: Move DND to its own component/file
 // a little function to help us with reordering the result
-const reorder = (list: DroppableItem[], startIndex: any, endIndex: any) => {
+const reorder = (list: ComposableItem[], startIndex: any, endIndex: any) => {
   const result = Array.from(list);
   const [removed] = result.splice(startIndex, 1);
   result.splice(endIndex, 0, removed);
@@ -45,7 +46,7 @@ const reorder = (list: DroppableItem[], startIndex: any, endIndex: any) => {
   return result;
 };
 
-const move = (source: DroppableItem[], destination: DroppableItem[], droppableSource: any, droppableDestination: any) => {
+const move = (source: ComposableItem[], destination: ComposableItem[], droppableSource: any, droppableDestination: any) => {
     const sourceClone = Array.from(source);
     const destClone = Array.from(destination);
     const [removed] = sourceClone.splice(droppableSource.index, 1);
@@ -91,18 +92,17 @@ const getListStyle = (isDraggingOver: boolean, styleJustify: string, styleOverfl
   borderRadius: '16px',
 });
 
-const DroppableControl: React.FC<{ droppableId: string; droppableItems: DroppableItem[]; itemLimit: number; }> = props => {
-  const { droppableId, droppableItems, itemLimit } = props;
+const DroppableControl: React.FC<{ droppableId: string; droppableItems: ComposableItem[]; itemLimit: number; holdings: TokenItem[] }> = props => {
+  const { droppableId, droppableItems, itemLimit, holdings } = props;
   
   const styleJustify = (itemLimit === 1) ? 'center' : 'left';
   const styleOverflow = (itemLimit > 10) ? 'auto' : 'hidden';
   const direction = (itemLimit > 10) ? 'vertical' : 'horizontal';
   const baseClassName = (itemLimit > 10) ? classes.dropList : '';
+  //const itemClassName = (filterTokenItem(holdings, encodedItem.tokenAddress, encodedItem.tokenId)) ? classes.nounImgDrag : classes.nounImgDragHighlight;
   const isDropDisabled = false;//(droppableItems.length === itemLimit) ? true : false;
     
   return (
-    <>
-    <strong>{droppableId}</strong>
     <Droppable droppableId={droppableId} direction={direction} isDropDisabled={isDropDisabled}>
         {(provided: any, snapshot: any) => (
             <div
@@ -111,8 +111,8 @@ const DroppableControl: React.FC<{ droppableId: string; droppableItems: Droppabl
                 style={getListStyle(snapshot.isDraggingOver, styleJustify, styleOverflow)}>
                 {droppableItems.map((item, index) => (
                     <Draggable
-                        key={item.id}
-                        draggableId={item.id}
+                        key={item.tokenAddress + "-" + item.tokenId}
+                        draggableId={item.tokenAddress + "-" + item.tokenId}
                         index={index}>
                         {(provided: any, snapshot: any) => (
                             <div
@@ -124,12 +124,12 @@ const DroppableControl: React.FC<{ droppableId: string; droppableItems: Droppabl
                                     provided.draggableProps.style
                                 )}>
 								<Noun
-				                  imgPath={`data:image/svg+xml;base64,${btoa(item.svg)}`}
-				                  alt="Noun"
-				                  className={classes.nounImgDrag}
+				                  imgPath={`data:image/svg+xml;base64,${btoa(getSVG(item.image.filename, item.image.data, item.image.palette))}`}
+				                  alt="Item"
+				                  className={(filterTokenItem(holdings, item.tokenAddress, item.tokenId)) ? classes.nounImgDragHighlight : classes.nounImgDrag}
 				                  wrapperClassName={classes.nounWrapperDrag}
 				                />		                                            
-				                <p style={{textAlign: 'center', margin: 0, padding: 0}}>{shortName(item.content)}</p>
+				                <p style={{textAlign: 'center', margin: 0, padding: 0}}>{shortName(item.meta.name)}</p>
                             </div>
                         )}
                     </Draggable>
@@ -138,22 +138,22 @@ const DroppableControl: React.FC<{ droppableId: string; droppableItems: Droppabl
             </div>
         )}
     </Droppable>
-    </>
   );
 };
 
-interface DroppableItem {
-  filename: string;
-  data: string;
-  svg: string;
-  id: string;
-  content: string;
-  palette: string[] | null;
-}  	
+const getSVG = (filename: string, data: string, palette: string[]): string => {
+  const part = {
+  	"filename": filename,
+	"data": data,
+  };
+  const parts = [ part ];
+  const svg = buildSVG(parts, palette, 'fff');
+  return svg;
+};
 
-interface DroppableItemSet {
+interface ComposableItemGroup {
   id: string;
-  items: DroppableItem[];
+  items: ComposableItem[];
 }
 
 /* end drag and drop */
@@ -177,18 +177,41 @@ const DEFAULT_TRAIT_TYPE = 'heads';
 
 const ComposerPage = () => {
 
-  const [stateItemsArray, setStateItemsArray] = useState<DroppableItemSet[]>([]);
-  const [nounExtensionName, setNounExtensionName] = useState<string>('Nouns');    
+  const [stateItemsArray, setStateItemsArray] = useState<ComposableItemGroup[]>([]);
   const [nounExtensions, setNounExtensions] = useState<any[]>([]);
+  const [nounExtensionName, setNounExtensionName] = useState<string>('Nouns');    
+  const [nounTokenAddress, setNounTokenAddress] = useState<string>();
+  const [nounTokenId, setNounTokenId] = useState<number>();
+  const [composerProxyAddress, setComposerProxyAddress] = useState<string>();
+  const [previousChildTokens, setPreviousChildTokens] = useState<TokenItem[]>([]);
+  const [previousComposedChildTokens, setPreviousComposedChildTokens] = useState<TokenItem[]>([]);
+    
+  const [composedItems, setComposedItems] = useState<ComposableItem[]>([]);
+  const [hasOwnedComposedItems, setHasOwnedComposedItems] = useState<boolean>(true);
+  const [hasDifferentComposedItems, setHasDifferentComposedItems] = useState<boolean>(true);
 
   const [seed, setSeed] = useState<INounSeed>();
   const [nounSVG, setNounSVG] = useState<string>();    
   const [initLoad, setInitLoad] = useState<boolean>(true);
-  const [displayNoun, setDisplayNoun] = useState<boolean>(false);
+  const [displayNounModal, setDisplayNounModal] = useState<boolean>(false);
   const [displayNounPicker, setDisplayNounPicker] = useState<boolean>(false);
+  const [displaySaveModal, setDisplaySaveModal] = useState<boolean>(false);
 
   const [pendingTrait, setPendingTrait] = useState<PendingCustomTrait>();
   const [isPendingTraitValid, setPendingTraitValid] = useState<boolean>();
+
+  const [collections, setCollections] = useState<ComposableItemCollection[]>();
+  const [collectionItems, setCollectionItems] = useState<ComposableItem[]>([]);
+  //const [listings, setListings] = useState<ComposablesMarketListing[]>();
+  const [holdings, setHoldings] = useState<TokenItem[]>([]);
+  
+  
+  const [selectedOwned, setSelectedOwned] = useState<boolean>(true);
+    
+  const activeAccount = useAppSelector(state => state.account.activeAccount);
+  const dispatch = useAppDispatch();
+  const setModal = useCallback((modal: AlertModal) => dispatch(setAlertModal(modal)), [dispatch]);
+  
 
   const customTraitFileRef = useRef<HTMLInputElement>(null);
   
@@ -206,49 +229,46 @@ const ComposerPage = () => {
   	const randomExtension = nounExtensions[randomIndex];
   	
   	const seed = getRandomNounSeed(getImageData(randomExtension.name));
+
+	setNounTokenAddress(undefined);
+	setNounTokenId(undefined);
   	setNounExtensionName(randomExtension.name);
 	setSeed(seed);
+	setPreviousChildTokens([]);
+	setPreviousComposedChildTokens([]);
   };
 
   useEffect(() => {
+    const loadCollections = async () => {
+
+	  const collections: ComposableItemCollection[] = await getComposableItemCollections(true);
+	  if (collections === undefined) {
+	  	return false;
+	  }
+
+	  setCollections(collections);
+    };
+
+    const loadExtensions = async () => {
+
+	  const extensions = config.composables.extensions;		  
+	  for (const extension of extensions) {
+		    const response = await fetch(extension.imageDataUri);
+		    const data = await response.json();			    
+		    extension.imageData = data;
+	  }		  
+	  
+	  setNounExtensions(extensions);
+    };
+
+    
     if (initLoad) {
 
-	    const loadExtensions = async () => {
-
-		  const extensions = config.composables.extensions;		  
-		  for (const extension of extensions) {
-			    const response = await fetch(extension.imageDataUri);
-			    const data = await response.json();			    
-			    extension.imageData = data;
-		  }		  
-		  
-		  setNounExtensions(extensions);
-	    };
-
+		loadCollections();
+		
 	    setNounExtensions(config.composables.extensions);
 	    loadExtensions();
     	
-		const dragItems: DroppableItem[] = [];
-		ComposablesImageData.images.composables.forEach(({filename, data}) => {		
-			//const tempItem = new ComposableDragItem({filename, data});
-			const part = {
-		        "filename": filename,
-		        "data": data,
-		     };
-		     const parts = [ part ];
-		     const svg = buildSVG(parts, ComposablesImageData.palette, 'fff');
-			
-			dragItems.push({filename, data, svg, id: filename, content: filename, palette: ComposablesImageData.palette});
-		});
-				
-	    setStateItemsArray((stateItemsArray) => [
-	        ...stateItemsArray,
-	        {
-	            id: "Inventory",
-	            items: dragItems
-	        },
-	    ]);
-	    
 	    setStateItemsArray((stateItemsArray) => [
 	        ...stateItemsArray,
 	        { id: "Foreground", items: [] },
@@ -261,7 +281,80 @@ const ComposerPage = () => {
 
       setInitLoad(false);
     }
-  }, [/*generateNounSvg,*/ initLoad]);
+  }, [initLoad]);
+
+  useEffect(() => {
+
+    if (collections) {
+
+	    const loadCollectionItems = async () => {
+	    	
+	    	const collectionNames: string[] = [];
+	    	const creatorNames: string[] = [];
+			const categoryNames: string[] = [];
+			    
+			//all of the items from the collections
+			let items: ComposableItem[] = [];
+	    	
+	    	for (let i = 0; i < collections.length; i++) {
+	    		const cItems = await getComposableItems(collections[i].tokenAddress, collections[i].itemCount, collections[i].name);
+	    		
+	    		items = items.concat(cItems);
+	    	}
+	    	
+	    	for (let i = 0; i < items.length; i++) {
+				
+				const item = items[i];
+
+			    if (collectionNames.indexOf(item.collection) === -1) {
+			        collectionNames.push(item.collection)
+			    }
+				
+			    if (creatorNames.indexOf(item.meta.attributes[1].value) === -1) {
+			        creatorNames.push(item.meta.attributes[1].value)
+			    }
+
+			    if (categoryNames.indexOf(item.meta.attributes[0].value) === -1) {
+			        categoryNames.push(item.meta.attributes[0].value)
+			    }	    		
+	    	}
+
+			setCollectionItems(items);
+
+		    setStateItemsArray((stateItemsArray) => [
+		        ...stateItemsArray,
+		        {
+		            id: "Items",
+		            items: items
+		        },
+		    ]);
+	    };
+	    
+	    loadCollectionItems();
+    }    
+
+  }, [collections]);
+
+  useEffect(() => {
+
+    if (activeAccount && collections) {
+	    
+	    const loadHoldings = async () => {
+			let items: TokenItem[] = [];
+	    	
+	    	for (let i = 0; i < collections.length; i++) {
+	      		const cItems = await getTokenHoldings(collections[i].tokenAddress, activeAccount);
+
+	    		items = items.concat(cItems);
+	    	}
+	    	
+			setHoldings(items);	    	
+	    };
+	    
+	    loadHoldings();
+    }
+  }, [activeAccount, collections]);
+
 
   useEffect(() => {
   	if (!seed) {
@@ -294,20 +387,106 @@ const ComposerPage = () => {
 	partsComposed[14] = itemsForeground[2];
 	partsComposed[15] = itemsForeground[3];
 	
-	const svg = buildSVG(partsComposed.filter(part => part != null), imageData.palette, background);
+	//const collections: ComposableItemCollection[] = collectionsCreated.map(item => ({tokenAddress: item.collectionContract, owner: item.creator, name: item.name, symbol: item.symbol, itemCount: -1}) as ComposableItemCollection );
+	
+	const svg = buildSVG(partsComposed.filter(part => part != null).map(item => ((item.image) ? item.image : item)), imageData.palette, background);
 	setNounSVG(svg);
 	
+	const mergedHoldings = holdings.concat(previousChildTokens);
+	const countUnownedMatches = partsComposed
+		.filter(part => part != null)
+		.filter(item => item.image)
+		.filter(item => !filterTokenItem(mergedHoldings, item.tokenAddress, item.tokenId));
+	
+	setComposedItems(partsComposed);
+	setHasOwnedComposedItems(countUnownedMatches.length === 0);
+	
+	let differentComposedItems = false;
+	if (previousComposedChildTokens) {
+		for (let i = 0; i < previousComposedChildTokens.length; i++) {
+			const part = (partsComposed[i] != null) ? (partsComposed[i].image ? partsComposed[i] : null) : null;
+			const child: TokenItem = previousComposedChildTokens[i];
+
+			if (child) {
+				if (child.tokenAddress !== '0x0000000000000000000000000000000000000000' || part != null) {
+					
+					if (child.tokenAddress === '0x0000000000000000000000000000000000000000' || part === null) {
+						differentComposedItems = true;
+					} else if (child.tokenAddress !== part.tokenAddress || !child.tokenId.isEqualTo(part.tokenId)) {
+						differentComposedItems = true;
+					}
+				}
+			}
+		}		
+	}
+	setHasDifferentComposedItems(differentComposedItems);
+	
+	
   	// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [/*generateNounSvg,*/ seed, stateItemsArray]);
+  }, [seed, stateItemsArray]);
+  
+    
+  const resetListsWithComposedChildTokens = (composedChildTokens: TokenItem[]) => {
+
+	const itemsBackground: ComposableItem[] = [];
+	const itemsBody: ComposableItem[] = [];
+	const itemsAccessory: ComposableItem[] = [];
+	const itemsHead: ComposableItem[] = [];
+	const itemsGlasses: ComposableItem[] = [];
+	const itemsForeground: ComposableItem[] = [];
+	
+	for (let i = 0; i < composedChildTokens.length; i++) {
+		const child: TokenItem = composedChildTokens[i];
+		
+		if (child.tokenAddress !== '0x0000000000000000000000000000000000000000') {
+			const match = filterComposableItem(collectionItems, child.tokenAddress, child.tokenId);
+			
+			if (match) {
+				if (i < 4) {
+					itemsBackground.push(match);
+				} else if (i < 6) {
+					itemsBody.push(match);
+				} else if (i < 8) {
+					itemsAccessory.push(match);
+				} else if (i < 10) {
+					itemsHead.push(match);
+				} else if (i < 12) {
+					itemsGlasses.push(match);
+				} else {					
+					itemsForeground.push(match);
+				}
+			}
+		}
+	}
+	
+	const filteredComposedChildTokens = composedChildTokens.filter(child => child.tokenAddress !== '0x0000000000000000000000000000000000000000');
+	const filteredCollectionItems = collectionItems.filter(item => !filterTokenItem(filteredComposedChildTokens, item.tokenAddress, item.tokenId));
+
+  	const resetStateItemsArray: ComposableItemGroup[] = [
+        { id: "Foreground", items: itemsForeground },
+        { id: "Glasses", items: itemsGlasses },
+        { id: "Head", items: itemsHead },
+        { id: "Accessory", items: itemsAccessory },
+        { id: "Body", items: itemsBody },
+        { id: "Background", items: itemsBackground },  	
+        { id: "Items", items: filteredCollectionItems },
+  	];
+
+	setStateItemsArray(resetStateItemsArray);
+  }
 
   const getList = (listId: string) => {
-  	var items: DroppableItem[] = [];
+  	var items: ComposableItem[] = [];
   	
 	stateItemsArray.forEach(droppableItem => {
 	    if (droppableItem.id === listId) {
 	    	items = droppableItem.items;
 	    }
-	});  	
+	});
+	  
+	if (listId === 'Items' && selectedOwned === true) {
+		items = items.filter(encodedItem => filterTokenItem(holdings, encodedItem.tokenAddress, encodedItem.tokenId));
+	}
   	
   	return items;
   }
@@ -380,7 +559,7 @@ const ComposerPage = () => {
            	);
            	
            	if (replace && replacedItem !== undefined) {           		
-           		const droppableId = 'Inventory';
+           		const droppableId = 'Items';
 		      	const items = (source.droppableId === droppableId) ? result.source : getList(droppableId);
       			items.unshift(replacedItem);
            		
@@ -466,7 +645,7 @@ const ComposerPage = () => {
     };
     reader.readAsArrayBuffer(file);
   };
-
+  
   const uploadCustomTrait = () => {
     const { type, data, palette, filename } = pendingTrait || {};
     if (type && data && palette && filename) {
@@ -477,17 +656,15 @@ const ComposerPage = () => {
         data,
       });
       
-      const droppableId = 'Inventory';
+      const droppableId = 'Items';
       const items = getList(droppableId);
-
-      const part = {
-        "filename": filename,
-        "data": data,
-      };
-      const parts = [ part ];
-      const svg = buildSVG(parts, palette, 'fff');      
       
-      items.unshift({filename, data, svg, id: filename, content: filename, palette: palette});
+      const image: ComposableEncodedImage = {filename: filename, data: data, palette: palette};
+      const meta = JSON.parse("{}");
+      meta.name = filename;
+	  const item: ComposableItem = { meta: meta, image: image, collection: 'None', tokenAddress: filename, tokenId: new BigNumber(0) };
+      items.unshift(item);
+
 
 	  setStateItemsArray(
         stateItemsArray.map((droppables) =>
@@ -515,29 +692,82 @@ const ComposerPage = () => {
     }
   };
 
+  const handleOwnedFilterChange = () => {
+    setSelectedOwned(current => !current);
+  };
+  
+  var encodedItems: ComposableItem[] = getList('Items');
+  
+  if (true) {
+	  if (selectedOwned === true) {
+	  	//encodedItems = encodedItems.filter(encodedItem => filterTokenItem(holdings, encodedItem.tokenAddress, encodedItem.tokenId));
+	  }
+  }
+  
+  const mergedHoldings = holdings.concat(previousChildTokens);
+  
+  const saveEnabled = (nounTokenAddress !== undefined && nounTokenId !== undefined && composerProxyAddress !== undefined) && (hasOwnedComposedItems) && (hasDifferentComposedItems);
+
   return (
     <>
-      {displayNoun && nounSVG && (
+      {displayNounModal && nounSVG && (
         <NounModal
           onDismiss={() => {
-            setDisplayNoun(false);
+            setDisplayNounModal(false);
           }}
           svg={nounSVG}
         />
       )}
       {displayNounPicker && (
         <NounPicker
-          onSelect={(extensionName: string | undefined, seed: INounSeed | undefined) => {
+          onSelect={(extensionName: string | undefined, tokenAddress: string | undefined, tokenId: number | undefined, seed: INounSeed | undefined, composerProxyAddress: string | undefined, childTokens: TokenItem[], composedChildTokens: TokenItem[]) => {
           	//check if none selected, then just close modal
-          	if (extensionName !== undefined && seed !== undefined) {
+
+          	if (tokenAddress !== undefined && tokenId !== undefined
+          		&& extensionName !== undefined && seed !== undefined) {
 	          	setNounExtensionName(extensionName);
 	          	setSeed(seed);
+
+				setNounTokenAddress(tokenAddress);
+				setNounTokenId(tokenId);
+				
+				setComposerProxyAddress(composerProxyAddress);
+				setPreviousChildTokens(childTokens);
+				setPreviousComposedChildTokens(composedChildTokens);
+
+				resetListsWithComposedChildTokens(composedChildTokens);
 	        }
           	
             setDisplayNounPicker(false);
           }}
         />
       )}  	
+      {displaySaveModal && composerProxyAddress && (
+        <SaveModal
+          tokenAddress={nounTokenAddress!}
+          tokenId={nounTokenId!}
+          composedItems={composedItems}
+          composerProxyAddress={composerProxyAddress}
+          collectionItems={collectionItems}
+          previousChildTokens={previousChildTokens}
+          previousComposedChildTokens={previousComposedChildTokens}
+          svg={nounSVG!}
+          onComplete={(saved: boolean) => {          	
+          	//check if none selected, then just close modal
+          	
+            setDisplaySaveModal(false);
+          	
+          	if (saved) {
+	          	setModal({
+			    	title: <Trans>Success</Trans>,
+			    	message: <Trans>Changes successfully saved on-chain!</Trans>,
+			    	show: true,
+			  	});
+          	}
+          }}
+        />
+      )}  	
+
       <Container fluid="lg">
         <Row>
           <Col lg={12} className={classes.headerRow}>
@@ -571,70 +801,89 @@ const ComposerPage = () => {
           </Col>
         </Row>
 		<Row className="composer-selecter">
+		<DragDropContext onDragEnd={(results: any) => {onDragEnd(results);}}>
         {nounSVG && (
-			<DragDropContext onDragEnd={(results: any) => {onDragEnd(results);}}>
-	        	<Row>
-		          <Col lg={6} xs={12}>
-					{nounSVG && (
-	                  <div
-	                    onClick={() => {
-	                      setDisplayNoun(true);
-	                    }}
-	                  >
-						<Noun
-		                  imgPath={`data:image/svg+xml;base64,${btoa(nounSVG)}`}
-		                  alt="Noun"
-		                  className={classes.nounImg}
-		                  wrapperClassName={classes.nounWrapper}
-		                />	
-
-
-		              </div>		              
-					)}
-				  </Col>
-		          <Col lg={6} xs={12}>
+        	<>
+		      <Col lg={6} xs={12}>
+				{nounSVG && (
+		          <div
+		            onClick={() => {
+		              setDisplayNounModal(true);
+		            }}
+		          >
+					<Noun
+		              imgPath={`data:image/svg+xml;base64,${btoa(nounSVG)}`}
+		              alt="Noun"
+		              className={classes.nounImg}
+		              wrapperClassName={classes.nounWrapper}
+		            />	
+		          </div>
+				)}
+			  </Col>
+		      <Col lg={6} xs={12}>
 		
-						<Row style={{marginBottom: 25}}>
-							<Col lg={12} xs={12}>
-								<DroppableControl droppableId="Foreground" droppableItems={getList('Foreground')} itemLimit={4} />
-							</Col>
-						</Row>
-						<Row style={{marginBottom: 25}}>
-							<Col lg={3} xs={3}>
-								<DroppableControl droppableId="Body" droppableItems={getList('Body')} itemLimit={1} />
-							</Col>
-							<Col lg={3} xs={3}>
-								<DroppableControl droppableId="Accessory" droppableItems={getList('Accessory')} itemLimit={1} />
-							</Col>
-							<Col lg={3} xs={3}>
-								<DroppableControl droppableId="Head" droppableItems={getList('Head')} itemLimit={1} />
-							</Col>
-							<Col lg={3} xs={3}>
-								<DroppableControl droppableId="Glasses" droppableItems={getList('Glasses')} itemLimit={1} />
-							</Col>
-						</Row>
-						<Row>
-							<Col lg={12} xs={12}>
-								<DroppableControl droppableId="Background" droppableItems={getList('Background')} itemLimit={4} />
-							</Col>
-						</Row>
-				  </Col>
-	          	  <Col lg={12}>
-					<DroppableControl droppableId="Inventory" droppableItems={getList('Inventory')} itemLimit={1000} />          					
-	          	  </Col>
-	        	</Row>
-			</DragDropContext>
+					<Row style={{marginBottom: 25}}>
+						<Col lg={12} xs={12}>
+							<strong>Foreground</strong>
+							<DroppableControl droppableId="Foreground" droppableItems={getList('Foreground')} holdings={mergedHoldings} itemLimit={4} />
+						</Col>
+					</Row>
+					<Row style={{marginBottom: 25}}>
+						<Col lg={3} xs={3}>
+							<strong>Body</strong>
+							<DroppableControl droppableId="Body" droppableItems={getList('Body')} holdings={mergedHoldings} itemLimit={1} />
+						</Col>
+						<Col lg={3} xs={3}>
+							<strong>Accessory</strong>
+							<DroppableControl droppableId="Accessory" droppableItems={getList('Accessory')} holdings={mergedHoldings} itemLimit={1} />
+						</Col>
+						<Col lg={3} xs={3}>
+							<strong>Head</strong>
+							<DroppableControl droppableId="Head" droppableItems={getList('Head')} holdings={mergedHoldings} itemLimit={1} />
+						</Col>
+						<Col lg={3} xs={3}>
+							<strong>Glasses</strong>
+							<DroppableControl droppableId="Glasses" droppableItems={getList('Glasses')} holdings={mergedHoldings} itemLimit={1} />
+						</Col>
+					</Row>
+					<Row>
+						<Col lg={12} xs={12}>
+							<strong>Background</strong>
+							<DroppableControl droppableId="Background" droppableItems={getList('Background')} holdings={mergedHoldings} itemLimit={4} />
+						</Col>
+					</Row>
+			  </Col>
+        	</>
 		)}
+        {(activeAccount || nounSVG) && (
+        	<>
+        	<Col lg={1}>
+	    		<strong>Items</strong>
+	    	</Col>
+      		<Col lg={11}>
+      			<Form.Check type="switch" id="custom-switch" 
+      			defaultChecked={selectedOwned}
+      			value={selectedOwned.toString()}
+		        onChange={handleOwnedFilterChange}
+      			label="Only show owned items" />
+      		</Col>
+
+	  	  	<Col lg={12}>	    	
+				<DroppableControl droppableId="Items" droppableItems={encodedItems} holdings={mergedHoldings} itemLimit={1000} />          					
+	  	  	</Col>		
+        	</>
+		)}
+		</DragDropContext>
 		</Row>
 		<Row className="composer-saver">
         {nounSVG && (
         	<Row>
         		<Col lg={12}>
-		            <Button onClick={() => setDisplayNoun(true)} className={classes.primaryBtnSaver}>
+		            <Button className={classes.primaryBtnSaver} onClick={() => setDisplayNounModal(true)}>
 		              Download
 		            </Button>			
 					&nbsp;&nbsp;&nbsp;
-		            <Button className={classes.primaryBtnSaver} disabled={true}>
+		            <Button className={classes.primaryBtnSaver} onClick={() => setDisplaySaveModal(true)} disabled={!saveEnabled}>
 		              Save On-Chain
 		            </Button>			
         		

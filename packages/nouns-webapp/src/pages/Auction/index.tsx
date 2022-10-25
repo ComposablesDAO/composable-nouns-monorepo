@@ -49,8 +49,9 @@ const AuctionPage: React.FC<AuctionPageProps> = props => {
       {onDisplayAuctionNounId !== undefined && onDisplayAuctionNounId !== lastAuctionNounId ? (
         <ProfileActivityFeed nounId={onDisplayAuctionNounId} />
       ) : (
-        <Banner />
+        <></>
       )}
+      <Banner />
       <Documentation />
     </>
   );

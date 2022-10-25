@@ -87,7 +87,7 @@ const app: Record<SupportedChains, AppConfig> = {
   [ChainId.Hardhat]: {
     jsonRpcUri: 'http://localhost:8545',
     wsRpcUri: 'ws://localhost:8545',
-    nftApiUri: '',
+    nftApiUri: 'http://localhost:8888/image-data/mock-api.json?',
     subgraphApiUri: 'http://localhost:8000/subgraphs/name/nounsdao/nouns-subgraph',
     enableHistory: process.env.REACT_APP_ENABLE_HISTORY === 'true',
   },
@@ -116,12 +116,12 @@ const getAddresses = (): ContractAddresses => {
   return { ...nounsAddresses, ...externalAddresses[CHAIN_ID] };
 };
 
-const composableExtensions: Record<SupportedChains, any> = {
+const composableTokens: Record<SupportedChains, any> = {
   [ChainId.Rinkeby]: {
-  	'extensions': [
+  	extensions: [
 	    {
 	    	name: 'YOLONouns',
-	    	address: '0xb632fD44053B09bddDaF92dE2C212bB12Ce8DbDF',
+	    	tokenAddress: '0xb632fD44053B09bddDaF92dE2C212bB12Ce8DbDF',
 	    	imageDataUri: 'image-data-yolonouns.json',
 	    	imageData: undefined,
 	    },
@@ -138,40 +138,40 @@ const composableExtensions: Record<SupportedChains, any> = {
 	]
   },  
   [ChainId.Mainnet]: {
-  	'extensions': [
+  	extensions: [
 	    {
 	    	name: 'Nouns',
-	    	address: '0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03',
+	    	tokenAddress: '0x9C8fF314C9Bc7F6e59A9d9225Fb22946427eDC03',
 	    	imageDataUri: '/image-data/image-data.json',
 	    	imageData: undefined,
 	    },
 	    {
 	    	name: 'LilNoun',
-	    	address: '0x4b10701Bfd7BFEdc47d50562b76b436fbB5BdB3B',
+	    	tokenAddress: '0x4b10701Bfd7BFEdc47d50562b76b436fbB5BdB3B',
 	    	imageDataUri: '/image-data/image-data-lilnouns.json',
 	    	imageData: undefined,
 	    },
 	    {
 	    	name: 'YOLO Nouns',
-	    	address: '0xB9e9053aB6dDd4f3FF717c1a22192D3517963A80',
+	    	tokenAddress: '0xB9e9053aB6dDd4f3FF717c1a22192D3517963A80',
 	    	imageDataUri: '/image-data/image-data-yolonouns.json',
 	    	imageData: undefined,
 	    },
 	    {
 	    	name: 'NounsTown',
-	    	address: '0xb632fD44053B09bddDaF92dE2C212bB12Ce8DbDF',
+	    	tokenAddress: '0xb632fD44053B09bddDaF92dE2C212bB12Ce8DbDF',
 	    	imageDataUri: '/image-data/image-data-nounstown.json',
 	    	imageData: undefined,
 	    },
 	    {
 	    	name: 'nuNouns',
-	    	address: '0x4c597608A1045ac3089B4683f2787AF8f991139D',
+	    	tokenAddress: '0x4c597608A1045ac3089B4683f2787AF8f991139D',
 	    	imageDataUri: '/image-data/image-data-nunouns.json',
 	    	imageData: undefined,
 	    },	    
 	    {
 	    	name: 'FOODNOUNS',
-	    	address: '0xF5331380e1d19757388A6E6198BF3BDc93D8b07a',
+	    	tokenAddress: '0xF5331380e1d19757388A6E6198BF3BDc93D8b07a',
 	    	imageDataUri: '/image-data/image-data-foodnouns.json',
 	    	imageData: undefined,
 	    },	    
@@ -179,13 +179,30 @@ const composableExtensions: Record<SupportedChains, any> = {
 	]
   },
   [ChainId.Hardhat]: {
-  	'extensions': [
-	]
+  	extensions: [
+	    {
+	    	name: 'Nouns',
+	    	tokenAddress: '0xa513E6E4b8f2a923D98304ec87F64353C4D5C853',
+	    	composerProxy: '0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1',
+	    	imageDataUri: '/image-data/image-data.json',
+	    	imageData: undefined,
+	    },
+	],
+	composablesMarketProxy: '0x09635F643e140090A9A8Dcd712eD6285858ceBef',
+	composableItemFactory: '0x67d269191c92Caf3cD7723F116c85e6E9bf55933',
+  	items: [
+	    {
+	    	name: 'Starter Pack',
+	    	address: '0x09635F643e140090A9A8Dcd712eD6285858ceBef',
+	    	imageDataUri: '/image-data/image-data-composables.json',
+	    	imageData: undefined,
+	    },
+	]	
   },
 };
 
 const getComposables = (): any => {
-  return composableExtensions[CHAIN_ID] ;
+  return composableTokens[CHAIN_ID] ;
 };
 
 
@@ -197,4 +214,4 @@ const config = {
 
 export default config;
 
-export const multicallOnLocalhost = '0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e';
+export const multicallOnLocalhost = '0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE'; //0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e

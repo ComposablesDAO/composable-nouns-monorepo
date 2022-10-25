@@ -4,8 +4,9 @@
 
 .wrapper h1 {
   font-family: 'Londrina Solid';
-  font-size: 68px;
-  margin-bottom: 10px;
+  font-size: 56px; /*68px*/
+  margin-bottom: 5px; /*10px*/
+  line-height: 1;
 }
 
 @media (max-width: 992px) {
