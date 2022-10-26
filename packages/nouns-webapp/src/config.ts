@@ -74,7 +74,7 @@ const app: Record<SupportedChains, AppConfig> = {
     jsonRpcUri: createNetworkHttpUrl('goerli'),
     wsRpcUri: createNetworkWsUrl('goerli'),
     nftApiUri: createNetworkApiUrl('goerli'),
-    subgraphApiUri: 'https://api.thegraph.com/subgraphs/name/bcjgit/dao-v2-test',
+    subgraphApiUri: 'https://api.thegraph.com/subgraphs/name/composablesdao/goerli',
     enableHistory: process.env.REACT_APP_ENABLE_HISTORY === 'true',
   },
   [ChainId.Mainnet]: {
@@ -128,14 +128,25 @@ const composableTokens: Record<SupportedChains, any> = {
 	]
   },  
   [ChainId.Goerli]: {
-  	'extensions': [
+  	extensions: [
 	    {
-	    	name: 'YOLONouns',
-	    	address: '0xb632fD44053B09bddDaF92dE2C212bB12Ce8DbDF',
-	    	imageDataUri: 'image-data-yolonouns.json',
+	    	name: 'CX Nouns',
+	    	tokenAddress: '0x985F822285D688d05AD71D739A1b7B3116920f8D',
+	    	composerProxy: '0x14edab8509827481460ad77cf72674bE22165039',
+	    	imageDataUri: '/image-data/image-data.json',
 	    	imageData: undefined,
 	    },
-	]
+	],
+	composablesMarketProxy: '0x29A42a147d0843Ee7133d5941Ef257DE5a3c41E7',
+	composableItemFactory: '0x70014590c56BDa28577e651A0b3953d4371B8a32',
+  	items: [
+	    {
+	    	name: 'Starter Pack',
+	    	address: '0x09635F643e140090A9A8Dcd712eD6285858ceBef',
+	    	imageDataUri: '/image-data/image-data-composables.json',
+	    	imageData: undefined,
+	    },
+	]	
   },  
   [ChainId.Mainnet]: {
   	extensions: [
