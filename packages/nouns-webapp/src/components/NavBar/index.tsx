@@ -48,7 +48,7 @@ const NavBar = () => {
     : NavBarButtonStyle.WARM_INFO;
 
   const closeNav = () => setIsNavExpanded(false);
-
+  
   return (
     <>
       <Navbar
@@ -75,6 +75,7 @@ const NavBar = () => {
                   className={classes.nounsNavLink}
                   target="_blank"
                   rel="noreferrer"
+                  style={{display: 'none', visibility: 'hidden'}}
                 >
                   <NavBarTreasury
                     treasuryBalance={Number(utils.formatEther(treasuryBalance)).toFixed(0)}
@@ -90,11 +91,13 @@ const NavBar = () => {
             onClick={() => setIsNavExpanded(!isNavExpanded)}
           />
           <Navbar.Collapse className="justify-content-end">
-            <Nav.Link as={Link} to="/vote" className={classes.nounsNavLink} onClick={closeNav}>
+            <Nav.Link as={Link} to="/vote" className={classes.nounsNavLink} onClick={closeNav}
+            style={{display: 'none', visibility: 'hidden'}}
+            >
               <NavBarButton
                 buttonText={<Trans>DAO</Trans>}
                 buttonIcon={<FontAwesomeIcon icon={faUsers} />}
-                buttonStyle={nonWalletButtonStyle}
+                buttonStyle={nonWalletButtonStyle}                
               />
             </Nav.Link>
             <Nav.Link

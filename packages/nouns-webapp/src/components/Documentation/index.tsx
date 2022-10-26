@@ -32,7 +32,7 @@ const Documentation = () => {
   );
   return (
     <Section fullWidth={false}>
-      <Col lg={{ span: 10, offset: 1 }}>
+      <Col lg={{ span: 10, offset: 1 }} style={{display: 'none', visibility: 'hidden'}}>
         <div className={classes.headerWrapper}>
           <h1>
             <Trans>WTF?</Trans>

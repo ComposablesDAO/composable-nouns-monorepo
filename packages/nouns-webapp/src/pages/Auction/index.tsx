@@ -20,6 +20,8 @@ const AuctionPage: React.FC<AuctionPageProps> = props => {
   const onDisplayAuctionNounId = onDisplayAuction?.nounId.toNumber();
 
   const dispatch = useAppDispatch();
+  
+  const showActivityFeed = false;
 
   useEffect(() => {
     if (!lastAuctionNounId) return;
@@ -46,7 +48,7 @@ const AuctionPage: React.FC<AuctionPageProps> = props => {
   return (
     <>
       <Auction auction={onDisplayAuction} />
-      {onDisplayAuctionNounId !== undefined && onDisplayAuctionNounId !== lastAuctionNounId ? (
+      {onDisplayAuctionNounId !== undefined && onDisplayAuctionNounId !== lastAuctionNounId && showActivityFeed ? (
         <ProfileActivityFeed nounId={onDisplayAuctionNounId} />
       ) : (
         <></>
