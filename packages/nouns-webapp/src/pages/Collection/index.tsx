@@ -182,8 +182,12 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
         }
         const filename = file.name?.replace('.png', '') || 'custom';
 
-        //get the current collection palette
+        //get the current collection palette from on-chain data
         let palette = (collectionItems && collectionItems.length > 0) ? collectionItems[0].image.palette : [];
+        if (palette && palette[0] === '000000') {
+        	palette[0] = ''; //transparent 0-index spacer
+        }
+
         if (pendingCollectionItems && pendingCollectionItems.length > 0) {
         	//grab the latest cumulative palette to build upon
         	palette = pendingCollectionItems[pendingCollectionItems.length - 1].image.palette;
@@ -288,7 +292,7 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
     	const metaPage = dataToDescriptorInput(metas.map((meta) => ethers.utils.hexlify(ethers.utils.toUtf8Bytes(meta))));  		
 		
 		const palette = pendingCollectionItems[pendingCollectionItems.length - 1].image.palette;
-	  	const paletteString: string = `0x000000${palette.join('')}`;
+	  	const paletteString: string = `0x000000${palette.join('')}`; //add the transparent 0-index spacer
 
 	  	addItems(imagesPage.encodedCompressed, imagesPage.originalLength, imagesPage.itemCount,
 	  	metaPage.encodedCompressed, metaPage.originalLength, metaPage.itemCount,
