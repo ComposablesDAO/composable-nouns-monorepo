@@ -226,3 +226,9 @@
   margin: 0px;
   text-align: center;
 }
+
+.spinner {
+  display: flex;
+  justify-content: center;
+  color: var(--brand-gray-light-text);
+}

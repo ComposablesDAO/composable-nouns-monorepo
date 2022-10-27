@@ -4,7 +4,7 @@ import { Row, Col } from 'react-bootstrap';
 
 import { useEffect, useState } from 'react';
 import { ComposableItemCollection, getComposableItemCollections, 
-	getComposableItems } from '../../utils/composables/composablesWrapper';
+	getComposableItems, ComposablesMarketListing, getComposablesMarketListings } from '../../utils/composables/composablesWrapper';
 import { ComposableItemCollectionRows, CollectionItems } from '../../components/ComposableItemCollectionRow';
 import Link from '../../components/Link';
 import banner_animation from '../../assets/Composer-Banner.gif';
@@ -13,8 +13,9 @@ const Banner = () => {
 
 
   const [initLoad, setInitLoad] = useState<boolean>(true);
-  const [collections, setCollections] = useState<ComposableItemCollection[]>([]);
-  const [collectionItems, setCollectionItems] = useState<CollectionItems[]>([]);
+  const [collections, setCollections] = useState<ComposableItemCollection[] | undefined>(undefined);
+  const [collectionItems, setCollectionItems] = useState<CollectionItems[] | undefined>(undefined);
+  const [listings, setListings] = useState<ComposablesMarketListing[]>();
 
   useEffect(() => {
 
@@ -48,7 +49,10 @@ const Banner = () => {
 	    		items.push({tokenAddress: collections[i].tokenAddress, items: cItems });
 	    	}
 
-			setCollectionItems(items);	    			  
+			setCollectionItems(items);
+
+			const listings: ComposablesMarketListing[] = await getComposablesMarketListings();
+			setListings(listings);
 	    };
 	    
 	    loadCollectionItems();
@@ -68,10 +72,10 @@ const Banner = () => {
 	    	<Col lg={12}>
 	        	<span className={classes.sectionHeader}>Latest collections:</span>
 
-	          	<ComposableItemCollectionRows collections={collections} collectionItems={collectionItems} />
+	          	<ComposableItemCollectionRows collections={collections} collectionItems={collectionItems} listings={listings} />
 
 	          	<span className={classes.sectionFooter}>
-	          		<Link text={"All Collections"} url="/collections" leavesPage={false} />
+	          		<Link text={"View All Collections"} url="/collections" leavesPage={false} />
 	          	</span>
 
 			</Col>

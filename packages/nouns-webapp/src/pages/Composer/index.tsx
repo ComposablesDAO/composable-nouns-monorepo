@@ -1,7 +1,7 @@
 //import React from 'react';
 import React, { ChangeEvent, useEffect, useRef, useState, useCallback } from 'react';
 import classes from './Composer.module.css';
-import { Container, Row, Col, Button, Image, Form, OverlayTrigger, Popover } from 'react-bootstrap';
+import { Container, Row, Col, Button, Image, Form, OverlayTrigger, Popover, Spinner } from 'react-bootstrap';
 
 import { ComposableItemCollection, getComposableItemCollections, 
 	TokenItem, getTokenHoldings, filterComposableItem, filterTokenItem,
@@ -200,11 +200,10 @@ const ComposerPage = () => {
   const [pendingTrait, setPendingTrait] = useState<PendingCustomTrait>();
   const [isPendingTraitValid, setPendingTraitValid] = useState<boolean>();
 
-  const [collections, setCollections] = useState<ComposableItemCollection[]>();
-  const [collectionItems, setCollectionItems] = useState<ComposableItem[]>([]);
+  const [collections, setCollections] = useState<ComposableItemCollection[] | undefined>(undefined);
+  const [collectionItems, setCollectionItems] = useState<ComposableItem[] | undefined>(undefined);
   //const [listings, setListings] = useState<ComposablesMarketListing[]>();
-  const [holdings, setHoldings] = useState<TokenItem[]>([]);
-  
+  const [holdings, setHoldings] = useState<TokenItem[]>([]);  
   
   const [selectedOwned, setSelectedOwned] = useState<boolean>(true);
     
@@ -243,10 +242,10 @@ const ComposerPage = () => {
 
 	  const collections: ComposableItemCollection[] = await getComposableItemCollections(true);
 	  if (collections === undefined) {
-	  	return false;
+	  	setCollections([]);
+	  } else {
+		setCollections(collections);
 	  }
-
-	  setCollections(collections);
     };
 
     const loadExtensions = async () => {
@@ -260,7 +259,6 @@ const ComposerPage = () => {
 	  
 	  setNounExtensions(extensions);
     };
-
     
     if (initLoad) {
 
@@ -427,7 +425,7 @@ const ComposerPage = () => {
   
     
   const resetListsWithComposedChildTokens = (composedChildTokens: TokenItem[]) => {
-
+  	
 	const itemsBackground: ComposableItem[] = [];
 	const itemsBody: ComposableItem[] = [];
 	const itemsAccessory: ComposableItem[] = [];
@@ -439,7 +437,7 @@ const ComposerPage = () => {
 		const child: TokenItem = composedChildTokens[i];
 		
 		if (child.tokenAddress !== '0x0000000000000000000000000000000000000000') {
-			const match = filterComposableItem(collectionItems, child.tokenAddress, child.tokenId);
+			const match = filterComposableItem(collectionItems!, child.tokenAddress, child.tokenId);
 			
 			if (match) {
 				if (i < 4) {
@@ -460,7 +458,7 @@ const ComposerPage = () => {
 	}
 	
 	const filteredComposedChildTokens = composedChildTokens.filter(child => child.tokenAddress !== '0x0000000000000000000000000000000000000000');
-	const filteredCollectionItems = collectionItems.filter(item => !filterTokenItem(filteredComposedChildTokens, item.tokenAddress, item.tokenId));
+	const filteredCollectionItems = collectionItems!.filter(item => !filterTokenItem(filteredComposedChildTokens, item.tokenAddress, item.tokenId));
 
   	const resetStateItemsArray: ComposableItemGroup[] = [
         { id: "Foreground", items: itemsForeground },
@@ -748,7 +746,7 @@ const ComposerPage = () => {
           tokenId={nounTokenId!}
           composedItems={composedItems}
           composerProxyAddress={composerProxyAddress}
-          collectionItems={collectionItems}
+          collectionItems={collectionItems!}
           previousChildTokens={previousChildTokens}
           previousComposedChildTokens={previousComposedChildTokens}
           svg={nounSVG!}
@@ -800,6 +798,12 @@ const ComposerPage = () => {
         			
           </Col>
         </Row>
+    	{collectionItems === undefined && (
+			<div className={classes.spinner}>
+				<Spinner animation="border" />
+			</div>
+		)}		        
+        
 		<Row className="composer-selecter">
 		<DragDropContext onDragEnd={(results: any) => {onDragEnd(results);}}>
         {nounSVG && (

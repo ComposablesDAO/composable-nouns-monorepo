@@ -6,7 +6,8 @@ import { Trans } from '@lingui/macro';
 import { ComposableItemCollectionRows, CollectionItems } from '../../components/ComposableItemCollectionRow';
 import CollectionForm from './CollectionForm';
 	
-import { ComposableItemCollection, getComposableItemCollections, getComposableItems } from '../../utils/composables/composablesWrapper';
+import { ComposableItemCollection, getComposableItemCollections, getComposableItems,
+	ComposablesMarketListing, getComposablesMarketListings } from '../../utils/composables/composablesWrapper';
 
 import { useAppSelector } from '../../hooks';
 
@@ -15,8 +16,9 @@ import { Redirect } from 'react-router-dom';
 const CollectionsPage = () => {
     
   const [initLoad, setInitLoad] = useState<boolean>(true);
-  const [collections, setCollections] = useState<ComposableItemCollection[]>([]);
-  const [collectionItems, setCollectionItems] = useState<CollectionItems[]>([]);
+  const [collections, setCollections] = useState<ComposableItemCollection[] | undefined>(undefined);
+  const [collectionItems, setCollectionItems] = useState<CollectionItems[] | undefined>(undefined);
+  const [listings, setListings] = useState<ComposablesMarketListing[]>();
   const [displayCollectionForm, setDisplayCollectionForm] = useState<boolean>(false);
   
   const [redirectTokenAddress, setRedirectTokenAddress] = useState<string>();
@@ -29,10 +31,11 @@ const CollectionsPage = () => {
     	
 	  const collections: ComposableItemCollection[] = await getComposableItemCollections(true);
 	  if (collections === undefined) {
-	  	return false;
+	  	setCollections([]);
+	  } else {
+	  	setCollections(collections.reverse());
 	  }
 
-	  setCollections(collections.reverse());	
     };
     
     if (initLoad) {
@@ -56,7 +59,10 @@ const CollectionsPage = () => {
 	    		items.push({tokenAddress: collections[i].tokenAddress, items: cItems });
 	    	}
 
-			setCollectionItems(items);	    			  
+			setCollectionItems(items);
+
+			const listings: ComposablesMarketListing[] = await getComposablesMarketListings();
+			setListings(listings);			
 	    };
 	    
 	    loadCollectionItems();
@@ -64,9 +70,8 @@ const CollectionsPage = () => {
 
   }, [collections]);
   
-  const myCollections = (activeAccount) ? collections.filter(collection => collection.owner.toLowerCase() === activeAccount.toLowerCase()) : [];
-  const otherCollections = (activeAccount) ? collections.filter(collection => collection.owner.toLowerCase() !== activeAccount.toLowerCase()) : collections;
-  //const otherCollections = collections;
+  const myCollections = (activeAccount && collections) ? collections.filter(collection => collection.owner.toLowerCase() === activeAccount.toLowerCase()) : [];
+  const otherCollections = (activeAccount && collections) ? collections.filter(collection => collection.owner.toLowerCase() !== activeAccount.toLowerCase()) : collections;
 
   return (
   	<>
@@ -88,7 +93,7 @@ const CollectionsPage = () => {
       )}
       <Container fluid="lg">
         <Row>
-          <Col lg={10} className={classes.headerRow}>
+          <Col lg={12} className={classes.headerRow}>
             <span>
               <Trans>Explore</Trans>
             </span>
@@ -108,7 +113,7 @@ const CollectionsPage = () => {
 	        <Row>
 	          <Col lg={12}>
 	          	<span style={{fontWeight: 'bold'}}>My Collections:</span>
-	          	<ComposableItemCollectionRows collections={myCollections} collectionItems={collectionItems} />
+	          	<ComposableItemCollectionRows collections={myCollections} collectionItems={collectionItems} listings={listings} />
 	          	<hr />
 	          </Col>
 	        </Row>
@@ -117,7 +122,7 @@ const CollectionsPage = () => {
         <Row>
           <Col lg={12}>
           	<span style={{fontWeight: 'bold'}}>All Collections:</span>
-          	<ComposableItemCollectionRows collections={otherCollections} collectionItems={collectionItems} />
+          	<ComposableItemCollectionRows collections={otherCollections} collectionItems={collectionItems} listings={listings} />
           </Col>
         </Row>
       </Container>

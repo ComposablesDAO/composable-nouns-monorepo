@@ -8,6 +8,7 @@ import {
   Row,
   FloatingLabel,
   Form,
+  Spinner
 } from 'react-bootstrap';
 import { Trans } from '@lingui/macro';
 //import { useAppSelector } from '../../hooks';
@@ -28,8 +29,8 @@ const MarketPage = () => {
   const [filters, setFilters] = useState<Filter[]>();
   const [initLoad, setInitLoad] = useState<boolean>(true);
   const [selectIndexes, setSelectIndexes] = useState<Record<string, number>>({});
-  const [collections, setCollections] = useState<ComposableItemCollection[]>([]);
-  const [collectionItems, setCollectionItems] = useState<ComposableItem[]>([]);
+  const [collections, setCollections] = useState<ComposableItemCollection[] | undefined>(undefined);
+  const [collectionItems, setCollectionItems] = useState<ComposableItem[] | undefined>(undefined);
   const [listings, setListings] = useState<ComposablesMarketListing[]>([]);
   
   //const activeAccount = useAppSelector(state => state.account.activeAccount);
@@ -40,19 +41,24 @@ const MarketPage = () => {
 
 	  const collections: ComposableItemCollection[] = await getComposableItemCollections(true);
 	  if (collections === undefined) {
-	  	return false;
+	  	setCollections([]);
+	  } else {
+		setCollections(collections);
 	  }
-
-	  setCollections(collections);
-
-      const listings: ComposablesMarketListing[] = await getComposablesMarketListings();
-	  setListings(listings);
     };
     
     if (initLoad) {
     	loadCollections();
     	setInitLoad(false);
-    }	
+    	
+    	setFilters([
+		  	{title: 'Status', filterNames: []},
+	    	{title: 'Collection', filterNames: []}, 
+	    	{title: 'Creator', filterNames: []}, 
+	    	{title: 'Category', filterNames: []}
+		]);
+
+    }
   }, [initLoad]);
   
 
@@ -100,7 +106,9 @@ const MarketPage = () => {
 		    	{title: 'Creator', filterNames: creatorNames}, 
 		    	{title: 'Category', filterNames: categoryNames}
 		    ]);
-		  
+		    
+		    const listings: ComposablesMarketListing[] = await getComposablesMarketListings();
+		    setListings(listings);
 	    };
 	    
 	    loadCollectionItems();
@@ -123,9 +131,9 @@ const MarketPage = () => {
   const filterButtonHandler = (filter: Filter, filterIndex: number) => {
   };
 
-  var encodedItems: ComposableItem[] = collectionItems;
+  var encodedItems = collectionItems;
   
-  if (filters) {
+  if (encodedItems && filters) {
 	  const selectedListedOnSale = filters[0].filterNames[selectIndexes?.['Status']] ?? undefined;
 	  const selectedCollection = filters[1].filterNames[selectIndexes?.['Collection']] ?? undefined;
 	  const selectedCreator = filters[2].filterNames[selectIndexes?.['Creator']] ?? undefined;
@@ -150,14 +158,13 @@ const MarketPage = () => {
   }
 
   //encodedItems = encodedItems.filter(encodedItem => getListings(encodedItem.tokenAddress, encodedItem.tokenId).length > 0);
-  //encodedItems = encodedItems.filter(encodedItem => getListing(encodedItem.tokenAddress, encodedItem.tokenId));
-  
+  //encodedItems = encodedItems.filter(encodedItem => getListing(encodedItem.tokenAddress, encodedItem.tokenId));  
   //parts.sort((a, b) => a.filename > b.filename ? -1 : 1)
   
   return (
       <Container fluid="lg">
         <Row>
-          <Col lg={10} className={classes.headerRow}>
+          <Col lg={12} className={classes.headerRow}>
             <span>
               <Trans>Browse</Trans>
             </span>
@@ -174,11 +181,7 @@ const MarketPage = () => {
         <Row>
           <Col lg={3}>
             <Col lg={12}>
-              <Button
-                className={classes.primaryBtnSearch}
-              >
-                <Trans>Search</Trans>
-              </Button>
+              <Button href="/collections" className={classes.primaryBtnSearch}>View Collections</Button>
             </Col>
             <Row>
               {filters &&
@@ -217,7 +220,13 @@ const MarketPage = () => {
           <Col lg={9}>
             <Row>
 		        <Row style={{ marginBottom: '0rem' }}>
-		          <ComposableItemCards composableItems={encodedItems} listings={listings} />		        
+		        	{encodedItems === undefined ? (
+						<div className={classes.spinner}>
+							<Spinner animation="border" />
+						</div>
+					) : (
+						<ComposableItemCards composableItems={encodedItems} listings={listings} />							
+					)}		        
 		        </Row>
             </Row>
           </Col>

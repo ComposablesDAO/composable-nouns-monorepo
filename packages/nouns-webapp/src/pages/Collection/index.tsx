@@ -9,7 +9,8 @@ import {
   Row,
   Form,
   OverlayTrigger,
-  Popover
+  Popover,
+  Spinner
 } from 'react-bootstrap';
 
 import { PNGCollectionEncoder } from '@nouns/sdk';
@@ -57,8 +58,8 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
   const { collectionAddress } = props;  
 
   const [toggleLoad, setToggleLoad] = useState<boolean>(true);
-  const [collection, setCollection] = useState<ComposableItemCollection>();
-  const [collectionItems, setCollectionItems] = useState<ComposableItem[]>([]);
+  const [collection, setCollection] = useState<ComposableItemCollection | undefined>(undefined);
+  const [collectionItems, setCollectionItems] = useState<ComposableItem[] | undefined>(undefined);
   const [listings, setListings] = useState<ComposablesMarketListing[]>();
 
   const [pendingCollectionItems, setPendingCollectionItems] = useState<ComposableItem[]>([]);
@@ -122,18 +123,31 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
 	    const loadCollectionInfo = async () => {
 	    	
 	    	const collection = await getComposableItemCollection(collectionAddress);
-	    	const collectionItems = await getComposableItems(collection.tokenAddress, collection.itemCount, collection.name);
-      		const listings: ComposablesMarketListing[] = await getComposablesMarketListings();
-
 	    	setCollection(collection);
-	    	setCollectionItems(collectionItems);
-	    	setListings(listings);
 	    };
 	    
 	    loadCollectionInfo();	    
     }    
 
-  }, [collectionAddress, toggleLoad]);  
+  }, [collectionAddress]);
+
+  useEffect(() => {
+
+    if (collection) {
+
+	    const loadCollectionItems = async () => {
+
+	    	const collectionItems = await getComposableItems(collection.tokenAddress, collection.itemCount, collection.name);
+      		const listings: ComposablesMarketListing[] = await getComposablesMarketListings();
+
+	    	setCollectionItems(collectionItems);
+	    	setListings(listings);
+	    };
+	    
+	    loadCollectionItems();
+    }    
+
+  }, [collection, toggleLoad]);  
 
   const resetTraitFileUpload = () => {
     if (customTraitFileRef.current) {
@@ -227,13 +241,7 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
       setPendingTraitValid(undefined);      
     }
   };
-  
-  if (!collection) {
-  	return <></>;
-  }
-  
-  const isOwner = (activeAccount && activeAccount.toLowerCase() === collection.owner.toLowerCase());
-    
+      
   const onItemButtonClick = (item: ComposableItem) => {
   	
   	const listing = filterComposableItemMarketListing(listings!, item.tokenAddress, item.tokenId);
@@ -308,6 +316,8 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
   	return isValid;
   };
 
+  const isOwner = (activeAccount && collection && activeAccount.toLowerCase() === collection.owner.toLowerCase());
+
   const categories: string[] = ['Background', 'Body', 'Accessory', 'Head', 'Glasses', 'Flag', 'Pet', 'Wearable'];
 
   const saveEnabled = validateFormInputs();
@@ -335,163 +345,181 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
       )}  	
       <Container fluid="lg">
         <Row>
-          <Col lg={10} className={classes.headerRow}>
+          <Col lg={12} className={classes.headerRow}>
             <span>
-              <Trans>Explore</Trans>
+              <Trans>Explore Collection</Trans>
             </span>
-            <h1>
-              {collection.name} ({collection.symbol}) - {collection.itemCount} item(s)
-            </h1>
-            <p>
-				Explore this collection from {collection.owner}
-            </p>
-          </Col>
-        </Row>
-        <Row>
-          <Col lg={12}>
-            <Row>
-		        <Row style={{ marginBottom: '0rem' }}>
-		          <ComposableItemCards composableItems={collectionItems!} listings={listings} buttonType='Listing' onButtonClick={onItemButtonClick} />
-		        </Row>
-            </Row>
-          </Col>
-        </Row>
-		<Row className="composer-uploader">
-        {isOwner && (
-        	<>
-        	<Row>
-          	  <Col lg={12}>					
-				<hr style={{ marginBottom: 0 }} />
-				<br />
-				<span style={{ fontWeight: 'bold' }}>Add new items to your collection:</span>
-				<br />
-				You can upload custom traits to be minted on-chain. You'll be able to give them a name, assign a category, and list them for sale on the marketplace.					
-          	  </Col>
-
-          	  <Col lg={3}>
-
-	            <label style={{ margin: '1rem 0 .25rem 0' }} htmlFor="custom-trait-upload">
-	              <Trans>Upload Custom Trait</Trans>
-	              <OverlayTrigger
-	                trigger={["hover", "hover"]}
-	                placement="top"
-	                overlay={
-	                  <Popover>
-	                    <div style={{ padding: '0.25rem' }}>
-	                      <Trans>Only 32x32 PNG images are accepted</Trans>
-	                    </div>
-	                  </Popover>
-	                }
-	              >
-	                <Image
-	                  style={{ margin: '0 0 .25rem .25rem' }}
-	                  src={InfoIcon}
-	                  className={classes.voteIcon}
-	                />
-	              </OverlayTrigger>
-	            </label>
-	            <Form.Control
-	              type="file"
-	              id="custom-trait-upload"
-	              accept="image/PNG"
-	              isValid={isPendingTraitValid}
-	              isInvalid={isPendingTraitValid === false}
-	              ref={customTraitFileRef}
-	              className={classes.fileUpload}
-	              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-	                validateAndSetCustomTrait(e.target.files?.[0])
-	              }
-	            />
-	            {pendingTrait && (
-	              <>
-	              	<br />
-	                <Button onClick={() => uploadCustomTrait()} className={classes.primaryBtnUploader}>
-	                  <Trans>Upload</Trans>
-	                </Button>
-	              </>
-	            )}
-				<br />
-          	  </Col>
-          	  <Col lg={9}>
-
-	            <p style={{  }}>
+            {collection && (
+            	<>
+	            <h1>
+	              {collection.name} ({collection.symbol}) - {collection.itemCount} item(s)
+	            </h1>
+	            <p>
+					Explore this collection from {collection.owner}
 	            </p>
-
-			  </Col>          	  
-			</Row>
-			
-			{pendingCollectionItems && pendingCollectionItems.length > 0 && (
-        	<Row style={{textAlign: 'center', justifyContent: 'center'}}>
-				{pendingCollectionItems.map((item, index) => (
-			      	<Row className={classes.itemRow}>
-				        <Col xs={2} md={2} lg={2} className={classes.itemGroup}>
-				          <ComposableItemCard composableItem={item} 
-				          onlyThumbnail={true} />
-				        </Col>
-				        <Col xs={10} md={10} lg={10} className={classes.itemGroup} style={{paddingTop: '10px', textAlign: 'center'}}>
-
-							<Row>
-								<Col xs={4} lg={4} className={classes.formSection}>
-									<Form.Label htmlFor={"txtName" + index} style={{ fontWeight: 'bold'}}>Name</Form.Label>
-									<Form.Control 
-									id={"txtName" + index}
-									type="text" 
-									required
-									placeholder="Name" 
-									maxLength={32} 
-									style={{ maxWidth: '300px' }} 
-									onChange={onFormInputChange}
-									/>
-								</Col>
-								<Col xs={4} lg={4} className={classes.formSection}>
-									<Form.Label htmlFor={"txtCreator" + index} style={{ fontWeight: 'bold'}}>Creator</Form.Label>
-									<Form.Control 
-									id={"txtCreator" + index}
-									type="text" 
-									required
-									placeholder="Creator" 
-									maxLength={32} 
-									style={{ maxWidth: '300px' }} 
-									onChange={onFormInputChange}
-									/>
-								</Col>
-								<Col xs={4} lg={4} className={classes.formSection}>
-									<Form.Label htmlFor={"selCategory" + index} style={{ fontWeight: 'bold'}}>Category</Form.Label>
-									<Form.Select
-									id={"selCategory" + index}
-									required
-									onChange={onFormInputChange}
-									>
-								        <option key='' value=''>
-								          Select
-								        </option>										
-
-									{categories.map(value => (
-								        <option key={value} value={value}>
-								          {value}
-								        </option>										
-										)
-									)}      
-			                        </Form.Select>
-								</Col>			
-							</Row>
-
-				        </Col>
-					</Row>
-		      	))}
-	            <Button className={classes.primaryBtnUploader} onClick={() => saveForm()} disabled={!saveEnabled}>
-	              Save On-Chain
-	            </Button>
-	            &nbsp;
-	            <Button className={classes.primaryBtnUploader} onClick={() => resetForm()}>
-	              Reset
-	            </Button>
-			</Row>				
-			)}
-		</>
+	            </>
+            )}
+          </Col>
+        </Row>
+		{!collection ? (
+			<div className={classes.spinner}>
+				<Spinner animation="border" />
+			</div>
+		) : (
+			<>
+	        <Row>
+	          <Col lg={12}>
+	            <Row>
+			        <Row style={{ marginBottom: '0rem' }}>
+			        	{collectionItems === undefined ? (
+							<div className={classes.spinner}>
+								<Spinner animation="border" />
+							</div>
+						) : (
+							<ComposableItemCards composableItems={collectionItems} listings={listings} buttonType='Listing' onButtonClick={onItemButtonClick} />							
+						)}
+			        </Row>
+	            </Row>
+	          </Col>
+	        </Row>
+			<Row className="composer-uploader">
+	        {isOwner && (
+	        	<>
+	        	<Row>
+	          	  <Col lg={12}>					
+					<hr style={{ marginBottom: 0 }} />
+					<br />
+					<span style={{ fontWeight: 'bold' }}>Add new items to your collection:</span>
+					<br />
+					You can upload custom traits to be minted on-chain. You'll be able to give them a name, assign a category, and list them for sale on the marketplace.					
+	          	  </Col>
+	
+	          	  <Col lg={3}>
+	
+		            <label style={{ margin: '1rem 0 .25rem 0' }} htmlFor="custom-trait-upload">
+		              <Trans>Upload Custom Trait</Trans>
+		              <OverlayTrigger
+		                trigger={["hover", "hover"]}
+		                placement="top"
+		                overlay={
+		                  <Popover>
+		                    <div style={{ padding: '0.25rem' }}>
+		                      <Trans>Only 32x32 PNG images are accepted</Trans>
+		                    </div>
+		                  </Popover>
+		                }
+		              >
+		                <Image
+		                  style={{ margin: '0 0 .25rem .25rem' }}
+		                  src={InfoIcon}
+		                  className={classes.voteIcon}
+		                />
+		              </OverlayTrigger>
+		            </label>
+		            <Form.Control
+		              type="file"
+		              id="custom-trait-upload"
+		              accept="image/PNG"
+		              isValid={isPendingTraitValid}
+		              isInvalid={isPendingTraitValid === false}
+		              ref={customTraitFileRef}
+		              className={classes.fileUpload}
+		              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+		                validateAndSetCustomTrait(e.target.files?.[0])
+		              }
+		            />
+		            {pendingTrait && (
+		              <>
+		              	<br />
+		                <Button onClick={() => uploadCustomTrait()} className={classes.primaryBtnUploader}>
+		                  <Trans>Upload</Trans>
+		                </Button>
+		              </>
+		            )}
+					<br />
+	          	  </Col>
+	          	  <Col lg={9}>
+	
+		            <p style={{  }}>
+		            </p>
+	
+				  </Col>          	  
+				</Row>
 				
-		)}		
-		</Row>        
+				{pendingCollectionItems && pendingCollectionItems.length > 0 && (
+	        	<Row style={{textAlign: 'center', justifyContent: 'center'}}>
+					{pendingCollectionItems.map((item, index) => (
+				      	<Row className={classes.itemRow}>
+					        <Col xs={2} md={2} lg={2} className={classes.itemGroup}>
+					          <ComposableItemCard composableItem={item} 
+					          onlyThumbnail={true} />
+					        </Col>
+					        <Col xs={10} md={10} lg={10} className={classes.itemGroup} style={{paddingTop: '10px', textAlign: 'center'}}>
+	
+								<Row>
+									<Col xs={4} lg={4} className={classes.formSection}>
+										<Form.Label htmlFor={"txtName" + index} style={{ fontWeight: 'bold'}}>Name</Form.Label>
+										<Form.Control 
+										id={"txtName" + index}
+										type="text" 
+										required
+										placeholder="Name" 
+										maxLength={32} 
+										style={{ maxWidth: '300px' }} 
+										onChange={onFormInputChange}
+										/>
+									</Col>
+									<Col xs={4} lg={4} className={classes.formSection}>
+										<Form.Label htmlFor={"txtCreator" + index} style={{ fontWeight: 'bold'}}>Creator</Form.Label>
+										<Form.Control 
+										id={"txtCreator" + index}
+										type="text" 
+										required
+										placeholder="Creator" 
+										maxLength={32} 
+										style={{ maxWidth: '300px' }} 
+										onChange={onFormInputChange}
+										/>
+									</Col>
+									<Col xs={4} lg={4} className={classes.formSection}>
+										<Form.Label htmlFor={"selCategory" + index} style={{ fontWeight: 'bold'}}>Category</Form.Label>
+										<Form.Select
+										id={"selCategory" + index}
+										required
+										onChange={onFormInputChange}
+										>
+									        <option key='' value=''>
+									          Select
+									        </option>										
+	
+										{categories.map(value => (
+									        <option key={value} value={value}>
+									          {value}
+									        </option>										
+											)
+										)}      
+				                        </Form.Select>
+									</Col>			
+								</Row>
+	
+					        </Col>
+						</Row>
+			      	))}
+		            <Button className={classes.primaryBtnUploader} onClick={() => saveForm()} disabled={!saveEnabled}>
+		              Save On-Chain
+		            </Button>
+		            &nbsp;
+		            <Button className={classes.primaryBtnUploader} onClick={() => resetForm()}>
+		              Reset
+		            </Button>
+				</Row>				
+				)}
+			</>
+					
+			)}		
+			</Row>
+			</>
+		)}
       </Container>
   	</>
   );
