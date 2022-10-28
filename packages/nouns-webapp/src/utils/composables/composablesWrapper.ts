@@ -1,9 +1,11 @@
+import config from '../../config';
 import { getCollectionCreatedEvents, getListingCreatedEvents, getListingDeletedEvents,
 	getCollectionOwner, getCollectionName, getCollectionSymbol, getCollectionItemCount,
 	getCollectionPalette, getCollectionItemBytes, getCollectionItemMeta,
 	getComposedChildBatch as _getComposedChildBatch,
 	getChildReceivedEvents, getChildTransferredEvents, getTransferSingleEvents } from './composablesContracts';
 import BigNumber from 'bignumber.js';
+import { connect } from '@planetscale/database'
 
 export interface ComposableEncodedImage {
   filename: string;
@@ -138,6 +140,13 @@ export async function getChildTokens(composerProxyAddress: string, tokenId: stri
 
 
 export async function getComposableItemCollections(full: boolean): Promise<ComposableItemCollection[]> {
+
+	const configDB = config.db;	
+	console.log(configDB);
+	
+	const conn = connect(configDB);
+	const results = await conn.execute('select * from collections where 1=?', [1]);
+	console.log('results', results);
 	
 	const collectionsCreated = await getCollectionCreatedEvents();
 
