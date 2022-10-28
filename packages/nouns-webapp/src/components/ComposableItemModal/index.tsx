@@ -194,11 +194,9 @@ const ComposableItemModal: React.FC<{ composableItem: ComposableItem, listing?: 
 							maxLength={10} 
 							style={{ maxWidth: '100px' }} 
 							ref={priceInputRef} 
-							aria-describedby="txtPriceHelp"
 							value={getTruncatedAmount(listing.price)}
 							disabled
 							/>
-							<Form.Text id="txtPriceHelp" muted>Item price</Form.Text>
 						</Col>
 						<Col xs={4} lg={4} className={classes.formSection}>
 		
@@ -211,14 +209,11 @@ const ComposableItemModal: React.FC<{ composableItem: ComposableItem, listing?: 
 							maxLength={10} 
 							style={{ maxWidth: '100px' }} 
 							ref={quantityInputRef} 
-							aria-describedby="txtQuantityHelp"
-							/>
-							<Form.Text id="txtQuantityHelp" muted>Item quantity</Form.Text>
-		
+							/>		
 						</Col>
 						<Col xs={4} lg={4} className={classes.formSection}>
 		
-							<Form.Label htmlFor="txtMax" style={{ fontWeight: 'bold'}}>Max</Form.Label>
+							<Form.Label htmlFor="txtMax" style={{ fontWeight: 'bold'}}>Max per wallet</Form.Label>
 							<Form.Control 
 							id="txtMax"
 							type="text"
@@ -227,16 +222,15 @@ const ComposableItemModal: React.FC<{ composableItem: ComposableItem, listing?: 
 							maxLength={10} 
 							style={{ maxWidth: '100px' }} 
 							ref={maxInputRef} 
-							aria-describedby="txtMaxHelp"
 							value={listing.maxPerAddress.toString()}
 							disabled
 							/>
-							<Form.Text id="txtMaxHelp" muted>Max per wallet</Form.Text>
-		
 						</Col>
 		
 						<Col xs={12} lg={12} className={classes.formSection} style={{ textAlign: 'center' }}>
-							<br />
+							<p style={{fontSize: 'small'}}>
+								Please indicate the item quantity you would like to purchase.
+							</p>
 							<Button onClick={() => fillListingHandler()} className={classes.primaryBtn} disabled={isDisabled}>
 				              {fillButtonContent.loading ? <Spinner animation="border" size="sm" /> : fillButtonContent.content}
 				            </Button>

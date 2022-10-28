@@ -4,6 +4,7 @@ import classes from './CollectionForm.module.css';
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { Backdrop } from '../../../components/Modal';
+import TooltipInfo from '../../../components/TooltipInfo';
 
 import { useAppSelector, useAppDispatch } from '../../../hooks';
 import config from '../../../config';
@@ -137,7 +138,7 @@ const CollectionForm: React.FC<{ onComplete: (tokenAddress: string | undefined) 
 			<InputGroup>
 				<Row>
 					<Col xs={12} lg={12} className={classes.formSection}>
-						<Form.Label htmlFor="txtName" style={{ fontWeight: 'bold'}}>Name</Form.Label>
+						<Form.Label htmlFor="txtName" style={{ fontWeight: 'bold'}}>Name <TooltipInfo tooltipText={"This is how your collection will be shown on marketplaces like Composables, Opensea and Rarible."} /></Form.Label>
 						<Form.Control 
 						id="txtName"
 						type="text" 
@@ -147,11 +148,11 @@ const CollectionForm: React.FC<{ onComplete: (tokenAddress: string | undefined) 
 						ref={nameInputRef} 
 						aria-describedby="txtNameHelp"
 						/>
-						<Form.Text id="txtNameHelp" muted>Collection name, max length: 32 chars</Form.Text>
+						<Form.Text id="txtNameHelp" muted>Collection name, e.g. "Bored Ape Yacht Club"</Form.Text>
 					</Col>
 
 					<Col xs={12} lg={12} className={classes.formSection}>
-						<Form.Label htmlFor="txtSymbol" style={{ fontWeight: 'bold'}}>Symbol</Form.Label>
+						<Form.Label htmlFor="txtSymbol" style={{ fontWeight: 'bold'}}>Symbol <TooltipInfo tooltipText={"This is visible on Etherscan and other on-chain explorers."} /></Form.Label>
 						<Form.Control 
 						id="txtSymbol"
 						type="text" 
@@ -161,7 +162,7 @@ const CollectionForm: React.FC<{ onComplete: (tokenAddress: string | undefined) 
 						ref={symbolInputRef} 
 						aria-describedby="txtSymbolHelp"
 						/>
-						<Form.Text id="txtSymbolHelp" muted>Collection symbol, max length: 10 chars</Form.Text>
+						<Form.Text id="txtSymbolHelp" muted>Collection symbol, e.g. "APE"</Form.Text>
 					</Col>
 					<Col xs={12} lg={12} className={classes.formSection} style={{ textAlign: 'center' }}>
 						<br />

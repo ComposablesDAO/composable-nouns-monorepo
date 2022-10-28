@@ -860,7 +860,7 @@ const ComposerPage = () => {
       			defaultChecked={selectedOwned}
       			value={selectedOwned.toString()}
 		        onChange={handleOwnedFilterChange}
-      			label="Only show owned items" />
+      			label="Only show items I own" />
       		</Col>
 
 	  	  	<Col lg={12}>	    	

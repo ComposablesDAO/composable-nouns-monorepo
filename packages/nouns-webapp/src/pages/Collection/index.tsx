@@ -5,11 +5,8 @@ import {
   Container,
   Col,
   Button,
-  Image,
   Row,
   Form,
-  OverlayTrigger,
-  Popover,
   Spinner
 } from 'react-bootstrap';
 
@@ -23,7 +20,6 @@ import BigNumber from 'bignumber.js';
 
 import { dataToDescriptorInput } from '../../utils/composables/nounsContracts';
 
-import InfoIcon from '../../assets/icons/Info.svg';
 import { PNG } from 'pngjs';
 
 import { useAppSelector, useAppDispatch } from '../../hooks';
@@ -243,13 +239,26 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
           },
         });
         
-        setPendingTrait({
-          data,
-          palette: encoder.data.palette,
-          filename,
-          type: DEFAULT_TRAIT_TYPE,
-        });
-        setPendingTraitValid(true);
+        const colorCount = encoder.data.palette.length;
+        console.log(colorCount);
+        if (colorCount > 256) {
+	      	setModal({
+		    	title: <>File Error</>,
+		    	message: <>This item will push the total color count of the collection past the allowed limit.</>,
+		    	show: true,
+		  	});
+		  	
+		  	setPendingTraitInvalid();
+        } else {
+	        setPendingTrait({
+	          data,
+	          palette: encoder.data.palette,
+	          filename,
+	          type: DEFAULT_TRAIT_TYPE,
+	        });
+	        setPendingTraitValid(true);
+		}
+
       } catch (error) {
       	console.log('error', error);
         setPendingTraitInvalid();
@@ -350,8 +359,12 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
   };
 
   const isOwner = (activeAccount && collection && activeAccount.toLowerCase() === collection.owner.toLowerCase());
+  
+  const buttonType = (isOwner) ? 'Listing' : '';
 
   const categories: string[] = ['Background', 'Body', 'Accessory', 'Head', 'Glasses', 'Flag', 'Pet', 'Wearable'];
+  
+  const colorCount = (collectionItems && collectionItems.length > 0) ? collectionItems[0].image.palette.length : 0;
 
   const saveEnabled = validateFormInputs();
 
@@ -413,7 +426,7 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
 								<Spinner animation="border" />
 							</div>
 						) : (
-							<ComposableItemCards composableItems={collectionItems} listings={listings} buttonType='Listing' onButtonClick={onItemButtonClick} />							
+							<ComposableItemCards composableItems={collectionItems} listings={listings} buttonType={buttonType} onButtonClick={onItemButtonClick} />							
 						)}
 			        </Row>
 	            </Row>
@@ -429,29 +442,15 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
 					<span style={{ fontWeight: 'bold' }}>Add new items to your collection:</span>
 					<br />
 					You can upload custom traits to be minted on-chain. You'll be able to give them a name, assign a category, and list them for sale on the marketplace.					
+					<br /><br />
+					Only 32 x 32 PNG images are supported, and the <span style={{ fontWeight: 'bold' }}>TOTAL</span> color count in your palette for each collection is limited to <span style={{ fontWeight: 'bold' }}>256</span>. 
+					Current color count: <span style={{ fontWeight: 'bold' }}>{colorCount}</span>.
 	          	  </Col>
 	
 	          	  <Col lg={3}>
 	
-		            <label style={{ margin: '1rem 0 .25rem 0' }} htmlFor="custom-trait-upload">
-		              <Trans>Upload Custom Trait</Trans>
-		              <OverlayTrigger
-		                trigger={["hover", "hover"]}
-		                placement="top"
-		                overlay={
-		                  <Popover>
-		                    <div style={{ padding: '0.25rem' }}>
-		                      <Trans>Only 32x32 PNG images are accepted</Trans>
-		                    </div>
-		                  </Popover>
-		                }
-		              >
-		                <Image
-		                  style={{ margin: '0 0 .25rem .25rem' }}
-		                  src={InfoIcon}
-		                  className={classes.voteIcon}
-		                />
-		              </OverlayTrigger>
+		            <label style={{ margin: '1rem 0 .25rem 0', fontWeight: 'bold' }} htmlFor="custom-trait-upload">
+		              <Trans>Upload New Item</Trans>
 		            </label>
 		            <Form.Control
 		              type="file"
@@ -549,6 +548,11 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
 		            <Button className={classes.primaryBtnUploader} onClick={() => resetForm()} disabled={isDisabled}>
 		              Reset
 		            </Button>
+
+			      	<p style={{fontStyle: 'italic'}}>
+			      	Color count with new items: <span style={{ fontWeight: 'bold' }}>{pendingCollectionItems[pendingCollectionItems.length - 1].image.palette.length}.</span>
+			      	</p>
+
 				</Row>				
 				)}
 			</>

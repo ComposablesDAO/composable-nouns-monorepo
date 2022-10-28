@@ -101,7 +101,7 @@ const CollectionsPage = () => {
               <Trans>Collections</Trans>
             </h1>
             <p>
-                Explore the latest collections on Composables, created by artists and creators from the Nouns community.
+                Explore the latest collections on Composables, created by artists and builders from the Nouns community.
             </p>
 			<Button onClick={() => setDisplayCollectionForm(true)} className={classes.primaryBtn}>
               New Collection

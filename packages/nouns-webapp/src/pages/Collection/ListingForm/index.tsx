@@ -4,6 +4,7 @@ import classes from './ListingForm.module.css';
 import React, { useEffect, useState, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import { Backdrop } from '../../../components/Modal';
+import TooltipInfo from '../../../components/TooltipInfo';
 
 import { useAppSelector, useAppDispatch } from '../../../hooks';
 import config from '../../../config';
@@ -240,7 +241,7 @@ const ListingForm: React.FC<{ composableItems: ComposableItem[], listing?: Compo
 				        </Col>
 					
 						<Col xs={3} md={3} lg={3} className={classes.formSection}>
-							<Form.Label htmlFor={"txtPrice" + index} style={{ fontWeight: 'bold'}}>Price</Form.Label>
+							<Form.Label htmlFor={"txtPrice" + index} style={{ fontWeight: 'bold'}}>Price <TooltipInfo tooltipText={"Price per item, in Ξ. You can set the price to '0' to make it a free mint."} /></Form.Label>
 							<Form.Control 
 							id={"txtPrice" + index}
 							type="number"
@@ -248,12 +249,12 @@ const ListingForm: React.FC<{ composableItems: ComposableItem[], listing?: Compo
 							required
 							placeholder="0.01" 
 							maxLength={10} 
-							style={{ maxWidth: '100px' }} 
+							style={{ maxWidth: '120px' }} 
 							onChange={onFormInputChange}
 							/>
 						</Col>
 						<Col xs={3} md={3} lg={3} className={classes.formSection}>
-							<Form.Label htmlFor={"txtQuantity" + index} style={{ fontWeight: 'bold'}}>Quantity</Form.Label>
+							<Form.Label htmlFor={"txtQuantity" + index} style={{ fontWeight: 'bold'}}>Quantity <TooltipInfo tooltipText={"This is the maximum quantity of this item you want to make available for sale. You can set quantity to '0' to make it an Open Edition (no limit)"} /></Form.Label>
 							<Form.Control 
 							id={"txtQuantity" + index}
 							type="number"
@@ -261,12 +262,12 @@ const ListingForm: React.FC<{ composableItems: ComposableItem[], listing?: Compo
 							required
 							placeholder="100" 
 							maxLength={10} 
-							style={{ maxWidth: '100px' }} 
+							style={{ maxWidth: '120px' }} 
 							onChange={onFormInputChange}
 							/>
 						</Col>
-						<Col xs={3} md={3} lg={3} className={classes.formSection}>
-							<Form.Label htmlFor={"txtMax" + index} style={{ fontWeight: 'bold'}}>Max</Form.Label>
+						<Col xs={4} md={4} lg={4} className={classes.formSection}>
+							<Form.Label htmlFor={"txtMax" + index} style={{ fontWeight: 'bold'}}>Max per wallet <TooltipInfo tooltipText={"You can limit the amount each wallet address can mint, or leave it at '0' for no limit per wallet address."} /></Form.Label>
 							<Form.Control 
 							id={"txtMax" + index}
 							type="number"
@@ -274,7 +275,7 @@ const ListingForm: React.FC<{ composableItems: ComposableItem[], listing?: Compo
 							required
 							placeholder="0" 
 							maxLength={10} 
-							style={{ maxWidth: '100px' }} 
+							style={{ maxWidth: '120px' }} 
 							onChange={onFormInputChange}
 							/>
 						</Col>
@@ -311,7 +312,7 @@ const ListingForm: React.FC<{ composableItems: ComposableItem[], listing?: Compo
 						type="text"
 						required
 						maxLength={10} 
-						style={{ maxWidth: '100px' }} 
+						style={{ maxWidth: '120px' }} 
 						value={getTruncatedAmount(listing.price)}
 						disabled
 						/>
@@ -325,19 +326,19 @@ const ListingForm: React.FC<{ composableItems: ComposableItem[], listing?: Compo
 						required
 						placeholder="100" 
 						maxLength={10} 
-						style={{ maxWidth: '100px' }} 
+						style={{ maxWidth: '120px' }} 
 						value={listing.quantity.toString()}
 						disabled
 						/>
 					</Col>
-					<Col xs={3} md={3} lg={3} className={classes.formSection}>
-						<Form.Label htmlFor={"txtMax"} style={{ fontWeight: 'bold'}}>Max</Form.Label>
+					<Col xs={4} md={4} lg={4} className={classes.formSection}>
+						<Form.Label htmlFor={"txtMax"} style={{ fontWeight: 'bold'}}>Max per wallet</Form.Label>
 						<Form.Control 
 						id={"txtMax"}
 						type="text"
 						required
 						maxLength={10} 
-						style={{ maxWidth: '100px' }} 
+						style={{ maxWidth: '120px' }} 
 						value={listing.maxPerAddress.toString()}
 						disabled
 						/>

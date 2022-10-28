@@ -57,6 +57,8 @@ export const ComposableItemCollectionRow: React.FC<{
     
   const name = collection.name;
   const creatorName = collection.owner;
+  
+  const latestItems = (composableItems) ? composableItems.slice().reverse().slice(0, 5) : composableItems;
 
   return (
     <>
@@ -75,12 +77,12 @@ export const ComposableItemCollectionRow: React.FC<{
       <Col xs={6} md={6} lg={6} className={classes.collectionRowItems}>
       	<strong>Latest Items:</strong>
       	<Row>
-	    	{composableItems === undefined ? (
+	    	{latestItems === undefined ? (
 				<div className={classes.spinner}>
 					<Spinner animation="border" />
 				</div>
 	        ) : (      	
-				<ComposableItemCards composableItems={composableItems} listings={listings} onlyThumbnail={true} />
+				<ComposableItemCards composableItems={latestItems} listings={listings} onlyThumbnail={true} />
 	        )}
         </Row>
       </Col>	      
