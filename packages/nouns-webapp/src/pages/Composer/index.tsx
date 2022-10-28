@@ -1,5 +1,5 @@
 //import React from 'react';
-import React, { ChangeEvent, useEffect, useRef, useState, useCallback } from 'react';
+import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 import classes from './Composer.module.css';
 import { Container, Row, Col, Button, Image, Form, OverlayTrigger, Popover, Spinner } from 'react-bootstrap';
 
@@ -16,8 +16,6 @@ import { ImageData } from '@nouns/assets';
 import { EncodedImage, PNGCollectionEncoder } from '@nouns/sdk';
 import { buildSVG } from '../../utils/composables/nounsSDK';
 import { getNounData, getRandomNounSeed } from '../../utils/composables/nounsAssets';
-import { useAppDispatch } from '../../hooks';
-import { AlertModal, setAlertModal } from '../../state/slices/application';
 
 import { INounSeed } from '../../wrappers/nounToken';
 import InfoIcon from '../../assets/icons/Info.svg';
@@ -208,9 +206,6 @@ const ComposerPage = () => {
   const [selectedOwned, setSelectedOwned] = useState<boolean>(true);
     
   const activeAccount = useAppSelector(state => state.account.activeAccount);
-  const dispatch = useAppDispatch();
-  const setModal = useCallback((modal: AlertModal) => dispatch(setAlertModal(modal)), [dispatch]);
-  
 
   const customTraitFileRef = useRef<HTMLInputElement>(null);
   
@@ -756,11 +751,7 @@ const ComposerPage = () => {
             setDisplaySaveModal(false);
           	
           	if (saved) {
-	          	setModal({
-			    	title: <Trans>Success</Trans>,
-			    	message: <Trans>Changes successfully saved on-chain!</Trans>,
-			    	show: true,
-			  	});
+          		//do a refresh
           	}
           }}
         />

@@ -1,12 +1,14 @@
-import { Row, Col, Button, Form } from 'react-bootstrap';
+import { Row, Col, Button, Form, Spinner } from 'react-bootstrap';
 
 import classes from './ListingForm.module.css';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import { Backdrop } from '../../../components/Modal';
 
-import { useAppSelector } from '../../../hooks';
+import { useAppSelector, useAppDispatch } from '../../../hooks';
 import config from '../../../config';
+import { AlertModal, setAlertModal } from '../../../state/slices/application';
+import { Trans } from '@lingui/macro';
 
 import { ComposableItemCard } from '../../../components/ComposableItemCard';
 import { ComposableItem, ComposablesMarketListing } from '../../../utils/composables/composablesWrapper';	
@@ -26,10 +28,16 @@ const getTruncatedAmount = (amount: BigNumber): string => {
 
 const ListingForm: React.FC<{ composableItems: ComposableItem[], listing?: ComposablesMarketListing, onComplete: (action: number | undefined) => void; }> = props => {
   const { composableItems, listing, onComplete } = props;
+
+  const [createButtonContent, setCreateButtonContent] = useState({ loading: false, content: <Trans>List On-Chain</Trans>});
+  const [deleteButtonContent, setDeleteButtonContent] = useState({ loading: false, content: <Trans>Remove Listing</Trans>});
     
   const [formInputs, setFormInputs] = useState<Record<string, string>>({});
     
   const activeAccount = useAppSelector(state => state.account.activeAccount);
+
+  const dispatch = useAppDispatch();
+  const setModal = useCallback((modal: AlertModal) => dispatch(setAlertModal(modal)), [dispatch]);  
   
   const composablesMarketContract = new Contract(
   	composablesMarketAddress,
@@ -88,21 +96,43 @@ const ListingForm: React.FC<{ composableItems: ComposableItem[], listing?: Compo
   useEffect(() => {    
     switch (createListingState.status) {      
       case 'None':
+      	setCreateButtonContent({ loading: false, content: <>List On-Chain</> });
         break;
       case 'PendingSignature':
+      	setCreateButtonContent({ loading: true, content: <></> });
         break;
       case 'Mining':
+      	setCreateButtonContent({ loading: true, content: <></> });
         break;
       case 'Success':
       	console.log('success', createListingState.receipt);
       	onComplete(1); //to trigger toggle reload
+
+      	setModal({
+	    	title: <Trans>Success</Trans>,
+	    	message: <Trans>Item successfully listed on-chain!</Trans>,
+	    	show: true,
+	  	});
+      	setCreateButtonContent({ loading: false, content: <>List On-Chain</> });
       	      	
         break;
       case 'Fail':
-      	console.log('fail', createListingState?.errorMessage);      
+      	setModal({
+	    	title: <Trans>Transaction Failed</Trans>,
+	    	message: createListingState?.errorMessage || <Trans>Please try again.</Trans>,
+	    	show: true,
+	  	});
+
+      	setCreateButtonContent({ loading: false, content: <>List On-Chain</> });
         break;
       case 'Exception':
-      	console.log('exception', createListingState?.errorMessage);      
+      	setModal({
+	    	title: <Trans>Transaction Error</Trans>,
+	    	message: createListingState?.errorMessage || <Trans>Please try again.</Trans>,
+	    	show: true,
+	  	});
+
+      	setCreateButtonContent({ loading: false, content: <>List On-Chain</> });
         break;
     }
     
@@ -112,21 +142,43 @@ const ListingForm: React.FC<{ composableItems: ComposableItem[], listing?: Compo
   useEffect(() => {
     switch (deleteListingState.status) {      
       case 'None':
-        break;
+       setDeleteButtonContent({ loading: false, content: <>Remove Listing</> });
+       break;
       case 'PendingSignature':
+      	setDeleteButtonContent({ loading: true, content: <></> });
         break;
       case 'Mining':
+      	setDeleteButtonContent({ loading: true, content: <></> });
         break;
       case 'Success':
       	console.log('success', deleteListingState.receipt);
       	onComplete(1); //to trigger toggle reload
+
+      	setModal({
+	    	title: <Trans>Success</Trans>,
+	    	message: <Trans>Listing successfully removed on-chain!</Trans>,
+	    	show: true,
+	  	});
+      	setDeleteButtonContent({ loading: false, content: <>Remove Listing</> });
       	      	
         break;
       case 'Fail':
-      	console.log('fail', deleteListingState?.errorMessage);      
+      	setModal({
+	    	title: <Trans>Transaction Failed</Trans>,
+	    	message: deleteListingState?.errorMessage || <Trans>Please try again.</Trans>,
+	    	show: true,
+	  	});
+
+      	setDeleteButtonContent({ loading: false, content: <>Remove Listing</> });
         break;
       case 'Exception':
-      	console.log('exception', deleteListingState?.errorMessage);      
+      	setModal({
+	    	title: <Trans>Transaction Error</Trans>,
+	    	message: deleteListingState?.errorMessage || <Trans>Please try again.</Trans>,
+	    	show: true,
+	  	});
+
+      	setDeleteButtonContent({ loading: false, content: <>Remove Listing</> });
         break;
     }
     
@@ -161,6 +213,7 @@ const ListingForm: React.FC<{ composableItems: ComposableItem[], listing?: Compo
   };
   
   const saveEnabled = validateFormInputs();
+  const isDisabled = createListingState.status === 'Mining' || deleteListingState.status === 'Mining' || !activeAccount;
     
   return (
     <>
@@ -230,16 +283,16 @@ const ListingForm: React.FC<{ composableItems: ComposableItem[], listing?: Compo
 				<Row>					
 					<Col xs={12} lg={12} className={classes.formSection} style={{ textAlign: 'center' }}>
 						<br />
-						<Button onClick={() => createListingHandler()} disabled={!saveEnabled} className={classes.primaryBtn}>
-			              List On-Chain
+						<Button onClick={() => createListingHandler()} disabled={!saveEnabled || isDisabled} className={classes.primaryBtn}>
+			              {createButtonContent.loading ? <Spinner animation="border" size="sm" /> : createButtonContent.content}
 			            </Button>
 			            <br />
 	
-						<Button onClick={() => onComplete(undefined)} className={classes.primaryBtnOptions}>
+						<Button onClick={() => onComplete(undefined)} className={classes.primaryBtnOptions} disabled={isDisabled}>
 			              More
 			            </Button>		            
 			            &nbsp;
-						<Button onClick={() => onComplete(-1)} className={classes.primaryBtnOptions}>
+						<Button onClick={() => onComplete(-1)} className={classes.primaryBtnOptions} disabled={isDisabled}>
 			              Reset
 			            </Button>		            
 			        </Col>
@@ -292,8 +345,8 @@ const ListingForm: React.FC<{ composableItems: ComposableItem[], listing?: Compo
 				</Row>
 				<Row>					
 					<Col xs={12} lg={12} className={classes.formSection} style={{ textAlign: 'center' }}>
-						<Button onClick={() => deleteListingHandler()} className={classes.primaryBtn}>
-			              Remove Listing
+						<Button onClick={() => deleteListingHandler()} className={classes.primaryBtn} disabled={isDisabled}>
+			              {deleteButtonContent.loading ? <Spinner animation="border" size="sm" /> : deleteButtonContent.content}
 			            </Button>
 			        </Col>
 				</Row>

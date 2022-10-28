@@ -1,5 +1,5 @@
 //import React from 'react';
-import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
+import React, { ChangeEvent, useEffect, useRef, useState, useCallback } from 'react';
 import classes from './Collection.module.css';
 import {
   Container,
@@ -26,9 +26,10 @@ import { dataToDescriptorInput } from '../../utils/composables/nounsContracts';
 import InfoIcon from '../../assets/icons/Info.svg';
 import { PNG } from 'pngjs';
 
+import { useAppSelector, useAppDispatch } from '../../hooks';
+import { AlertModal, setAlertModal } from '../../state/slices/application';
 import { Trans } from '@lingui/macro';
 
-import { useAppSelector } from '../../hooks';
 import { useContractFunction } from '@usedapp/core';
 import { ethers, Contract, utils } from 'ethers';
 import ComposableItemABI from '../../libs/abi/ComposableItem.json';
@@ -73,8 +74,13 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
   const [selectedListing, setSelectedListing] = useState<ComposablesMarketListing>();
 
   const [formInputs, setFormInputs] = useState<Record<string, string>>({});
+  
+  const [saveButtonContent, setSaveButtonContent] = useState({ loading: false, content: <>Save On-Chain</>});
 
   const activeAccount = useAppSelector(state => state.account.activeAccount);
+
+  const dispatch = useAppDispatch();
+  const setModal = useCallback((modal: AlertModal) => dispatch(setAlertModal(modal)), [dispatch]);  
   
   var encoder = new PNGCollectionEncoder([]);
 
@@ -91,10 +97,13 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
   useEffect(() => {    
     switch (addItemsState.status) {      
       case 'None':
+      	setSaveButtonContent({ loading: false, content: <>Save On-Chain</> });
         break;
       case 'PendingSignature':
+      	setSaveButtonContent({ loading: true, content: <></> });
         break;
       case 'Mining':
+      	setSaveButtonContent({ loading: true, content: <></> });
         break;
       case 'Success':
       	console.log('success', addItemsState.receipt);
@@ -102,14 +111,34 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
       	setPendingCollectionItems([]);
       	setFormInputs({});
       	//re-fetch the collection data
+      	setCollectionItems(undefined);
 	    setToggleLoad(!toggleLoad);
+
+      	setModal({
+	    	title: <>Success</>,
+	    	message: <>Items successfully saved on-chain!</>,
+	    	show: true,
+	  	});
+      	setSaveButtonContent({ loading: false, content: <>Save On-Chain</> });
       	
         break;
       case 'Fail':
-      	console.log('fail', addItemsState?.errorMessage);      
+      	setModal({
+	    	title: <>Transaction Failed</>,
+	    	message: addItemsState?.errorMessage || <>Please try again.</>,
+	    	show: true,
+	  	});
+
+      	setSaveButtonContent({ loading: false, content: <>Save On-Chain</> });
         break;
       case 'Exception':
-      	console.log('exception', addItemsState?.errorMessage);      
+      	setModal({
+	    	title: <>Transaction Error</>,
+	    	message: addItemsState?.errorMessage || <>Please try again.</>,
+	    	show: true,
+	  	});
+
+      	setSaveButtonContent({ loading: false, content: <>Save On-Chain</> });
         break;
     }    
     
@@ -187,7 +216,7 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
         if (palette && palette[0] === '000000') {
         	palette[0] = ''; //transparent 0-index spacer
         }
-
+        
         if (pendingCollectionItems && pendingCollectionItems.length > 0) {
         	//grab the latest cumulative palette to build upon
         	palette = pendingCollectionItems[pendingCollectionItems.length - 1].image.palette;
@@ -213,7 +242,7 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
             };
           },
         });
-
+        
         setPendingTrait({
           data,
           palette: encoder.data.palette,
@@ -326,6 +355,8 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
 
   const saveEnabled = validateFormInputs();
 
+  const isDisabled = addItemsState.status === 'Mining' || !activeAccount;
+
   return (
   	<>
       {displayListingForm && selectedItems && (
@@ -336,6 +367,8 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
 
 	        if (action === 1) {
           		setSelectedItems([]);
+
+				setCollectionItems(undefined);
           		setToggleLoad(!toggleLoad);
 	        }
 
@@ -509,11 +542,11 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
 					        </Col>
 						</Row>
 			      	))}
-		            <Button className={classes.primaryBtnUploader} onClick={() => saveForm()} disabled={!saveEnabled}>
-		              Save On-Chain
+		            <Button className={classes.primaryBtnUploader} onClick={() => saveForm()} disabled={!saveEnabled || isDisabled}>
+		              {saveButtonContent.loading ? <Spinner animation="border" size="sm" /> : saveButtonContent.content}
 		            </Button>
 		            &nbsp;
-		            <Button className={classes.primaryBtnUploader} onClick={() => resetForm()}>
+		            <Button className={classes.primaryBtnUploader} onClick={() => resetForm()} disabled={isDisabled}>
 		              Reset
 		            </Button>
 				</Row>				

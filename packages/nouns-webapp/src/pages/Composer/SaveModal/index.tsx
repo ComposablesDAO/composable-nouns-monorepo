@@ -1,11 +1,12 @@
-import { Row, Col, Card, Button } from 'react-bootstrap';
+import { Row, Col, Card, Button, Spinner } from 'react-bootstrap';
 import classes from './SaveModal.module.css';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import ReactDOM from 'react-dom';
 import { Backdrop } from '../../../components/Modal';
 
-import { useAppSelector } from '../../../hooks';
+import { useAppSelector, useAppDispatch } from '../../../hooks';
 import config from '../../../config';
+import { AlertModal, setAlertModal } from '../../../state/slices/application';
 
 import { ComposableItemCard } from '../../../components/ComposableItemCard';
 
@@ -24,12 +25,16 @@ const nounExtensions = config.composables.extensions;
 
 const SaveModal: React.FC<{ tokenAddress: string, tokenId: number, composerProxyAddress: string, composedItems: ComposableItem[], collectionItems: ComposableItem[], previousChildTokens: TokenItem[], previousComposedChildTokens: TokenItem[], svg: string, onComplete: (saved: boolean) => void; }> = props => {
   const { tokenAddress, tokenId, composerProxyAddress, composedItems, collectionItems, previousChildTokens, previousComposedChildTokens, svg, onComplete } = props;
-  
-  const activeAccount = useAppSelector(state => state.account.activeAccount);  
-  
+    
   const [loadSetApproval, setLoadSetApproval] = useState<boolean>(false);  
   const [approvalTokenAddress, setApprovalTokenAddress] = useState<string>();
- 
+  const [saveButtonContent, setSaveButtonContent] = useState({ loading: false, content: <>Save</>});
+
+  const activeAccount = useAppSelector(state => state.account.activeAccount);  
+
+  const dispatch = useAppDispatch();
+  const setModal = useCallback((modal: AlertModal) => dispatch(setAlertModal(modal)), [dispatch]);  
+
   let extensionName: string = '';
   for (const extension of nounExtensions) {
    		if (extension.tokenAddress.toLowerCase() === tokenAddress.toLowerCase()) {
@@ -131,27 +136,51 @@ const SaveModal: React.FC<{ tokenAddress: string, tokenId: number, composerProxy
   useEffect(() => {    
     switch (receiveAndComposeChildBatchMixedState.status) {      
       case 'None':
+      	setSaveButtonContent({ loading: false, content: <>Save</> });
         break;
       case 'PendingSignature':
+      	setSaveButtonContent({ loading: true, content: <></> });
         break;
       case 'Mining':
+      	setSaveButtonContent({ loading: true, content: <></> });
         break;
       case 'Success':
       	console.log('success', receiveAndComposeChildBatchMixedState.receipt);
       	onComplete(true);
+
+      	setModal({
+	    	title: <>Success</>,
+	    	message: <>Changes successfully saved on-chain!</>,
+	    	show: true,
+	  	});
+      	setSaveButtonContent({ loading: false, content: <>Save</> });
       	
         break;
       case 'Fail':
-      	console.log('fail', receiveAndComposeChildBatchMixedState?.errorMessage);      
+      	setModal({
+	    	title: <>Transaction Failed</>,
+	    	message: receiveAndComposeChildBatchMixedState?.errorMessage || <>Please try again.</>,
+	    	show: true,
+	  	});
+
+      	setSaveButtonContent({ loading: false, content: <>Save</> });
         break;
       case 'Exception':
-      	console.log('exception', receiveAndComposeChildBatchMixedState?.errorMessage);      
+      	setModal({
+	    	title: <>Transaction Error</>,
+	    	message: receiveAndComposeChildBatchMixedState?.errorMessage || <>Please try again.</>,
+	    	show: true,
+	  	});
+
+      	setSaveButtonContent({ loading: false, content: <>Save</> });
         break;
     }
     
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [receiveAndComposeChildBatchMixedState]);
-    
+
+  const isDisabled = receiveAndComposeChildBatchMixedState.status === 'Mining' || !activeAccount;
+
   return (
     <>
       {loadSetApproval && approvalTokenAddress && (
@@ -163,7 +192,6 @@ const SaveModal: React.FC<{ tokenAddress: string, tokenId: number, composerProxy
 	        if (approved) {
           		saveHandler();
 	        }
-
           	
             setLoadSetApproval(false);
           }}
@@ -235,8 +263,8 @@ const SaveModal: React.FC<{ tokenAddress: string, tokenId: number, composerProxy
 			<Row>
 				<Col xs={12} lg={12} className={classes.formSection} style={{ textAlign: 'center' }}>
 					<br />
-					<Button onClick={() => saveHandler()} className={classes.primaryBtn}>
-		              Save
+					<Button onClick={() => saveHandler()} className={classes.primaryBtn} disabled={isDisabled}>
+		              {saveButtonContent.loading ? <Spinner animation="border" size="sm" /> : saveButtonContent.content}
 		            </Button>
 				</Col>
 			</Row>
@@ -250,7 +278,10 @@ const SaveModal: React.FC<{ tokenAddress: string, tokenId: number, composerProxy
 const SetApproval: React.FC<{ tokenAddress: string, composerProxyAddress: string, onComplete: (approved: boolean) => void; }> = props => {
   const { tokenAddress, composerProxyAddress, onComplete } = props;
   
-  const activeAccount = useAppSelector(state => state.account.activeAccount);  
+  const activeAccount = useAppSelector(state => state.account.activeAccount);
+
+  const dispatch = useAppDispatch();
+  const setModal = useCallback((modal: AlertModal) => dispatch(setAlertModal(modal)), [dispatch]);
 
   const composableItemContract = new Contract(
   	tokenAddress,
@@ -287,10 +318,20 @@ const SetApproval: React.FC<{ tokenAddress: string, composerProxyAddress: string
       	
         break;
       case 'Fail':
-      	console.log('fail', setApprovalForAllState?.errorMessage);      
+      	setModal({
+	    	title: <>Transaction Failed</>,
+	    	message: setApprovalForAllState?.errorMessage || <>Please try again.</>,
+	    	show: true,
+	  	});
+
         break;
       case 'Exception':
-      	console.log('exception', setApprovalForAllState?.errorMessage);      
+      	setModal({
+	    	title: <>Transaction Error</>,
+	    	message: setApprovalForAllState?.errorMessage || <>Please try again.</>,
+	    	show: true,
+	  	});
+
         break;
     }
     

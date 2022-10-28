@@ -1,6 +1,6 @@
-import { Row, Col, Card, Button, InputGroup, Form } from 'react-bootstrap';
+import { Row, Col, Card, Button, InputGroup, Form, Spinner } from 'react-bootstrap';
 import classes from './ComposableItemModal.module.css';
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { Backdrop } from '../Modal';
 
@@ -8,11 +8,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
 import TruncatedAmount from '../TruncatedAmount';
 
-import { useAppSelector } from '../../hooks';
+import { useAppSelector, useAppDispatch } from '../../hooks';
 import config from '../../config';
-import { useAppDispatch } from '../../hooks';
 import { AlertModal, setAlertModal } from '../../state/slices/application';
-import { Trans } from '@lingui/macro';
 
 import { buildSVG } from '../../utils/composables/nounsSDK';
 
@@ -33,6 +31,8 @@ const getTruncatedAmount = (amount: BigNumber): string => {
 
 const ComposableItemModal: React.FC<{ composableItem: ComposableItem, listing?: ComposablesMarketListing, onComplete: (listingId: number | undefined) => void; }> = props => {
   const { composableItem, listing, onComplete } = props;
+
+  const [fillButtonContent, setFillButtonContent] = useState({ loading: false, content: <>Buy</>});
 
   const activeAccount = useAppSelector(state => state.account.activeAccount);
 
@@ -97,34 +97,52 @@ const ComposableItemModal: React.FC<{ composableItem: ComposableItem, listing?: 
 
     switch (fillListingState.status) {      
       case 'None':
+      	setFillButtonContent({ loading: false, content: <>Buy</> });
         break;
       case 'PendingSignature':
+      	setFillButtonContent({ loading: true, content: <></> });
         break;
       case 'Mining':
+      	setFillButtonContent({ loading: true, content: <></> });
         break;
       case 'Success':
       	console.log('success', fillListingState.receipt);
       	onComplete(undefined);
 
       	setModal({
-	    	title: <Trans>Success</Trans>,
-	    	message: <Trans>Item successfully purchased on-chain! <br /><br /> <Button href="/composer" className={classes.primaryBtn}>Go to Composer</Button></Trans>,
+	    	title: <>Success</>,
+	    	message: <>Item successfully purchased on-chain! <br /><br /> <Button href="/composer" className={classes.primaryBtn}>Go to Composer</Button></>,
 	    	show: true,
 	  	});
+      	setFillButtonContent({ loading: false, content: <>Buy</> });
       	
         break;
       case 'Fail':
-      	console.log('fail', fillListingState?.errorMessage);      
+      	setModal({
+	    	title: <>Transaction Failed</>,
+	    	message: fillListingState?.errorMessage || <>Please try again.</>,
+	    	show: true,
+	  	});
+
+      	setFillButtonContent({ loading: false, content: <>Buy</> });
         break;
       case 'Exception':
-      	console.log('exception', fillListingState?.errorMessage);      
+      	setModal({
+	    	title: <>Transaction Error</>,
+	    	message: fillListingState?.errorMessage || <>Please try again.</>,
+	    	show: true,
+	  	});
+
+      	setFillButtonContent({ loading: false, content: <>Buy</> });
         break;
     }
     
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fillListingState]);
   
-    
+  
+  const isDisabled = fillListingState.status === 'Mining' || !activeAccount;
+
   return (
     <>
       {ReactDOM.createPortal(
@@ -219,8 +237,8 @@ const ComposableItemModal: React.FC<{ composableItem: ComposableItem, listing?: 
 		
 						<Col xs={12} lg={12} className={classes.formSection} style={{ textAlign: 'center' }}>
 							<br />
-							<Button onClick={() => fillListingHandler()} className={classes.primaryBtn}>
-				              Buy
+							<Button onClick={() => fillListingHandler()} className={classes.primaryBtn} disabled={isDisabled}>
+				              {fillButtonContent.loading ? <Spinner animation="border" size="sm" /> : fillButtonContent.content}
 				            </Button>
 				        </Col>
 					</Row>
