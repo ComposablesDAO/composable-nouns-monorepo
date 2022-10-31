@@ -1,11 +1,9 @@
-import config from '../../config';
-import { getCollectionCreatedEvents, getListingCreatedEvents, getListingDeletedEvents,
-	getCollectionOwner, getCollectionName, getCollectionSymbol, getCollectionItemCount,
-	getCollectionPalette, getCollectionItemBytes, getCollectionItemMeta,
-	getComposedChildBatch as _getComposedChildBatch,
-	getChildReceivedEvents, getChildTransferredEvents, getTransferSingleEvents } from './composablesContracts';
+import * as contracts from './composablesContracts';
+import * as indexer from './composablesIndexer';
+
 import BigNumber from 'bignumber.js';
-import { connect } from '@planetscale/database'
+const isIndexer = indexer.isEnabled();
+const router = (isIndexer) ? indexer : contracts;
 
 export interface ComposableEncodedImage {
   filename: string;
@@ -87,68 +85,21 @@ export const filterTokenItem = (tokenItems: TokenItem[], tokenAddress: string, t
   	}
 }
 
-
-export async function getComposedChildBatch(composerProxyAddress: string, tokenId: string, position1Start: number, position1End: number): Promise<TokenItem[]> {
-
-	const children = await _getComposedChildBatch(composerProxyAddress, tokenId, position1Start, position1End);
-
-  	const items: TokenItem[] = children.map(item => ({
-  		tokenAddress: item.tokenAddress, 
-  		tokenId: new BigNumber(item.tokenId.toString())
-  		}) as TokenItem );
-
-	return items;
+export async function indexComposableItemCollections(): Promise<boolean> {
+	return (isIndexer) ? indexer.indexComposableItemCollections() : false;
 }
 
-export async function getChildTokens(composerProxyAddress: string, tokenId: string): Promise<TokenItem[]> {
-
-	const received = await getChildReceivedEvents(composerProxyAddress, tokenId);
-	const transferred = await getChildTransferredEvents(composerProxyAddress, tokenId);
-	
-	const children: TokenItem[] = [];
-	
-	for (let i = 0; i < received.length; i++) {
-		
-		const childTokenAddress = received[i].childTokenAddress;
-		const childTokenId = new BigNumber(received[i].childTokenId.toString());
-		const amount = new BigNumber(received[i].amount.toString());
-		
-		const index = children.findIndex(child => (child.tokenAddress === childTokenAddress && child.tokenId.isEqualTo(childTokenId)));
-		if (index > -1) {
-			children[index].balance = children[index].balance!.plus(amount);
-		} else {
-			children.push({tokenAddress: childTokenAddress, tokenId: childTokenId, balance: amount});
-		}
-	}
-
-	for (let i = 0; i < transferred.length; i++) {
-		
-		const childTokenAddress = transferred[i].childTokenAddress;
-		const childTokenId = new BigNumber(transferred[i].childTokenId.toString());
-		const amount = new BigNumber(transferred[i].amount.toString());
-
-		const index = children.findIndex(child => (child.tokenAddress === childTokenAddress && child.tokenId.isEqualTo(childTokenId)));
-		if (index > -1) {
-			children[index].balance = children[index].balance!.minus(amount);
-		} else {
-			console.log('Error: Mismatched receive/transfer child data.', composerProxyAddress, tokenId);
-		}
-	}	
-	
-	return children.filter(child => (child.balance!.isGreaterThan(new BigNumber(0))));
+export async function indexComposableItems(tokenAddress: string): Promise<boolean> {
+	return (isIndexer) ? indexer.indexComposableItems(tokenAddress) : false;
 }
 
+export async function indexComposablesMarketListings(): Promise<boolean> {
+	return (isIndexer) ? indexer.indexComposablesMarketListings() : false;
+}
 
 export async function getComposableItemCollections(full: boolean): Promise<ComposableItemCollection[]> {
-
-	const configDB = config.db;	
-	console.log(configDB);
 	
-	const conn = connect(configDB);
-	const results = await conn.execute('select * from collections where 1=?', [1]);
-	console.log('results', results);
-	
-	const collectionsCreated = await getCollectionCreatedEvents();
+	const collectionsCreated = await router.getCollectionCreatedEvents();
 
   	const collections: ComposableItemCollection[] = collectionsCreated.map(item => ({tokenAddress: item.collectionContract, owner: item.creator, name: item.name, symbol: item.symbol, itemCount: -1}) as ComposableItemCollection );
   	
@@ -157,10 +108,10 @@ export async function getComposableItemCollections(full: boolean): Promise<Compo
     		
     		const tokenAddress = collections[i].tokenAddress;
 			
-			//get latest owner
-		  	collections[i].name = await getCollectionName(tokenAddress);
-		  	collections[i].symbol = await getCollectionSymbol(tokenAddress);
-		  	collections[i].itemCount = await getCollectionItemCount(tokenAddress);
+		  	collections[i].owner = await router.getCollectionOwner(tokenAddress);
+		  	collections[i].name = await router.getCollectionName(tokenAddress);
+		  	collections[i].symbol = await router.getCollectionSymbol(tokenAddress);
+		  	collections[i].itemCount = await router.getCollectionItemCount(tokenAddress);
 		}
   	}
   
@@ -170,10 +121,10 @@ export async function getComposableItemCollections(full: boolean): Promise<Compo
 export async function getComposableItemCollection(tokenAddress: string): Promise<ComposableItemCollection> {
 
 
-	const owner = await getCollectionOwner(tokenAddress);
-	const name = await getCollectionName(tokenAddress);
-  	const symbol = await getCollectionSymbol(tokenAddress);
-  	const count = await getCollectionItemCount(tokenAddress);
+	const owner = await router.getCollectionOwner(tokenAddress);
+	const name = await router.getCollectionName(tokenAddress);
+  	const symbol = await router.getCollectionSymbol(tokenAddress);
+  	const count = await router.getCollectionItemCount(tokenAddress);
   	
   	const collection: ComposableItemCollection = {tokenAddress: tokenAddress, owner: owner, name: name, symbol: symbol, itemCount: count } as ComposableItemCollection;
 
@@ -182,21 +133,21 @@ export async function getComposableItemCollection(tokenAddress: string): Promise
 
 //get collection name out of here...
 export async function getComposableItems(tokenAddress: string, itemCount: number, collectionName: string): Promise<ComposableItem[]> {
-	
 	const items: ComposableItem[] = [];
-	
+
 	if (itemCount === 0) {
 		return items;
 	}
 
-	//first, get the palette	
-	const paletteRaw = await getCollectionPalette(tokenAddress);			      
-    const paletteReg = paletteRaw.toString().substring(2).match(/.{1,6}/g);			      
+	//first, get the palette
+	const paletteRaw = await router.getCollectionPalette(tokenAddress);
+    //const paletteReg = paletteRaw.toString().substring(2).match(/.{1,6}/g);
+    const paletteReg = paletteRaw.substring(2).match(/.{1,6}/g);
     const palette: string[] = paletteReg!.map(reg => (reg.toString()) as string );
-	
+
 	for (let i = 0; i < itemCount; i++) {
-		const data = await getCollectionItemBytes(tokenAddress, i.toString());
-		const meta = await getCollectionItemMeta(tokenAddress, i.toString());
+		const data = await router.getCollectionItemImageBytes(tokenAddress, i.toString());
+		const meta = await router.getCollectionItemMetaGenerated(tokenAddress, i.toString());
 		
 		if (data && meta) {
 			const json = JSON.parse("{" + meta + "}");
@@ -222,8 +173,8 @@ export async function getComposableItems(tokenAddress: string, itemCount: number
 
 export async function getTokenHoldings(tokenAddress: string, holder: string): Promise<TokenItem[]> {
 	
-	const transferIn = await getTransferSingleEvents(tokenAddress, null, holder);
-	const transferOut = await getTransferSingleEvents(tokenAddress, holder, null);
+	const transferIn = await contracts.getTransferSingleEvents(tokenAddress, null, holder);
+	const transferOut = await contracts.getTransferSingleEvents(tokenAddress, holder, null);
 
 	const holdings: TokenItem[] = [];
 
@@ -259,8 +210,8 @@ export async function getTokenHoldings(tokenAddress: string, holder: string): Pr
 
 export async function getComposablesMarketListings(): Promise<ComposablesMarketListing[]> {
 	
-	const listingsCreated = await getListingCreatedEvents();
-	const listingsDeleted = await getListingDeletedEvents();
+	const listingsCreated = await router.getListingCreatedEvents();
+	const listingsDeleted = await router.getListingDeletedEvents();
 
 	const listingsFiltered = listingsCreated.filter(listing => (!listingsDeleted.find(deleted => (deleted.listingId.toString() === listing.listingId.toString()))));
 
@@ -278,4 +229,54 @@ export async function getComposablesMarketListings(): Promise<ComposablesMarketL
   		}) as ComposablesMarketListing );
   
 	return listings;
+}
+
+export async function getComposedChildBatch(composerProxyAddress: string, tokenId: string, position1Start: number, position1End: number): Promise<TokenItem[]> {
+
+	const children = await contracts.getComposedChildBatch(composerProxyAddress, tokenId, position1Start, position1End);
+
+  	const items: TokenItem[] = children.map(item => ({
+  		tokenAddress: item.tokenAddress, 
+  		tokenId: new BigNumber(item.tokenId.toString())
+  		}) as TokenItem );
+
+	return items;
+}
+
+export async function getChildTokens(composerProxyAddress: string, tokenId: string): Promise<TokenItem[]> {
+
+	const received = await contracts.getChildReceivedEvents(composerProxyAddress, tokenId);
+	const transferred = await contracts.getChildTransferredEvents(composerProxyAddress, tokenId);
+	
+	const children: TokenItem[] = [];
+	
+	for (let i = 0; i < received.length; i++) {
+		
+		const childTokenAddress = received[i].childTokenAddress;
+		const childTokenId = new BigNumber(received[i].childTokenId.toString());
+		const amount = new BigNumber(received[i].amount.toString());
+		
+		const index = children.findIndex(child => (child.tokenAddress === childTokenAddress && child.tokenId.isEqualTo(childTokenId)));
+		if (index > -1) {
+			children[index].balance = children[index].balance!.plus(amount);
+		} else {
+			children.push({tokenAddress: childTokenAddress, tokenId: childTokenId, balance: amount});
+		}
+	}
+
+	for (let i = 0; i < transferred.length; i++) {
+		
+		const childTokenAddress = transferred[i].childTokenAddress;
+		const childTokenId = new BigNumber(transferred[i].childTokenId.toString());
+		const amount = new BigNumber(transferred[i].amount.toString());
+
+		const index = children.findIndex(child => (child.tokenAddress === childTokenAddress && child.tokenId.isEqualTo(childTokenId)));
+		if (index > -1) {
+			children[index].balance = children[index].balance!.minus(amount);
+		} else {
+			console.log('Error: Mismatched receive/transfer child data.', composerProxyAddress, tokenId);
+		}
+	}	
+	
+	return children.filter(child => (child.balance!.isGreaterThan(new BigNumber(0))));
 }

@@ -15,7 +15,8 @@ import { PNGCollectionEncoder } from '@nouns/sdk';
 import { ComposableItemCollection, getComposableItemCollection, 
 	ComposableEncodedImage, ComposableItem, getComposableItems,
 	ComposablesMarketListing, getComposablesMarketListings,
-	filterComposableItemMarketListing } from '../../utils/composables/composablesWrapper';	
+	filterComposableItemMarketListing } from '../../utils/composables/composablesWrapper';
+import { indexComposableItemCollections, indexComposableItems, indexComposablesMarketListings } from '../../utils/composables/composablesWrapper';
 import BigNumber from 'bignumber.js';
 
 import { dataToDescriptorInput } from '../../utils/composables/nounsContracts';
@@ -107,6 +108,7 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
       	setPendingCollectionItems([]);
       	setFormInputs({});
       	//re-fetch the collection data
+      	setCollection(undefined);
       	setCollectionItems(undefined);
 	    setToggleLoad(!toggleLoad);
 
@@ -146,6 +148,10 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
     if (collectionAddress) {
 
 	    const loadCollectionInfo = async () => {
+	    	//run the indexer
+	    	await indexComposableItemCollections();
+	    	await indexComposableItems(collectionAddress);
+	    	await indexComposablesMarketListings();
 	    	
 	    	const collection = await getComposableItemCollection(collectionAddress);
 	    	setCollection(collection);
@@ -154,7 +160,7 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
 	    loadCollectionInfo();	    
     }    
 
-  }, [collectionAddress]);
+  }, [collectionAddress, toggleLoad]);
 
   useEffect(() => {
 
@@ -172,7 +178,7 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
 	    loadCollectionItems();
     }    
 
-  }, [collection, toggleLoad]);  
+  }, [collection]);  
 
   const resetTraitFileUpload = () => {
     if (customTraitFileRef.current) {
@@ -240,7 +246,6 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
         });
         
         const colorCount = encoder.data.palette.length;
-        console.log(colorCount);
         if (colorCount > 256) {
 	      	setModal({
 		    	title: <>File Error</>,
@@ -381,6 +386,7 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
 	        if (action === 1) {
           		setSelectedItems([]);
 
+				setCollection(undefined);
 				setCollectionItems(undefined);
           		setToggleLoad(!toggleLoad);
 	        }

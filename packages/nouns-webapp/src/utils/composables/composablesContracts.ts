@@ -16,15 +16,21 @@ const composablesMarketAddress = config.composables.composablesMarketProxy;
 
 
 export interface CollectionCreatedEvent {
+  	blockNumber: number;
+  	blockHash: string;
+
 	collectionContract: string;
   	creator: string;
   	version: EthersBN;
   	name: string;
   	symbol: string;
-  	nonce: EthersBN;
+  	nonce: EthersBN;  	
 }
 
 export interface ListingCreatedEvent {
+  	blockNumber: number;
+  	blockHash: string;
+
 	listingId: EthersBN;
 
     seller: string;
@@ -49,6 +55,9 @@ export interface ListingFilledEvent {
 }
 
 export interface ListingDeletedEvent {
+  	blockNumber: number;
+  	blockHash: string;
+
 	listingId: EthersBN;
 }
 
@@ -85,57 +94,9 @@ export interface TokenMetadata {
   image: string;
 }
 
-export async function getComposedChildBatch(composerProxyAddress: string, tokenId: string, position1Start: number, position1End: number): Promise<any[]> {
-
-  	const jsonRpcProvider = new providers.JsonRpcProvider(config.app.jsonRpcUri);
-
-	const nounsComposerContract = new Contract(
-		composerProxyAddress,
-		nounsComposerABI,
-		jsonRpcProvider,
-  	);
-
-  	const tokenItems = await nounsComposerContract.getComposedChildBatch(tokenId, position1Start, position1End);
-  	return tokenItems;
-}
-
-export async function getChildReceivedEvents(composerProxyAddress: string, tokenId: string): Promise<ChildReceivedEvent[]> {
-	
-  	const jsonRpcProvider = new providers.JsonRpcProvider(config.app.jsonRpcUri);
-
-	const nounsComposerContract = new Contract(
-		composerProxyAddress,
-		nounsComposerABI,
-		jsonRpcProvider,
-  	);
-
-
-	const eventFilter = nounsComposerContract.filters.ChildReceived(tokenId, null, null);
-  	const events = await nounsComposerContract.queryFilter(eventFilter);
-  	  	
-  	const childReceived: ChildReceivedEvent[] = events.map(({ args }) => ({...args}) as ChildReceivedEvent );
-  
-	return childReceived;
-}
-
-export async function getChildTransferredEvents(composerProxyAddress: string, tokenId: string): Promise<ChildTransferredEvent[]> {
-	
-  	const jsonRpcProvider = new providers.JsonRpcProvider(config.app.jsonRpcUri);
-
-	const nounsComposerContract = new Contract(
-		composerProxyAddress,
-		nounsComposerABI,
-		jsonRpcProvider,
-  	);
-
-
-	const eventFilter = nounsComposerContract.filters.ChildTransferred(tokenId, null, null);
-  	const events = await nounsComposerContract.queryFilter(eventFilter);
-  	  	
-  	const childTransferred: ChildTransferredEvent[] = events.map(({ args }) => ({...args}) as ChildTransferredEvent );
-  
-	return childTransferred;
-}
+/*
+ * Composable Item Factory contract calls
+ */
 
 export async function predictCollectionAddress(creatorAddress: string, nonce: number): Promise<string> {
 
@@ -169,10 +130,14 @@ export async function getCollectionCreatedEvents(): Promise<CollectionCreatedEve
 	const eventFilter = composableItemFactoryContract.filters.CollectionCreated();
   	const events = await composableItemFactoryContract.queryFilter(eventFilter);
   	  	
-  	const collectionsCreated: CollectionCreatedEvent[] = events.map(({ args }) => ({...args}) as CollectionCreatedEvent );
+  	const collectionsCreated: CollectionCreatedEvent[] = events.map(item => ({blockNumber: item.blockNumber, blockHash: item.blockHash, ...item.args}) as CollectionCreatedEvent );
   
 	return collectionsCreated;
 }
+
+/*
+ * Composable Item contract calls
+ */
 
 export async function getComposablePart(itemTokenAddress: string, itemTokenId: string): Promise<any | undefined> {
 
@@ -289,7 +254,7 @@ export async function getCollectionItemSVGBuffer(collectionAddress: string, toke
 	}
 }
 
-export async function getCollectionPalette(collectionAddress: string): Promise<string[]> {
+export async function getCollectionPalette(collectionAddress: string): Promise<string> {
 
   	const jsonRpcProvider = new providers.JsonRpcProvider(config.app.jsonRpcUri);
 
@@ -303,7 +268,7 @@ export async function getCollectionPalette(collectionAddress: string): Promise<s
 	return palettes;
 }
 
-export async function getCollectionItemBytes(collectionAddress: string, tokenId: string): Promise<string> {
+export async function getCollectionItemImageBytes(collectionAddress: string, tokenId: string): Promise<string> {
 
   	const jsonRpcProvider = new providers.JsonRpcProvider(config.app.jsonRpcUri);
 
@@ -317,7 +282,7 @@ export async function getCollectionItemBytes(collectionAddress: string, tokenId:
 	return partBytes;
 }
 
-export async function getCollectionItemMeta(collectionAddress: string, tokenId: string): Promise<string> {
+export async function getCollectionItemMetaGenerated(collectionAddress: string, tokenId: string): Promise<string> {
 
   	const jsonRpcProvider = new providers.JsonRpcProvider(config.app.jsonRpcUri);
 
@@ -350,6 +315,62 @@ export async function getTransferSingleEvents(tokenAddress: string, from: string
 }
 
 /*
+ * Composer contract calls
+ */
+
+export async function getComposedChildBatch(composerProxyAddress: string, tokenId: string, position1Start: number, position1End: number): Promise<any[]> {
+
+  	const jsonRpcProvider = new providers.JsonRpcProvider(config.app.jsonRpcUri);
+
+	const nounsComposerContract = new Contract(
+		composerProxyAddress,
+		nounsComposerABI,
+		jsonRpcProvider,
+  	);
+
+  	const tokenItems = await nounsComposerContract.getComposedChildBatch(tokenId, position1Start, position1End);
+  	return tokenItems;
+}
+
+export async function getChildReceivedEvents(composerProxyAddress: string, tokenId: string): Promise<ChildReceivedEvent[]> {
+	
+  	const jsonRpcProvider = new providers.JsonRpcProvider(config.app.jsonRpcUri);
+
+	const nounsComposerContract = new Contract(
+		composerProxyAddress,
+		nounsComposerABI,
+		jsonRpcProvider,
+  	);
+
+
+	const eventFilter = nounsComposerContract.filters.ChildReceived(tokenId, null, null);
+  	const events = await nounsComposerContract.queryFilter(eventFilter);
+  	  	
+  	const childReceived: ChildReceivedEvent[] = events.map(({ args }) => ({...args}) as ChildReceivedEvent );
+  
+	return childReceived;
+}
+
+export async function getChildTransferredEvents(composerProxyAddress: string, tokenId: string): Promise<ChildTransferredEvent[]> {
+	
+  	const jsonRpcProvider = new providers.JsonRpcProvider(config.app.jsonRpcUri);
+
+	const nounsComposerContract = new Contract(
+		composerProxyAddress,
+		nounsComposerABI,
+		jsonRpcProvider,
+  	);
+
+
+	const eventFilter = nounsComposerContract.filters.ChildTransferred(tokenId, null, null);
+  	const events = await nounsComposerContract.queryFilter(eventFilter);
+  	  	
+  	const childTransferred: ChildTransferredEvent[] = events.map(({ args }) => ({...args}) as ChildTransferredEvent );
+  
+	return childTransferred;
+}
+
+/*
  * Marketplace contract calls
  */
 
@@ -367,7 +388,7 @@ export async function getListingCreatedEvents(): Promise<ListingCreatedEvent[]> 
 	const eventFilter = composablesMarketContract.filters.ListingCreated();
   	const events = await composablesMarketContract.queryFilter(eventFilter);
   	  	
-  	const listingsCreated: ListingCreatedEvent[] = events.map(({ args }) => ({...args}) as ListingCreatedEvent );
+  	const listingsCreated: ListingCreatedEvent[] = events.map(item => ({blockNumber: item.blockNumber, blockHash: item.blockHash, ...item.args}) as ListingCreatedEvent );
   
 	return listingsCreated;
 }
@@ -391,7 +412,6 @@ export async function getListingFilledEvents(buyer?: string): Promise<ListingFil
 }
 
 export async function getListingDeletedEvents(): Promise<ListingDeletedEvent[]> {
-
 	
   	const jsonRpcProvider = new providers.JsonRpcProvider(config.app.jsonRpcUri);
 
@@ -404,7 +424,7 @@ export async function getListingDeletedEvents(): Promise<ListingDeletedEvent[]> 
 	const eventFilter = composablesMarketContract.filters.ListingDeleted();
   	const events = await composablesMarketContract.queryFilter(eventFilter);
   	  	
-  	const listingsDeleted: ListingDeletedEvent[] = events.map(({ args }) => ({...args}) as ListingDeletedEvent );
-  
+  	const listingsDeleted: ListingDeletedEvent[] = events.map(item => ({blockNumber: item.blockNumber, blockHash: item.blockHash, ...item.args}) as ListingDeletedEvent );
+
 	return listingsDeleted;
 }

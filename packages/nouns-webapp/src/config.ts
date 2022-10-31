@@ -221,7 +221,7 @@ const config = {
   app: app[CHAIN_ID],
   addresses: getAddresses(),
   composables: getComposables(),
-  db: { 
+  indexer: { 
 	  host: process.env.REACT_APP_DATABASE_HOST,
 	  username: process.env.REACT_APP_DATABASE_USERNAME,
 	  password: process.env.REACT_APP_DATABASE_PASSWORD
