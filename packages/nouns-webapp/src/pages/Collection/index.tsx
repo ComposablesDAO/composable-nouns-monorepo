@@ -13,7 +13,7 @@ import {
 import { PNGCollectionEncoder } from '@nouns/sdk';
 
 import { ComposableItemCollection, getComposableItemCollection, 
-	ComposableEncodedImage, ComposableItem, getComposableItems,
+	ComposableEncodedImage, ComposableItem, getComposableItemsBatch,
 	ComposablesMarketListing, getComposablesMarketListings,
 	filterComposableItemMarketListing } from '../../utils/composables/composablesWrapper';
 import { indexComposableItemCollections, indexComposableItems, indexComposablesMarketListings } from '../../utils/composables/composablesWrapper';
@@ -168,7 +168,7 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
 
 	    const loadCollectionItems = async () => {
 
-	    	const collectionItems = await getComposableItems(collection.tokenAddress, collection.itemCount, collection.name);
+	    	const collectionItems = await getComposableItemsBatch([collection]);
       		const listings: ComposablesMarketListing[] = await getComposablesMarketListings();
 
 	    	setCollectionItems(collectionItems);

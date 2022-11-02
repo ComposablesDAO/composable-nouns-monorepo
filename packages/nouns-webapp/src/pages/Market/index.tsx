@@ -16,7 +16,7 @@ import { Trans } from '@lingui/macro';
 import { ComposableItemCollection, getComposableItemCollections, 
 	ComposablesMarketListing, getComposablesMarketListings,
 	filterComposableItemMarketListing,
-	ComposableItem, getComposableItems } from '../../utils/composables/composablesWrapper';
+	ComposableItem, getComposableItemsBatch } from '../../utils/composables/composablesWrapper';
 import { ComposableItemCards } from '../../components/ComposableItemCard';
 
 interface Filter {
@@ -73,13 +73,7 @@ const MarketPage = () => {
 			const categoryNames: string[] = [];
 			    
 			//all of the items from the collections
-			let items: ComposableItem[] = [];
-	    	
-	    	for (let i = 0; i < collections.length; i++) {
-	    		const cItems = await getComposableItems(collections[i].tokenAddress, collections[i].itemCount, collections[i].name);
-	    		
-	    		items = items.concat(cItems);
-	    	}
+			const items = await getComposableItemsBatch(collections);
 	    	
 	    	for (let i = 0; i < items.length; i++) {
 				

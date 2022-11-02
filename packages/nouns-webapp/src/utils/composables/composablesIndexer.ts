@@ -42,17 +42,31 @@ export async function getListingDeletedEvents(): Promise<ListingDeletedEvent[]> 
 	return listingsDeleted;
 }
 
-export async function getCollection(collectionAddress: string): Promise<ComposableItemCollection | undefined> {
+export async function getCollections(): Promise<ComposableItemCollection[]> {
   	const conn = connect(configIndexer);
-	const results = await conn.execute('SELECT tokenAddress, owner, name, symbol, itemCount FROM collections WHERE tokenAddress = ?', [collectionAddress], { as: 'object' });
+	const results = await conn.execute('SELECT tokenAddress, owner, name, symbol, itemCount FROM collections');
 	
 	const collections: ComposableItemCollection[] = results.rows.map(row => ({...row}) as ComposableItemCollection );
 	
-	if (collections.length > 0) {
-		return collections[0];
-	}
+	return collections;
 }
 
+export async function getCollection(collectionAddress: string): Promise<ComposableItemCollection> {
+  	const conn = connect(configIndexer);
+	const results = await conn.execute('SELECT tokenAddress, owner, name, symbol, itemCount FROM collections WHERE tokenAddress = ?', [collectionAddress]);
+	
+	const collections: ComposableItemCollection[] = results.rows.map(row => ({...row}) as ComposableItemCollection );
+	
+	return collections[0];
+}
+
+export async function getComposableItemsRows(collections: ComposableItemCollection[]): Promise<Record<string, any>[]> {
+  	const conn = connect(configIndexer);
+	const results = await conn.execute('SELECT C.tokenAddress, I.tokenId, C.name AS collectionName, C.Palette AS paletteRaw, I.imageBytes, I.metaGenerated FROM collections C INNER JOIN collection_items I ON C.tokenAddress = I.tokenAddress');
+	const rows: Record<string, any>[] = results.rows.map(row => ({...row}) as Record<string, any> );
+		
+	return rows;
+}
 
 export async function getCollectionOwner(collectionAddress: string): Promise<string> {
 	const collection = await getCollection(collectionAddress);	

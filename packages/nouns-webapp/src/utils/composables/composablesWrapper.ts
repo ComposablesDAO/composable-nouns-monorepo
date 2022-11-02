@@ -99,7 +99,11 @@ export async function indexComposablesMarketListings(): Promise<boolean> {
 
 export async function getComposableItemCollections(full: boolean): Promise<ComposableItemCollection[]> {
 	
-	const collectionsCreated = await router.getCollectionCreatedEvents();
+	if (isIndexer) {
+		return indexer.getCollections();
+	}
+	
+	const collectionsCreated = await contracts.getCollectionCreatedEvents();
 
   	const collections: ComposableItemCollection[] = collectionsCreated.map(item => ({tokenAddress: item.collectionContract, owner: item.creator, name: item.name, symbol: item.symbol, itemCount: -1}) as ComposableItemCollection );
   	
@@ -108,10 +112,10 @@ export async function getComposableItemCollections(full: boolean): Promise<Compo
     		
     		const tokenAddress = collections[i].tokenAddress;
 			
-		  	collections[i].owner = await router.getCollectionOwner(tokenAddress);
-		  	collections[i].name = await router.getCollectionName(tokenAddress);
-		  	collections[i].symbol = await router.getCollectionSymbol(tokenAddress);
-		  	collections[i].itemCount = await router.getCollectionItemCount(tokenAddress);
+		  	collections[i].owner = await contracts.getCollectionOwner(tokenAddress);
+		  	collections[i].name = await contracts.getCollectionName(tokenAddress);
+		  	collections[i].symbol = await contracts.getCollectionSymbol(tokenAddress);
+		  	collections[i].itemCount = await contracts.getCollectionItemCount(tokenAddress);
 		}
   	}
   
@@ -120,15 +124,43 @@ export async function getComposableItemCollections(full: boolean): Promise<Compo
 
 export async function getComposableItemCollection(tokenAddress: string): Promise<ComposableItemCollection> {
 
+	if (isIndexer) {
+		return indexer.getCollection(tokenAddress);
+	}
 
-	const owner = await router.getCollectionOwner(tokenAddress);
-	const name = await router.getCollectionName(tokenAddress);
-  	const symbol = await router.getCollectionSymbol(tokenAddress);
-  	const count = await router.getCollectionItemCount(tokenAddress);
+	const owner = await contracts.getCollectionOwner(tokenAddress);
+	const name = await contracts.getCollectionName(tokenAddress);
+  	const symbol = await contracts.getCollectionSymbol(tokenAddress);
+  	const count = await contracts.getCollectionItemCount(tokenAddress);
   	
   	const collection: ComposableItemCollection = {tokenAddress: tokenAddress, owner: owner, name: name, symbol: symbol, itemCount: count } as ComposableItemCollection;
 
 	return collection;
+}
+
+export async function getComposableItemsBatch(collections: ComposableItemCollection[]): Promise<ComposableItem[]> {
+
+	let items: ComposableItem[] = [];
+
+	if (isIndexer) {
+		const rows: Record<string, any>[] = await indexer.getComposableItemsRows(collections);
+
+		for (let i = 0; i < rows.length; i++) {
+			const row: Record<string, any> = rows[i];
+			const item = prepareComposableItem(row.tokenAddress, row.tokenId, row.collectionName, row.paletteRaw, row.imageBytes, row.metaGenerated);
+			items.push(item);
+		}
+		
+		return items;
+	}
+
+	
+	for (let i = 0; i < collections.length; i++) {
+		const cItems = await getComposableItems(collections[i].tokenAddress, collections[i].itemCount, collections[i].name);
+		items = items.concat(cItems);
+	}
+	
+	return items;
 }
 
 //get collection name out of here...
@@ -141,34 +173,41 @@ export async function getComposableItems(tokenAddress: string, itemCount: number
 
 	//first, get the palette
 	const paletteRaw = await router.getCollectionPalette(tokenAddress);
-    //const paletteReg = paletteRaw.toString().substring(2).match(/.{1,6}/g);
-    const paletteReg = paletteRaw.substring(2).match(/.{1,6}/g);
-    const palette: string[] = paletteReg!.map(reg => (reg.toString()) as string );
 
 	for (let i = 0; i < itemCount; i++) {
 		const data = await router.getCollectionItemImageBytes(tokenAddress, i.toString());
 		const meta = await router.getCollectionItemMetaGenerated(tokenAddress, i.toString());
 		
-		if (data && meta) {
-			const json = JSON.parse("{" + meta + "}");
-			
-			const category = json.attributes[0].value;
-			const creator = json.attributes[1].value;
-			
-			const filename = creator + "-" + category + "-" + json.name;
-			
-			json.category = category;
-			json.creator = creator;
-			
-			const image: ComposableEncodedImage = {filename: filename, data: data, palette: palette};
-			const item: ComposableItem = { meta: json, image: image,
-				collection: collectionName, tokenAddress: tokenAddress, tokenId: new BigNumber(i) };
-
+		if (data && meta) {				
+			const item = prepareComposableItem(tokenAddress, i, collectionName, paletteRaw, data, meta);
 			items.push(item);
 		}
 	}
 	
 	return items;					  		  
+}
+
+export const prepareComposableItem = (tokenAddress: string, tokenId: number, collectionName: string, paletteRaw: string, imageBytes: string, metaGenerated: string) : ComposableItem => {
+
+    const paletteReg = paletteRaw.substring(2).match(/.{1,6}/g);
+    const palette: string[] = paletteReg!.map(reg => (reg.toString()) as string );
+
+	const json = JSON.parse("{" + metaGenerated + "}");
+
+	//should check these and not just assume...	
+	const category = json.attributes[0].value;
+	const creator = json.attributes[1].value;
+	
+	const filename = creator + "-" + category + "-" + json.name;
+	
+	json.category = category;
+	json.creator = creator;
+	
+	const image: ComposableEncodedImage = {filename: filename, data: imageBytes, palette: palette};
+	const item: ComposableItem = { meta: json, image: image,
+		collection: collectionName, tokenAddress: tokenAddress, tokenId: new BigNumber(tokenId) };
+	
+	return item;
 }
 
 export async function getTokenHoldings(tokenAddress: string, holder: string): Promise<TokenItem[]> {

@@ -8,20 +8,15 @@ import { ComposableItemCollection, ComposableItem, ComposablesMarketListing } fr
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
 
-export interface CollectionItems {
-  tokenAddress: string;
-  items: ComposableItem[];
-}
-
-export const filterItemsByAddress = (collectionItems: CollectionItems[] | undefined, tokenAddress: string) : ComposableItem[] | undefined => {
+export const filterItemsByAddress = (collectionItems: ComposableItem[] | undefined, tokenAddress: string) : ComposableItem[] | undefined => {
 	if (collectionItems === undefined) {
   		return undefined;	
   	} else {
-		return collectionItems!.find(arr => (arr.tokenAddress === tokenAddress))?.items
+  		return collectionItems!.filter(item => (item.tokenAddress === tokenAddress));
 	}
 }
 
-export const ComposableItemCollectionRows: React.FC<{collections: ComposableItemCollection[] | undefined, collectionItems: CollectionItems[] | undefined, listings?: ComposablesMarketListing[]  }> = props => {
+export const ComposableItemCollectionRows: React.FC<{collections: ComposableItemCollection[] | undefined, collectionItems: ComposableItem[] | undefined, listings?: ComposablesMarketListing[]  }> = props => {
   const { collections, collectionItems, listings } = props;  
 
   return (

@@ -5,7 +5,7 @@ import { Container, Row, Col, Button, Image, Form, OverlayTrigger, Popover, Spin
 
 import { ComposableItemCollection, getComposableItemCollections, 
 	TokenItem, getTokenHoldings, filterComposableItem, filterTokenItem,
-	ComposableEncodedImage, ComposableItem, getComposableItems } from '../../utils/composables/composablesWrapper';
+	ComposableEncodedImage, ComposableItem, getComposableItemsBatch } from '../../utils/composables/composablesWrapper';
 //	ComposablesMarketListing, getComposablesMarketListings,
 import BigNumber from 'bignumber.js';
 	
@@ -287,13 +287,7 @@ const ComposerPage = () => {
 			const categoryNames: string[] = [];
 			    
 			//all of the items from the collections
-			let items: ComposableItem[] = [];
-	    	
-	    	for (let i = 0; i < collections.length; i++) {
-	    		const cItems = await getComposableItems(collections[i].tokenAddress, collections[i].itemCount, collections[i].name);
-	    		
-	    		items = items.concat(cItems);
-	    	}
+			const items = await getComposableItemsBatch(collections);
 	    	
 	    	for (let i = 0; i < items.length; i++) {
 				

@@ -3,10 +3,10 @@ import classes from './Collections.module.css';
 import { Container, Row, Col, Button } from 'react-bootstrap';
 import { Trans } from '@lingui/macro';
 
-import { ComposableItemCollectionRows, CollectionItems } from '../../components/ComposableItemCollectionRow';
+import { ComposableItemCollectionRows } from '../../components/ComposableItemCollectionRow';
 import CollectionForm from './CollectionForm';
 	
-import { ComposableItemCollection, getComposableItemCollections, getComposableItems,
+import { ComposableItemCollection, getComposableItemCollections, ComposableItem, getComposableItemsBatch,
 	ComposablesMarketListing, getComposablesMarketListings } from '../../utils/composables/composablesWrapper';
 
 import { useAppSelector } from '../../hooks';
@@ -17,7 +17,7 @@ const CollectionsPage = () => {
     
   const [initLoad, setInitLoad] = useState<boolean>(true);
   const [collections, setCollections] = useState<ComposableItemCollection[] | undefined>(undefined);
-  const [collectionItems, setCollectionItems] = useState<CollectionItems[] | undefined>(undefined);
+  const [collectionItems, setCollectionItems] = useState<ComposableItem[] | undefined>(undefined);
   const [listings, setListings] = useState<ComposablesMarketListing[]>();
   const [displayCollectionForm, setDisplayCollectionForm] = useState<boolean>(false);
   
@@ -51,14 +51,7 @@ const CollectionsPage = () => {
 
 	    const loadCollectionItems = async () => {
 	    	
-			let items: CollectionItems[] = [];
-	    	
-	    	for (let i = 0; i < collections.length; i++) {
-	    		const cItems = await getComposableItems(collections[i].tokenAddress, collections[i].itemCount, collections[i].name);
-	    		
-	    		items.push({tokenAddress: collections[i].tokenAddress, items: cItems });
-	    	}
-
+			const items = await getComposableItemsBatch(collections);
 			setCollectionItems(items);
 
 			const listings: ComposablesMarketListing[] = await getComposablesMarketListings();

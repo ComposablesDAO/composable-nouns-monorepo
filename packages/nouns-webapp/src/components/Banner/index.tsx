@@ -4,8 +4,8 @@ import { Row, Col } from 'react-bootstrap';
 
 import { useEffect, useState } from 'react';
 import { ComposableItemCollection, getComposableItemCollections, 
-	getComposableItems, ComposablesMarketListing, getComposablesMarketListings } from '../../utils/composables/composablesWrapper';
-import { ComposableItemCollectionRows, CollectionItems } from '../../components/ComposableItemCollectionRow';
+	ComposableItem, getComposableItemsBatch, ComposablesMarketListing, getComposablesMarketListings } from '../../utils/composables/composablesWrapper';
+import { ComposableItemCollectionRows } from '../../components/ComposableItemCollectionRow';
 import Link from '../../components/Link';
 import banner_animation from '../../assets/Composer-Banner.gif';
 
@@ -14,7 +14,7 @@ const Banner = () => {
 
   const [initLoad, setInitLoad] = useState<boolean>(true);
   const [collections, setCollections] = useState<ComposableItemCollection[] | undefined>(undefined);
-  const [collectionItems, setCollectionItems] = useState<CollectionItems[] | undefined>(undefined);
+  const [collectionItems, setCollectionItems] = useState<ComposableItem[] | undefined>(undefined);
   const [listings, setListings] = useState<ComposablesMarketListing[]>();
 
   useEffect(() => {
@@ -41,14 +41,7 @@ const Banner = () => {
 
 	    const loadCollectionItems = async () => {
 	    	
-			let items: CollectionItems[] = [];
-	    	
-	    	for (let i = 0; i < collections.length; i++) {
-	    		const cItems = await getComposableItems(collections[i].tokenAddress, collections[i].itemCount, collections[i].name);
-	    		
-	    		items.push({tokenAddress: collections[i].tokenAddress, items: cItems });
-	    	}
-
+	    	const items = await getComposableItemsBatch(collections);
 			setCollectionItems(items);
 
 			const listings: ComposablesMarketListing[] = await getComposablesMarketListings();
