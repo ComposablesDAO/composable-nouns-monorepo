@@ -18,6 +18,7 @@ import { faUsers } from '@fortawesome/free-solid-svg-icons';
 import { faComments } from '@fortawesome/free-solid-svg-icons';
 import { faPlay } from '@fortawesome/free-solid-svg-icons';
 import { faStore } from '@fortawesome/free-solid-svg-icons';
+import { faEdit } from '@fortawesome/free-solid-svg-icons';
 import NavBarTreasury from '../NavBarTreasury';
 import NavWallet from '../NavWallet';
 import { Trans } from '@lingui/macro';
@@ -36,7 +37,7 @@ const NavBar = () => {
   const [isNavExpanded, setIsNavExpanded] = useState(false);
 
   const useStateBg =
-    //history.location.pathname === '/' ||
+    history.location.pathname === '/' ||
     history.location.pathname.includes('/noun/') ||
     history.location.pathname.includes('/auction/');
 
@@ -47,7 +48,7 @@ const NavBar = () => {
     : NavBarButtonStyle.WARM_INFO;
 
   const closeNav = () => setIsNavExpanded(false);
-
+  
   return (
     <>
       <Navbar
@@ -67,13 +68,14 @@ const NavBar = () => {
                 TESTNET
               </Nav.Item>
             )}
-            <Nav.Item style={{display: 'none', visibility: 'hidden'}}>
+            <Nav.Item>
               {treasuryBalance && (
                 <Nav.Link
                   href={daoEtherscanLink}
                   className={classes.nounsNavLink}
                   target="_blank"
                   rel="noreferrer"
+                  style={{display: 'none', visibility: 'hidden'}}
                 >
                   <NavBarTreasury
                     treasuryBalance={Number(utils.formatEther(treasuryBalance)).toFixed(0)}
@@ -89,15 +91,17 @@ const NavBar = () => {
             onClick={() => setIsNavExpanded(!isNavExpanded)}
           />
           <Navbar.Collapse className="justify-content-end">
-            <Nav.Link as={Link} to="/vote" className={classes.nounsNavLink} onClick={closeNav} style={{display: 'none', visibility: 'hidden'}}>
+            <Nav.Link as={Link} to="/vote" className={classes.nounsNavLink} onClick={closeNav}
+            style={{display: 'none', visibility: 'hidden'}}
+            >
               <NavBarButton
                 buttonText={<Trans>DAO</Trans>}
                 buttonIcon={<FontAwesomeIcon icon={faUsers} />}
-                buttonStyle={nonWalletButtonStyle}
+                buttonStyle={nonWalletButtonStyle}                
               />
             </Nav.Link>
             <Nav.Link
-              href={"https://hackmd.io/@jhernanx/B1AoPVcR5"}
+              href={externalURL(ExternalURL.nounsCenter)}
               className={classes.nounsNavLink}
               target="_blank"
               rel="noreferrer"
@@ -118,6 +122,18 @@ const NavBar = () => {
               <NavBarButton
                 buttonText={<Trans>Market</Trans>}
                 buttonIcon={<FontAwesomeIcon icon={faStore} />}
+                buttonStyle={nonWalletButtonStyle}
+              />
+            </Nav.Link>
+            <Nav.Link
+              as={Link}
+              to="/composer"
+              className={classes.nounsNavLink}
+              onClick={closeNav}
+            >
+              <NavBarButton
+                buttonText={<Trans>Composer</Trans>}
+                buttonIcon={<FontAwesomeIcon icon={faEdit} />}
                 buttonStyle={nonWalletButtonStyle}
               />
             </Nav.Link>
@@ -148,7 +164,7 @@ const NavBar = () => {
                 buttonStyle={nonWalletButtonStyle}
               />
             </Nav.Link>
-            <NavLocaleSwitcher buttonStyle={nonWalletButtonStyle}  />
+            <NavLocaleSwitcher buttonStyle={nonWalletButtonStyle} />
             <NavWallet address={activeAccount || '0'} buttonStyle={nonWalletButtonStyle} />{' '}
           </Navbar.Collapse>
         </Container>

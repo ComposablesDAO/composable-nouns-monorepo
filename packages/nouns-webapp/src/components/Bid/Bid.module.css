@@ -139,6 +139,11 @@
   -moz-appearance: textfield;
 }
 
+.voteForNextNounBtnWrapper {
+  display: none;
+  visibility: hidden;
+}
+
 @media (max-width: 992px) {
   .bidInput {
     border: none;

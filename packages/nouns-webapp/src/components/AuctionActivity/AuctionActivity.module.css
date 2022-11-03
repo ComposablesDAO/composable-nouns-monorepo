@@ -114,6 +114,8 @@ h4 {
   margin-top: 0rem;
   margin-bottom: 1rem;
   transition: 0.2s ease-in-out;
+  display: none;
+  visibility: hidden;
 }
 
 .fomoNounsLink svg {

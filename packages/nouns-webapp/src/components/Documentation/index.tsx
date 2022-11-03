@@ -32,7 +32,7 @@ const Documentation = () => {
   );
   return (
     <Section fullWidth={false}>
-      <Col lg={{ span: 10, offset: 1 }}>
+      <Col lg={{ span: 10, offset: 1 }} style={{display: 'none', visibility: 'hidden'}}>
         <div className={classes.headerWrapper}>
           <h1>
             <Trans>WTF?</Trans>
@@ -316,7 +316,13 @@ const Documentation = () => {
                 <li>
                   <Link text="@punk4464" url="https://twitter.com/punk4464" leavesPage={true} />
                 </li>
-                <li>solimander</li>
+                <li>
+                  <Link
+                    text="@_solimander_"
+                    url="https://twitter.com/_solimander_"
+                    leavesPage={true}
+                  />
+                </li>
                 <li>
                   <Link text="@dhof" url="https://twitter.com/dhof" leavesPage={true} />
                 </li>

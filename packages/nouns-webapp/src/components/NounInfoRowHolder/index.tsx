@@ -23,7 +23,7 @@ const NounInfoRowHolder: React.FC<NounInfoRowHolderProps> = props => {
   const isCool = useAppSelector(state => state.application.isCoolBackground);
   const { loading, error, data } = useQuery(auctionQuery(nounId));
 
-  const winner = data && data.auction.bidder.id;
+  const winner = data && data.auction.bidder?.id;
 
   if (loading || !winner) {
     return (
@@ -73,10 +73,10 @@ const NounInfoRowHolder: React.FC<NounInfoRowHolderProps> = props => {
             ) : (
               shortAddressComponent
             )}
+            <span className={classes.linkIconSpan}>
+              <Image src={_LinkIcon} className={classes.linkIcon} />
+            </span>
           </a>
-        </span>
-        <span className={classes.linkIconSpan}>
-          <Image src={_LinkIcon} className={classes.linkIcon} />
         </span>
       </div>
     </Tooltip>

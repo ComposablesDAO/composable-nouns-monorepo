@@ -6,13 +6,14 @@ import Noun from '../../../components/Noun';
 import { Backdrop } from '../../../components/Modal';
 
 import { getNounSeed } from '../../../utils/composables/nounsContracts';
+import { TokenItem, getChildTokens, getComposedChildBatch } from '../../../utils/composables/composablesWrapper';
 
 import { useAppSelector } from '../../../hooks';
 import { INounSeed } from '../../../wrappers/nounToken';
 import axios, {AxiosResponse} from 'axios';
 import config from '../../../config';
 
-const NounPicker: React.FC<{ onSelect: (extensionName: string | undefined, seed: INounSeed | undefined) => void; }> = props => {
+const NounPicker: React.FC<{ onSelect: (extensionName: string | undefined, tokenAddress: string | undefined, tokenId: number | undefined, seed: INounSeed | undefined, composerProxyAddress: string | undefined, childTokens: TokenItem[], composedChildTokens: TokenItem[]) => void; }> = props => {
   const { onSelect } = props;
   const svg = '';
 
@@ -36,13 +37,22 @@ const NounPicker: React.FC<{ onSelect: (extensionName: string | undefined, seed:
 	  	const seed = await getNounSeed(tokenAddress, tokenId);
 	  	
 	  	let extensionName = undefined;
+	  	let composerProxyAddress = undefined;
 	  	for (const extension of nounExtensions) {
-		  	if (extension.address.toLowerCase() === tokenAddress.toLowerCase()) {
-		  		extensionName = extension.name;	  		
+		  	if (extension.tokenAddress.toLowerCase() === tokenAddress.toLowerCase()) {
+		  		extensionName = extension.name;
+		  		composerProxyAddress = extension.composerProxy;
 		  	}
 		}
 		
-		onSelect(extensionName, seed);
+		let childTokens: TokenItem[] = [];
+		let composedChildTokens: TokenItem[] = [];
+		if (composerProxyAddress) {
+			childTokens = await getChildTokens(composerProxyAddress, tokenId);
+			composedChildTokens = await getComposedChildBatch(composerProxyAddress, tokenId, 1, 16);
+		}
+		
+		onSelect(extensionName, tokenAddress, tokenId, seed, composerProxyAddress, childTokens, composedChildTokens);
     };
     loadSeed();
 	
@@ -64,13 +74,13 @@ const NounPicker: React.FC<{ onSelect: (extensionName: string | undefined, seed:
 		let url = `${baseURL}/getNFTs/?owner=${activeAccount}`;
 		
 		for (const extension of nounExtensions) {
-			url += "&contractAddresses[]=" + extension.address;
+			url += "&contractAddresses[]=" + extension.tokenAddress;
 		}		  		
 		url += "&withMetadata=true";
 				
 		// Make the request and print the formatted response:
 		axios.get(url)
-		    .then(response => setNounNfts(response) /*console.log(response['data'])*/)
+		    .then(response => setNounNfts(response))
 		    .catch(error => console.log('error', error));
           
     };
@@ -87,7 +97,7 @@ const NounPicker: React.FC<{ onSelect: (extensionName: string | undefined, seed:
       {ReactDOM.createPortal(
         <Backdrop
           onDismiss={() => {
-            onSelect(undefined, undefined);
+            onSelect(undefined, undefined, undefined, undefined, undefined, [], []);
           }}
         />,
         document.getElementById('backdrop-root')!,

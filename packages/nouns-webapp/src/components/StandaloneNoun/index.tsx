@@ -9,6 +9,10 @@ import { useDispatch } from 'react-redux';
 import { setOnDisplayAuctionNounId } from '../../state/slices/onDisplayAuction';
 import nounClasses from '../Noun/Noun.module.css';
 
+import { useState, useEffect } from 'react';
+import { getNounSVGBuffer } from '../../utils/composables/nounsContracts';	
+
+
 interface StandaloneNounProps {
   nounId: EthersBN;
 }
@@ -125,6 +129,21 @@ export const StandaloneNounWithSeed: React.FC<StandaloneNounWithSeedProps> = (
   const seed = useNounSeed(nounId);
   const seedIsInvalid = Object.values(seed || {}).every(v => v === 0);
 
+  const [auctionSVG, setAuctionSVG] = useState<Buffer | null>();
+  //load up the Noun item image, only when there's a new auctionId
+  useEffect(() => {
+    const loadSVG = async () => {
+	   const svg = await getNounSVGBuffer(undefined, nounId.toString());
+       setAuctionSVG(svg);       
+    };
+    setAuctionSVG(null);
+    loadSVG();
+
+    return () => {
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nounId]);
+
   if (!seed || seedIsInvalid || !nounId || !onLoadSeed) return <Noun imgPath="" alt="Noun" />;
 
   onLoadSeed(seed);
@@ -134,8 +153,11 @@ export const StandaloneNounWithSeed: React.FC<StandaloneNounWithSeedProps> = (
   };
 
   const { image, description } = getNoun(nounId, seed);
+  
 
-  const noun = <Noun imgPath={image} alt={description} />;
+  //const noun = <Noun imgPath={image} alt={description} />;
+  const noun = <Noun imgPath={(auctionSVG) ? `data:image/svg+xml;base64,${btoa(auctionSVG.toString())}` : image} alt={description} />;
+
   const nounWithLink = (
     <Link
       to={'/noun/' + nounId.toString()}

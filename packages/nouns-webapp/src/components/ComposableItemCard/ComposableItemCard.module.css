@@ -1,0 +1,159 @@
+.collectionRows {
+}
+
+.collectionRow {
+  border: 1px solid #e2e3e8;
+  margin: 0.5rem 0;
+  border-radius: 12px;  
+  padding: 0.5rem;
+}
+
+.itemGroup {
+  /*
+  padding-right: 5px;
+  padding-left: 5px;
+  */
+  padding: 5px;
+}
+.itemGroup a {
+  font-size: 1rem;
+}
+
+.itemGroup img {
+  /*border-radius: 50%;*/
+  width: 50%;
+  max-width: 100px;
+
+  border: 1px solid #000;
+  box-shadow: 2px 5px 5px 2px rgb(0 0 0 / 25%);
+  border-radius: 12px;  
+}
+
+.itemGroup {
+  margin-bottom: 2rem;
+  text-align: center;
+  /* 
+  margin: 0.5rem;
+  border: 1px solid #000;
+  box-shadow: 2px 5px 5px 2px rgb(0 0 0 / 25%);
+  border-radius: 12px;  
+  */
+}
+.itemGroup a:hover svg {
+  fill: var(--brand-dark-red);
+}
+.itemGroup img {
+  margin-bottom: 0.5rem;
+}
+
+.itemGroup img:hover {
+  cursor: pointer;
+  transform: scale(1.1);
+}
+
+.twitterIcon {
+  width: 20px;
+  color: #aaa;
+  margin-right: 5px;
+}
+
+.card {
+  border: none;
+}
+
+.card,
+.headerWrapper {
+  font-size: 1.3rem;
+}
+.cardHeader {
+  border: none;
+  background-color: transparent;
+  font-family: 'Londrina Solid';
+  font-size: 2.5rem;
+  cursor: pointer;
+}
+
+.cardTitle {
+    margin-bottom: 0;
+    font-size: 1rem;
+}
+
+.cardText {
+    padding-top: 0;
+}
+
+.primaryBtnItem {
+  margin-top: 10px;
+  font-size: small;
+}
+
+.primaryBtnItem, .primaryBtnCollection {
+  width: 50%;
+  max-width: 100px;
+  font-weight: bold;
+  border-radius: 12px;
+  background-color: var(--brand-dark-red);
+  border: var(--brand-dark-red);
+}
+
+.primaryBtnItem:focus,
+.primaryBtnItem:hover,
+.primaryBtnCollection:focus,
+.primaryBtnCollection:hover 
+{
+  background-color: var(--brand-dark-red) !important;
+  box-shadow: 0 0 0 0.2rem rgb(214, 60, 94, 0.75);
+}
+
+.primaryBtnItem:active,
+.primaryBtnCollection:active {
+  background-color: var(--brand-dark-red) !important;
+}
+
+.primaryBtnItem:disabled,
+.primaryBtnCollection:disabled {
+  color: var(--brand-gray-dark-text) !important;
+  background-color: var(--brand-gray-background) !important;
+  border-color: var(--brand-gray-border) !important;  
+  border-style: solid;
+}
+
+
+.traitForm {
+  height: 4rem;
+}
+.traitFormBtn {
+  height: 100% !important;
+  width: 100%;
+  margin: 0.5rem 0;
+  border-radius: 12px;
+  background-color: white !important;
+  border-color: #e2e3e8 !important;
+  font-size: 18px;
+  font-weight: bold;
+  color: #14161b;
+}
+.traitFormBtn:hover,
+.traitFormBtn:focus {
+  border-color: #e2e3e8 !important;
+  background-color: #f4f4f8 !important;
+  box-shadow: none !important;
+}
+.floatingLabel,
+.fileUpload {
+  font-size: 15px;
+  color: #8c8d92;
+}
+.nounYearsFooter {
+  font-style: italic;
+}
+.nounImg {
+  border-radius: 16px;
+}
+.nounImg:hover {
+  cursor: pointer;
+  transform: scale(1.01);
+}
+.nounWrapper {
+  margin-bottom: 1rem;
+}

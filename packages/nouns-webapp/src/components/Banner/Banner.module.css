@@ -3,6 +3,27 @@
   font-size: 5rem;
 }
 
+.bannerSection {
+  padding: 0 !important;
+}
+
+.bannerSection div {
+  justify-content: center;
+}
+
+.bannerSection img {
+  width: auto;
+}
+
+.sectionHeader {
+  font-weight: bold;
+}
+
+.sectionFooter a {
+  text-decoration: none;
+  font-weight: bold;
+}
+
 @media (max-width: 992px) {
   .wrapper {
     padding: 2rem;
