@@ -14,6 +14,7 @@ import { PNGCollectionEncoder } from '@nouns/sdk';
 
 import { ComposableItemCollection, getComposableItemCollection, 
 	ComposableEncodedImage, ComposableItem, getComposableItemsBatch,
+	filterComposableItemByAddress,
 	ComposablesMarketListing, getComposablesMarketListings,
 	filterComposableItemMarketListing } from '../../utils/composables/composablesWrapper';
 import { indexComposableItemCollections, indexComposableItems, indexComposablesMarketListings } from '../../utils/composables/composablesWrapper';
@@ -168,7 +169,9 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
 
 	    const loadCollectionItems = async () => {
 
-	    	const collectionItems = await getComposableItemsBatch([collection]);
+	    	const collectionItemsAll = await getComposableItemsBatch([collection]);
+	    	//workaround until the indexer function is corrected for single collection pulls
+	    	const collectionItems = filterComposableItemByAddress(collectionItemsAll, collection.tokenAddress);
       		const listings: ComposablesMarketListing[] = await getComposablesMarketListings();
 
 	    	setCollectionItems(collectionItems);

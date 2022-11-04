@@ -85,6 +85,14 @@ export const filterTokenItem = (tokenItems: TokenItem[], tokenAddress: string, t
   	}
 }
 
+export const filterComposableItemByAddress = (collectionItems: ComposableItem[] | undefined, tokenAddress: string) : ComposableItem[] | undefined => {
+	if (collectionItems === undefined) {
+  		return undefined;	
+  	} else {
+  		return collectionItems!.filter(item => (item.tokenAddress === tokenAddress));
+	}
+}
+
 export async function indexComposableItemCollections(): Promise<boolean> {
 	return (isIndexer) ? indexer.indexComposableItemCollections() : false;
 }

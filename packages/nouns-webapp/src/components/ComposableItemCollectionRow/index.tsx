@@ -3,18 +3,10 @@ import { Row, Col, Button, Card, Spinner } from 'react-bootstrap';
 
 import { ComposableItemCards } from '../ComposableItemCard';
 
-import { ComposableItemCollection, ComposableItem, ComposablesMarketListing } from '../../utils/composables/composablesWrapper';
+import { ComposableItemCollection, ComposableItem, ComposablesMarketListing, filterComposableItemByAddress } from '../../utils/composables/composablesWrapper';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
-
-export const filterItemsByAddress = (collectionItems: ComposableItem[] | undefined, tokenAddress: string) : ComposableItem[] | undefined => {
-	if (collectionItems === undefined) {
-  		return undefined;	
-  	} else {
-  		return collectionItems!.filter(item => (item.tokenAddress === tokenAddress));
-	}
-}
 
 export const ComposableItemCollectionRows: React.FC<{collections: ComposableItemCollection[] | undefined, collectionItems: ComposableItem[] | undefined, listings?: ComposablesMarketListing[]  }> = props => {
   const { collections, collectionItems, listings } = props;  
@@ -28,7 +20,7 @@ export const ComposableItemCollectionRows: React.FC<{collections: ComposableItem
         ) : (
 			collections.map(collection => (
 		        <Row className={classes.collectionRow}>
-		          <ComposableItemCollectionRow collection={collection} composableItems={filterItemsByAddress(collectionItems, collection.tokenAddress)} listings={listings} />
+		          <ComposableItemCollectionRow collection={collection} composableItems={filterComposableItemByAddress(collectionItems, collection.tokenAddress)} listings={listings} />
 		        </Row>
 			))
         )}
