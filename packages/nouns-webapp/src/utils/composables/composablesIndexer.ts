@@ -62,7 +62,7 @@ export async function getCollection(collectionAddress: string): Promise<Composab
 
 export async function getComposableItemsRows(collections: ComposableItemCollection[]): Promise<Record<string, any>[]> {
   	const conn = connect(configIndexer);
-	const results = await conn.execute('SELECT C.tokenAddress, I.tokenId, C.name AS collectionName, C.Palette AS paletteRaw, I.imageBytes, I.metaGenerated FROM collections C INNER JOIN collection_items I ON C.tokenAddress = I.tokenAddress');
+	const results = await conn.execute('SELECT C.tokenAddress, I.tokenId, C.name AS collectionName, C.Palette AS paletteRaw, I.imageBytes, I.metaGenerated FROM collections C INNER JOIN collection_items I ON C.tokenAddress = I.tokenAddress ORDER BY priority DESC');
 	const rows: Record<string, any>[] = results.rows.map(row => ({...row}) as Record<string, any> );
 		
 	return rows;

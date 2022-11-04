@@ -472,7 +472,11 @@ const ComposerPage = () => {
 	});
 	  
 	if (listId === 'Items' && selectedOwned === true) {
+		const uploadedItems = items.filter(encodedItem => encodedItem.collection === 'UPLOADED');
+
 		items = items.filter(encodedItem => filterTokenItem(holdings, encodedItem.tokenAddress, encodedItem.tokenId));
+		
+		items = items.concat(uploadedItems);
 	}
   	
   	return items;
@@ -644,12 +648,20 @@ const ComposerPage = () => {
       });
       
       const droppableId = 'Items';
-      const items = getList(droppableId);
+      //const items = getList(droppableId);
+      //get it direct
+      var items: ComposableItem[] = [];
+      
+      stateItemsArray.forEach(droppableItem => {
+      	if (droppableItem.id === droppableId) {
+			items = droppableItem.items;
+		}
+	  });
       
       const image: ComposableEncodedImage = {filename: filename, data: data, palette: palette};
       const meta = JSON.parse("{}");
       meta.name = filename;
-	  const item: ComposableItem = { meta: meta, image: image, collection: 'None', tokenAddress: filename, tokenId: new BigNumber(0) };
+	  const item: ComposableItem = { meta: meta, image: image, collection: 'UPLOADED', tokenAddress: filename, tokenId: new BigNumber(0) };
       items.unshift(item);
 
 
