@@ -1,7 +1,8 @@
 //import React from 'react';
 import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 import classes from './Composer.module.css';
-import { Container, Row, Col, Button, Image, Form, OverlayTrigger, Popover, Spinner } from 'react-bootstrap';
+import { Container, Row, Col, Button, Form, Spinner } from 'react-bootstrap';
+import TooltipInfo from '../../components/TooltipInfo';
 
 import { ComposableItemCollection, getComposableItemCollections, 
 	TokenItem, getTokenHoldings, filterComposableItem, filterTokenItem,
@@ -18,7 +19,6 @@ import { buildSVG } from '../../utils/composables/nounsSDK';
 import { getNounData, getRandomNounSeed } from '../../utils/composables/nounsAssets';
 
 import { INounSeed } from '../../wrappers/nounToken';
-import InfoIcon from '../../assets/icons/Info.svg';
 import { PNG } from 'pngjs';
 import NounModal from './NounModal';
 import NounPicker from './NounPicker';
@@ -875,7 +875,7 @@ const ComposerPage = () => {
 		            <Button className={classes.primaryBtnSaver} onClick={() => setDisplaySaveModal(true)} disabled={!saveEnabled}>
 		              Save On-Chain
 		            </Button>			
-        		
+        			<TooltipInfo tooltipText={"You can only save your changes on-chain when you are the owner of the base NFT, AND the owner of all of the parts you're trying to compose inside of it."} />
 	         	</Col>
 	        </Row>
 		)}
@@ -885,29 +885,19 @@ const ComposerPage = () => {
         	<Row>
 	          	  <Col lg={12}>					
 					<hr style={{ marginBottom: 0 }} />
+
+	          	  	<span>
+	          	  	You can also upload your own art into the Composer to experiment with adding new custom traits. 
+	          	  	<br /><br />
+	          	  	When you're ready, you can then mint and sell your creations on the Collection pages. <a href="/collections/" style={{ textDecoration: 'none', fontWeight: 'bold'}}>Learn more →</a>
+	          	  	</span>
+
 	          	  </Col>
 	
-	          	  <Col lg={3}>
-	
+	          	  <Col lg={3}>	
 		            <label style={{ margin: '1rem 0 .25rem 0' }} htmlFor="custom-trait-upload">
 		              <Trans>Upload Custom Trait</Trans>
-		              <OverlayTrigger
-		                trigger={["hover", "hover"]}
-		                placement="top"
-		                overlay={
-		                  <Popover>
-		                    <div style={{ padding: '0.25rem' }}>
-		                      <Trans>Only 32x32 PNG images are accepted</Trans>
-		                    </div>
-		                  </Popover>
-		                }
-		              >
-		                <Image
-		                  style={{ margin: '0 0 .25rem .25rem' }}
-		                  src={InfoIcon}
-		                  className={classes.voteIcon}
-		                />
-		              </OverlayTrigger>
+		              <TooltipInfo tooltipText={"Only 32x32 PNG images are accepted."} />
 		            </label>
 		            <Form.Control
 		              type="file"
@@ -932,11 +922,7 @@ const ComposerPage = () => {
 	
 	          	  </Col>
 	          	  <Col lg={9}>
-
-		            <p style={{ fontStyle: 'italic' }}>
-		                Are you a Noundry artist or an extension creator? We'd love to add your creations to the Composables marketplace!
-		            </p>
-
+					&nbsp;
 				  </Col>
 	          	  
 	        	</Row>

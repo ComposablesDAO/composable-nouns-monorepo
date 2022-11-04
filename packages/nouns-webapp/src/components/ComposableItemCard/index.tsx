@@ -56,9 +56,9 @@ export const ComposableItemCard: React.FC<ComposableItemCardProps> = props => {
       </Card.Title>
       {!onlyThumbnail && (
 	      <Card.Text style={{ paddingTop: '0rem', fontSize: 'small' }}>	       
-	      	<span style={{ }}>{collectionName}</span>
-	      	<br />	      	
 	      	<span style={{ fontStyle: 'italic' }}>{categoryName}</span>
+	      	<br />	      	
+	      	<span style={{ }}>{collectionName}</span>
 	      	<br />
 	      	<span style={{ color: 'gray' }}><FontAwesomeIcon icon={faUser} /> {creatorName}</span>
 	      	{listing && (
