@@ -26,7 +26,7 @@ const Banner = () => {
 	  	return false;
 	  }
 	  
-	  setCollections(collections.filter(collection => collection.itemCount > 0).reverse().slice(0, 5));	
+	  setCollections(collections.filter(collection => collection.itemCount > 0).reverse().slice(0, 3));	
     };
     
     if (initLoad) {
@@ -63,12 +63,12 @@ const Banner = () => {
     <Section fullWidth={false} className={classes.homeSection}>
 		<Row>
 	    	<Col lg={12}>
-	        	<span className={classes.sectionHeader}>Latest collections:</span>
+	        	<span className={classes.sectionHeader}>Latest Collections:</span>
 
 	          	<ComposableItemCollectionRows collections={collections} collectionItems={collectionItems} listings={listings} />
 
 	          	<span className={classes.sectionFooter}>
-	          		<Link text={"View All Collections"} url="/collections" leavesPage={false} />
+	          		<Link text={"View All →"} url="/collections" leavesPage={false} />
 	          	</span>
 
 			</Col>
