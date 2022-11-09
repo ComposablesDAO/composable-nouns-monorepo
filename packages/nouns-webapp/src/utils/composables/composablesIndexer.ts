@@ -106,7 +106,7 @@ export async function getCollectionItemCount(collectionAddress: string): Promise
 
 export async function getCollectionPalette(collectionAddress: string): Promise<string> {
   	const conn = connect(configIndexer);
-	const results = await conn.execute('SELECT palette FROM collections WHERE tokenAddress = ?', [collectionAddress], { as: 'object' });
+	const results = await conn.execute('SELECT palette FROM collections WHERE tokenAddress = ?', [collectionAddress]);
 
 	if (results.rows.length > 0) {
 		const row: Record<string, any> = results.rows[0];
@@ -118,7 +118,7 @@ export async function getCollectionPalette(collectionAddress: string): Promise<s
 
 export async function getCollectionItemImageBytes(collectionAddress: string, tokenId: string): Promise<string> {
   	const conn = connect(configIndexer);
-	const results = await conn.execute('SELECT imageBytes FROM collection_items WHERE tokenAddress = ? AND tokenId = ?', [collectionAddress, tokenId], { as: 'object' });
+	const results = await conn.execute('SELECT imageBytes FROM collection_items WHERE tokenAddress = ? AND tokenId = ?', [collectionAddress, tokenId]);
 
 	if (results.rows.length > 0) {
 		const row: Record<string, any> = results.rows[0];
@@ -130,7 +130,7 @@ export async function getCollectionItemImageBytes(collectionAddress: string, tok
 
 export async function getCollectionItemMetaGenerated(collectionAddress: string, tokenId: string): Promise<string> {
   	const conn = connect(configIndexer);
-	const results = await conn.execute('SELECT metaGenerated FROM collection_items WHERE tokenAddress = ? AND tokenId = ?', [collectionAddress, tokenId], { as: 'object' });
+	const results = await conn.execute('SELECT metaGenerated FROM collection_items WHERE tokenAddress = ? AND tokenId = ?', [collectionAddress, tokenId]);
 
 	if (results.rows.length > 0) {
 		const row: Record<string, any> = results.rows[0];
@@ -140,8 +140,28 @@ export async function getCollectionItemMetaGenerated(collectionAddress: string, 
 	return '';
 }
 
+export async function getCollectionInfo(tokenAddress: string): Promise<Record<string, any> | undefined> {
+  	const conn = connect(configIndexer);
+	const results = await conn.execute('SELECT id, description, thumbnailImage, bannerImage FROM collections WHERE tokenAddress = ?', [tokenAddress]);
+
+	if (results.rows.length > 0) {
+		const row: Record<string, any> = results.rows[0];
+		return row;
+	}
+}
+
+export async function saveCollectionInfo(tokenAddress: string, description: string, thumbnailImage: string, bannerImage: string): Promise<boolean> {
+  	const conn = connect(configIndexer);
+	
+	const update = await conn.execute('UPDATE collections SET description = ?, thumbnailImage = ?, bannerImage = ? WHERE tokenAddress = ?', [description, thumbnailImage, bannerImage, tokenAddress]);
+	console.log('update collection info', update);
+
+	return true;
+}
+
 /*
  * Indexer save functions
+ * Move these to backend
  */
 
 export async function indexComposableItemCollections(): Promise<boolean> {

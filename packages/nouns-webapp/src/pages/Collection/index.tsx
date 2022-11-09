@@ -18,6 +18,7 @@ import { ComposableItemCollection, getComposableItemCollection,
 	ComposablesMarketListing, getComposablesMarketListings,
 	filterComposableItemMarketListing } from '../../utils/composables/composablesWrapper';
 import { indexComposableItemCollections, indexComposableItems, indexComposablesMarketListings } from '../../utils/composables/composablesWrapper';
+import { getCollectionInfo } from '../../utils/composables/composablesIndexer';
 import BigNumber from 'bignumber.js';
 
 import { dataToDescriptorInput } from '../../utils/composables/nounsContracts';
@@ -33,8 +34,11 @@ import { ethers, Contract, utils } from 'ethers';
 import ComposableItemABI from '../../libs/abi/ComposableItem.json';
 
 import { ComposableItemCard, ComposableItemCards } from '../../components/ComposableItemCard';
+import ShortAddress from '../../components/ShortAddress';
+import lightGrayImage from '../../assets/light-gray.png';
 
 import ListingForm from './ListingForm';
+import EditCollection from './EditCollection';
 
 const composableItemABI = new utils.Interface(ComposableItemABI);
 
@@ -60,6 +64,7 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
   const [collection, setCollection] = useState<ComposableItemCollection | undefined>(undefined);
   const [collectionItems, setCollectionItems] = useState<ComposableItem[] | undefined>(undefined);
   const [listings, setListings] = useState<ComposablesMarketListing[]>();
+  const [collectionInfo, setCollectionInfo] = useState<Record<string, any>>();  
 
   const [pendingCollectionItems, setPendingCollectionItems] = useState<ComposableItem[]>([]);
         
@@ -68,6 +73,7 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
   const customTraitFileRef = useRef<HTMLInputElement>(null);
 
   const [displayListingForm, setDisplayListingForm] = useState<boolean>(false);
+  const [displayEditCollection, setDisplayEditCollection] = useState<boolean>(false);
   const [selectedItems, setSelectedItems] = useState<ComposableItem[]>([]);
   const [selectedListing, setSelectedListing] = useState<ComposablesMarketListing>();
 
@@ -81,7 +87,7 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
   const setModal = useCallback((modal: AlertModal) => dispatch(setAlertModal(modal)), [dispatch]);  
   
   var encoder = new PNGCollectionEncoder([]);
-
+  
   const composableItemContract = new Contract(
   	collectionAddress!,
 	composableItemABI
@@ -155,7 +161,10 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
 	    	await indexComposablesMarketListings();
 	    	
 	    	const collection = await getComposableItemCollection(collectionAddress);
+	    	const collectionInfo = await getCollectionInfo(collectionAddress);
+	    	
 	    	setCollection(collection);
+	    	setCollectionInfo(collectionInfo);
 	    };
 	    
 	    loadCollectionInfo();	    
@@ -377,9 +386,27 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
   const saveEnabled = validateFormInputs();
 
   const isDisabled = addItemsState.status === 'Mining' || !activeAccount;
+  
+  const bannerImage = (collectionInfo && collectionInfo.bannerImage && collectionInfo.bannerImage !== '' ) ? `data:image/png;base64,${collectionInfo.bannerImage}` : lightGrayImage;
+  const thumbnailImage = (collectionInfo && collectionInfo.thumbnailImage && collectionInfo.thumbnailImage !== '') ? `data:image/png;base64,${collectionInfo.thumbnailImage}` : lightGrayImage;
+  const description = (collectionInfo && collectionInfo.description && collectionInfo.description !== '') ? collectionInfo.description : 'Explore this collection';
 
   return (
   	<>
+      {displayEditCollection && collectionAddress && collectionInfo && (
+        <EditCollection
+          tokenAddress={collectionAddress}
+          collectionInfo={collectionInfo}
+          onComplete={(updated: boolean) => {
+
+	        if (updated) {
+          		setToggleLoad(!toggleLoad);
+	        }
+
+            setDisplayEditCollection(false);
+          }}
+        />
+      )}
       {displayListingForm && selectedItems && (
         <ListingForm
           composableItems={selectedItems}
@@ -404,21 +431,42 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
       )}  	
       <Container fluid="lg">
         <Row>
-          <Col lg={12} className={classes.headerRow}>
-            <span>
-              <Trans>Explore Collection</Trans>
-            </span>
+          <Col lg={12} className={classes.headerBannerRow}>
+          		<div className={classes.bannerRow}>
+            	<img src={bannerImage} className={classes.bannerImage} alt='banner' />
+            	<img src={thumbnailImage} className={classes.thumbnailImage} alt='thumbnail' />
+				</div>
+          </Col>
             {collection && (
             	<>
-	            <h1>
-	              {collection.name} ({collection.symbol}) - {collection.itemCount} item(s)
-	            </h1>
-	            <p>
-					Explore this collection from {collection.owner}
-	            </p>
+          		<Col sm={10} lg={10} className={classes.headerRow}>
+		            <h1>
+		              {collection.name}
+		            </h1>
+		        </Col>
+				<Col sm={2} lg={2} className={classes.headerRow} style={{textAlign: 'right'}}>
+		        {isOwner && (
+					<Button className={classes.primaryBtn} onClick={() => setDisplayEditCollection(true)}>Edit Info</Button>
+		        )}
+			    </Col>
+		        <Col sm={1} lg={1}>
+					Symbol:
+		        </Col>
+		        <Col sm={11} lg={11}>
+					{collection.symbol}
+		        </Col>
+		        <Col sm={1} lg={1}>
+					Owner:
+		        </Col>
+		        <Col sm={11} lg={11}>
+					<ShortAddress address={collection.owner} avatar={true} />		        
+		        </Col>
+		        <Col lg={12} className={classes.descriptionRow}>
+					{description}
+					<hr style={{ marginBottom: 0 }} />
+		        </Col>
 	            </>
             )}
-          </Col>
         </Row>
 		{!collection ? (
 			<div className={classes.spinner}>

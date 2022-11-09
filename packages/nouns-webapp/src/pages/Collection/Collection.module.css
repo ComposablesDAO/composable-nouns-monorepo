@@ -1,5 +1,5 @@
 .headerRow {
-  margin: 2rem 0;
+  margin: 0.5rem 0;
 }
 .headerRow span {
   color: #8c8d92;
@@ -10,9 +10,41 @@
   color: #14161b;
   font-size: 56px;
   font-family: 'Londrina Solid';
+  margin: 0;
+  padding: 0;
 }
 .headerRow p {
   color: #14161b;
+}
+
+.headerBannerRow {
+  margin: 0.5rem 0;
+}
+
+.bannerRow {
+  position: relative;
+}
+
+.bannerImage {
+  width: 100%;
+  min-height: 100px;
+  max-height: 200px;
+}
+
+.thumbnailImage {
+  position: absolute;
+  height: 100px;
+  width: 100px;
+  left: 10px;
+  bottom: -10px;
+  
+  border: 1px solid #fff;
+  box-shadow: 2px 5px 5px 2px rgb(0 0 0 / 25%);
+  border-radius: 12px;    
+}
+
+.descriptionRow {
+  margin: 0.5rem 0;	
 }
 
 .categoryHeader  {
