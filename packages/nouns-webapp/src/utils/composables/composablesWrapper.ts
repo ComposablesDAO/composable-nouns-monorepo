@@ -155,8 +155,10 @@ export async function getComposableItemsBatch(collections: ComposableItemCollect
 
 		for (let i = 0; i < rows.length; i++) {
 			const row: Record<string, any> = rows[i];
-			const item = prepareComposableItem(row.tokenAddress, row.tokenId, row.collectionName, row.paletteRaw, row.imageBytes, row.metaGenerated);
-			items.push(item);
+			if (row.paletteRaw) {
+				const item = prepareComposableItem(row.tokenAddress, row.tokenId, row.collectionName, row.paletteRaw, row.imageBytes, row.metaGenerated);
+				items.push(item);
+			}
 		}
 		
 		return items;
