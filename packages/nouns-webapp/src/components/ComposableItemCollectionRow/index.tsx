@@ -5,8 +5,7 @@ import { ComposableItemCards } from '../ComposableItemCard';
 
 import { ComposableItemCollection, ComposableItem, ComposablesMarketListing, filterComposableItemByAddress } from '../../utils/composables/composablesWrapper';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser } from '@fortawesome/free-solid-svg-icons';
+import ShortAddress from '../ShortAddress';
 
 export const ComposableItemCollectionRows: React.FC<{collections: ComposableItemCollection[] | undefined, collectionItems: ComposableItem[] | undefined, listings?: ComposablesMarketListing[]  }> = props => {
   const { collections, collectionItems, listings } = props;  
@@ -43,7 +42,7 @@ export const ComposableItemCollectionRow: React.FC<{
   }
     
   const name = collection.name;
-  const creatorName = collection.owner;
+  const ownerAddress = collection.owner;
   
   const latestItems = (composableItems) ? composableItems.slice().reverse().slice(0, 5) : composableItems;
 
@@ -54,7 +53,7 @@ export const ComposableItemCollectionRow: React.FC<{
 	        {name}
 	      </Card.Title>
 	      <Card.Text style={{ paddingTop: '0rem' }}>
-	      	<span style={{ color: 'gray' }}><FontAwesomeIcon icon={faUser} /> {creatorName}</span>
+	      	<ShortAddress address={ownerAddress} avatar={true} link={true} />
 	      	<br />
 	      </Card.Text>
 		  <a href={`/collection/${collectionAddress}`}>

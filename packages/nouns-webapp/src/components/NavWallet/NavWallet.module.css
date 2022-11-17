@@ -39,8 +39,18 @@
 }
 
 .mobileSwitchWalletText {
-  margin-right: 1rem;
-  padding-right: 1rem;
+  margin-right: 0.25rem;
+  padding-right: 0.25rem;
+}
+
+.mobileProfileText {
+  margin-right: 0.25rem;
+  padding-right: 0.25rem;
+}
+
+.mobileProfileText a {
+  text-decoration: none;
+  color: inherit;
 }
 
 .dropDownTop {
@@ -54,8 +64,24 @@
   transition: all 0.125s ease-in-out;
 }
 
-.dropDownTop:hover {
+.dropDownTop:hover,
+.dropDownMiddle:hover {
   color: black;
+}
+
+.dropDownMiddle {
+  padding-top: 0.65rem;
+  padding-bottom: 0.5rem;
+  padding-left: 1rem;
+  justify-content: flex-start;
+  margin-left: 4px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  transition: all 0.125s ease-in-out;
+}
+
+.dropDownMiddle a {
+  text-decoration: none;
+  color: inherit;
 }
 
 .dropDownBottom {

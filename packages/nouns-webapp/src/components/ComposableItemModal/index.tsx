@@ -54,6 +54,7 @@ const ComposableItemModal: React.FC<{ composableItem: ComposableItem, listing?: 
   const creatorName = composableItem.meta.creator;
   const categoryName = composableItem.meta.category;
   const itemName = composableItem.meta.name;
+  const tokenAddress = composableItem.tokenAddress;
     
   const priceInputRef = useRef<HTMLInputElement>(null);
   const quantityInputRef = useRef<HTMLInputElement>(null);
@@ -168,7 +169,7 @@ const ComposableItemModal: React.FC<{ composableItem: ComposableItem, listing?: 
 		              <h1>{itemName} </h1>
 		            </div>	        	
 					<Card.Text style={{ paddingTop: '0rem', fontSize: 'small' }}>	       
-				      	<span style={{ }}>{collectionName}</span>
+				      	<span><a style={{ textDecoration: 'none', fontWeight: 'bold', color: 'inherit' }} href={`/collection/${tokenAddress}`}>{collectionName}</a></span>
 				      	<br />	      	
 				      	<span style={{ fontStyle: 'italic' }}>{categoryName}</span>
 				      	<br />

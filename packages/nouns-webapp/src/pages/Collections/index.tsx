@@ -62,9 +62,6 @@ const CollectionsPage = () => {
     }    
 
   }, [collections]);
-  
-  const myCollections = (activeAccount && collections) ? collections.filter(collection => collection.owner.toLowerCase() === activeAccount.toLowerCase()) : [];
-  const otherCollections = (activeAccount && collections) ? collections.filter(collection => collection.owner.toLowerCase() !== activeAccount.toLowerCase()) : collections;
 
   return (
   	<>
@@ -96,26 +93,19 @@ const CollectionsPage = () => {
             <p>
                 Explore the latest collections on Composables, created by artists and builders from the Nouns community.
             </p>
+            {activeAccount && (
+				<Button href={`/profile/${activeAccount}`} className={classes.primaryBtn}>My Collections</Button>
+            )}
+			&nbsp;&nbsp;&nbsp;
 			<Button onClick={() => setDisplayCollectionForm(true)} className={classes.primaryBtn}>
               New Collection
             </Button>          
 
           </Col>
         </Row>
-        {activeAccount && myCollections && (
-	        <Row>
-	          <Col lg={12}>
-	          	<span style={{fontWeight: 'bold'}}>My Collections:</span>
-	          	<ComposableItemCollectionRows collections={myCollections} collectionItems={collectionItems} listings={listings} />
-	          	<hr />
-	          </Col>
-	        </Row>
-        	
-        )}
         <Row>
           <Col lg={12}>
-          	<span style={{fontWeight: 'bold'}}>All Collections:</span>
-          	<ComposableItemCollectionRows collections={otherCollections} collectionItems={collectionItems} listings={listings} />
+          	<ComposableItemCollectionRows collections={collections} collectionItems={collectionItems} listings={listings} />
           </Col>
         </Row>
       </Container>

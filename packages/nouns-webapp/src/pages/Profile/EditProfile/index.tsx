@@ -1,6 +1,6 @@
 import { Row, Col, Button, InputGroup, Form } from 'react-bootstrap';
 
-import classes from './EditCollection.module.css';
+import classes from './EditProfile.module.css';
 import React, { useState, useCallback, useRef, ChangeEvent } from 'react';
 import ReactDOM from 'react-dom';
 import { Backdrop } from '../../../components/Modal';
@@ -10,14 +10,14 @@ import { useAppSelector, useAppDispatch } from '../../../hooks';
 import { AlertModal, setAlertModal } from '../../../state/slices/application';
 import { PNG } from 'pngjs';
 
-import { updateCollectionInfo } from '../../../utils/composables/composablesIndexer';
+import { insertProfileInfo, updateProfileInfo } from '../../../utils/composables/composablesIndexer';
 
 import { useEthers } from '@usedapp/core';
 import { ethers } from 'ethers';
 
 
-const EditCollection: React.FC<{ tokenAddress: string, collectionInfo: Record<string, any>, onComplete: (updated: boolean) => void; }> = props => {
-  const { tokenAddress, collectionInfo, onComplete } = props;
+const EditProfile: React.FC<{ walletAddress: string, profileInfo?: Record<string, any>, onComplete: (updated: boolean) => void; }> = props => {
+  const { walletAddress, profileInfo, onComplete } = props;
 
   const { library } = useEthers();
   const activeAccount = useAppSelector(state => state.account.activeAccount);
@@ -32,10 +32,10 @@ const EditCollection: React.FC<{ tokenAddress: string, collectionInfo: Record<st
   const thumbnailImageFileRef = useRef<HTMLInputElement>(null);
   const bannerImageFileRef = useRef<HTMLInputElement>(null);
   
-  const thumbnailImageToSave = (thumbnailImage) ? thumbnailImage : collectionInfo.thumbnailImage;
-  const bannerImageToSave = (bannerImage) ? bannerImage : collectionInfo.bannerImage;
+  const thumbnailImageToSave = (thumbnailImage) ? thumbnailImage : (profileInfo) ? profileInfo.thumbnailImage : '';
+  const bannerImageToSave = (bannerImage) ? bannerImage : (profileInfo) ? profileInfo.bannerImage : '';
   
-  const saveCollectionProfile = async () => {
+  const saveProfile = async () => {
 
   	if (!activeAccount || !library) {
   		return;
@@ -52,19 +52,24 @@ const EditCollection: React.FC<{ tokenAddress: string, collectionInfo: Record<st
 
 	  	setModal({
 	    	title: <>Update Failed</>,
-	    	message: <>Collection info was not successfully updated</>,
+	    	message: <>Profile info was not successfully updated</>,
 	    	show: true,
 	  	});
   		
   		return;
   	}
-  	  	
-	const updated = await updateCollectionInfo(tokenAddress, description!, thumbnailImageToSave, bannerImageToSave);
 
-	if (updated) {
+	let saved = false;
+  	if (profileInfo) {
+		saved = await updateProfileInfo(walletAddress, description!, thumbnailImageToSave, bannerImageToSave);  		
+  	} else {
+		saved = await insertProfileInfo(walletAddress, description!, thumbnailImageToSave, bannerImageToSave);  		
+  	}
+
+	if (saved) {
 	  	setModal({
 	    	title: <>Update Successful</>,
-	    	message: <>Collection info successfully updated</>,
+	    	message: <>Profile info successfully updated</>,
 	    	show: true,
 	  	});
 	}
@@ -107,7 +112,9 @@ const EditCollection: React.FC<{ tokenAddress: string, collectionInfo: Record<st
       }
     };
     reader.readAsArrayBuffer(file);
-  };  
+  };
+  
+  const description = (profileInfo) ? profileInfo.description : '';
 
   const isDisabled = !activeAccount;
   
@@ -123,8 +130,8 @@ const EditCollection: React.FC<{ tokenAddress: string, collectionInfo: Record<st
       )}
       {ReactDOM.createPortal(
         <div className={classes.modal}>
-          <h2>Collection Info</h2>
-          Update your collection profile info on Composables <TooltipInfo tooltipText={"This information is stored off-chain."} />
+          <h2>Profile Info</h2>
+          Update your profile info on Composables <TooltipInfo tooltipText={"This information is stored off-chain."} />
 			<br /><br />
 			<InputGroup>
 				<Row>
@@ -175,12 +182,12 @@ const EditCollection: React.FC<{ tokenAddress: string, collectionInfo: Record<st
 						placeholder="Description" 
 						maxLength={1000}
 						ref={descriptionInputRef} 
-						defaultValue={collectionInfo.description}
+						defaultValue={description}
 						/>
 					</Col>
 					<Col xs={12} lg={12} className={classes.formSection} style={{ textAlign: 'center' }}>
 						<br />
-						<Button onClick={() => saveCollectionProfile()} className={classes.primaryBtn} disabled={isDisabled}>
+						<Button onClick={() => saveProfile()} className={classes.primaryBtn} disabled={isDisabled}>
 			              Save
 			            </Button>
 			            <br />
@@ -197,4 +204,4 @@ const EditCollection: React.FC<{ tokenAddress: string, collectionInfo: Record<st
     </>
   );
 };
-export default EditCollection;
+export default EditProfile;

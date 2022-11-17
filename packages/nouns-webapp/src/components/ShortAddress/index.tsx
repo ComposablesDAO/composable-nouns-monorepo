@@ -7,13 +7,16 @@ import { useShortAddress } from '../../utils/addressAndENSDisplayUtils';
 import React from 'react';
 import Identicon from '../Identicon';
 
-const ShortAddress: React.FC<{ address: string; avatar?: boolean; size?: number }> = props => {
-  const { address, avatar, size = 24 } = props;
+const ShortAddress: React.FC<{ address: string; avatar?: boolean; size?: number; link?: boolean; }> = props => {
+  const { address, avatar, size = 24, link } = props;
   const { library: provider } = useEthers();
 
   const ens = useReverseENSLookUp(address) || resolveNounContractAddress(address);
   const ensMatchesBlocklistRegex = containsBlockedText(ens || '', 'en');
   const shortAddress = useShortAddress(address);
+  
+  const txtAddress = (ens && !ensMatchesBlocklistRegex) ? ens : shortAddress;
+  const txtAddressLink = (link) ? <a href={`/profile/${address}`}>{txtAddress}</a> : txtAddress;
 
   if (avatar) {
     return (
@@ -23,12 +26,12 @@ const ShortAddress: React.FC<{ address: string; avatar?: boolean; size?: number 
             <Identicon size={size} address={address} provider={provider} />
           </div>
         )}
-        <span>{ens && !ensMatchesBlocklistRegex ? ens : shortAddress}</span>
+        <span>{txtAddressLink}</span>
       </div>
     );
   }
 
-  return <>{ens && !ensMatchesBlocklistRegex ? ens : shortAddress}</>;
+  return <>{txtAddressLink}</>;
 };
 
 export default ShortAddress;

@@ -5,7 +5,8 @@ import { CollectionCreatedEvent, ListingCreatedEvent, ListingDeletedEvent } from
 import { ComposableItemCollection } from './composablesWrapper';
 import { connect } from '@planetscale/database'
 
-const configIndexer = config.indexer;	
+const configIndexer = config.indexer;
+const logger = config.logger;
 
 export const isEnabled = () : boolean => {
 	return (configIndexer.host !== undefined);
@@ -150,11 +151,39 @@ export async function getCollectionInfo(tokenAddress: string): Promise<Record<st
 	}
 }
 
-export async function saveCollectionInfo(tokenAddress: string, description: string, thumbnailImage: string, bannerImage: string): Promise<boolean> {
+export async function getProfileInfo(walletAddress: string): Promise<Record<string, any> | undefined> {
+  	const conn = connect(configIndexer);
+	const results = await conn.execute('SELECT id, description, thumbnailImage, bannerImage FROM profiles WHERE walletAddress = ?', [walletAddress]);
+
+	if (results.rows.length > 0) {
+		const row: Record<string, any> = results.rows[0];
+		return row;
+	}
+}
+
+export async function updateCollectionInfo(tokenAddress: string, description: string, thumbnailImage: string, bannerImage: string): Promise<boolean> {
   	const conn = connect(configIndexer);
 	
 	const update = await conn.execute('UPDATE collections SET description = ?, thumbnailImage = ?, bannerImage = ? WHERE tokenAddress = ?', [description, thumbnailImage, bannerImage, tokenAddress]);
-	console.log('update collection info', update);
+	if (logger) console.log('update collection info', update);
+
+	return true;
+}
+
+export async function insertProfileInfo(walletAddress: string, description: string, thumbnailImage: string, bannerImage: string): Promise<boolean> {
+  	const conn = connect(configIndexer);
+	
+	const insert = await conn.execute('INSERT INTO profiles (walletAddress, description, thumbnailImage, bannerImage) VALUES (?, ?, ?, ?)', [walletAddress, description, thumbnailImage, bannerImage]);
+	if (logger) console.log('insert profile info', insert);
+
+	return true;
+}
+
+export async function updateProfileInfo(walletAddress: string, description: string, thumbnailImage: string, bannerImage: string): Promise<boolean> {
+  	const conn = connect(configIndexer);
+	
+	const update = await conn.execute('UPDATE profiles SET description = ?, thumbnailImage = ?, bannerImage = ? WHERE walletAddress = ?', [description, thumbnailImage, bannerImage, walletAddress]);
+	if (logger) console.log('update profile info', update);
 
 	return true;
 }
@@ -180,7 +209,7 @@ export async function indexComposableItemCollections(): Promise<boolean> {
 			const insert = await conn.execute('INSERT INTO events_collection_created (blockNumber, blockHash, collectionContract, creator, version, name, symbol, nonce) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [event.blockNumber, event.blockHash, event.collectionContract, event.creator, event.version, event.name, event.symbol, event.nonce]);
 			const insert2 = await conn.execute('INSERT INTO collections (tokenAddress, owner, name, symbol) VALUES (?, ?, ?, ?)', [event.collectionContract, event.creator, event.name, event.symbol]);
 			//rows affected
-			console.log('index collection', insert, insert2);
+			if (logger) console.log('index collection', insert, insert2);
 		}
 	}
   	
@@ -208,14 +237,14 @@ export async function indexComposableItems(tokenAddress: string): Promise<boolea
 				
 				if (data && meta) {
 					const insert = await conn.execute('INSERT INTO collection_items (tokenAddress, tokenId, imageBytes, metaGenerated) VALUES (?, ?, ?, ?)', [tokenAddress, i, data, meta]);
-					console.log('index collection item', insert);
+					if (logger) console.log('index collection item', insert);
 				}
 				
 			}
 		}		
 	  	
 		const update = await conn.execute('UPDATE collections SET itemCount = ?, palette = ? WHERE tokenAddress = ?', [contractCount, paletteRaw, tokenAddress]);
-	  	console.log('index collection items', update);  		
+	  	if (logger) console.log('index collection items', update);  		
   	}
   	
 
@@ -238,7 +267,7 @@ export async function indexComposablesMarketListings(): Promise<boolean> {
 		if (listingIdsCreated.indexOf(parseInt(event.listingId.toString())) === -1) {
 			const insert = await conn.execute('INSERT INTO events_listing_created (blockNumber, blockHash, listingId, seller, tokenAddress, tokenId, price, quantity, maxPerAddress) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)', [event.blockNumber, event.blockHash, event.listingId, event.seller, event.tokenAddress, event.tokenId, event.price, event.quantity, event.maxPerAddress]);
 			//rows affected
-			console.log('index listing created', insert);
+			if (logger) console.log('index listing created', insert);
 		}
 	}
 
@@ -252,7 +281,7 @@ export async function indexComposablesMarketListings(): Promise<boolean> {
 		if (listingIdsDeleted.indexOf(parseInt(event.listingId.toString())) === -1) {
 			const insert = await conn.execute('INSERT INTO events_listing_deleted (blockNumber, blockHash, listingId) VALUES (?, ?, ?)', [event.blockNumber, event.blockHash, event.listingId]);
 			//rows affected
-			console.log('index listing deleted', insert);
+			if (logger) console.log('index listing deleted', insert);
 		}
 	}
   	

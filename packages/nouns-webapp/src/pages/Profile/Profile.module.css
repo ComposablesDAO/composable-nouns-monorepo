@@ -1,7 +1,58 @@
-.collectionRows {
+.headerRow {
+  margin: 0.5rem 0;
+}
+.headerRow span {
+  color: #8c8d92;
+  font-size: 24px;
+  font-family: 'Londrina Solid';
+}
+.headerRow h1 {
+  color: #14161b;
+  font-size: 56px;
+  font-family: 'Londrina Solid';
+  margin: 0;
+  padding: 0;
+}
+.headerRow p {
+  color: #14161b;
 }
 
-.collectionRow {
+.headerBannerRow {
+  margin: 0.5rem 0;
+}
+
+.bannerRow {
+  position: relative;
+}
+
+.bannerImage {
+  width: 100%;
+  min-height: 100px;
+  max-height: 200px;
+}
+
+.thumbnailImage {
+  position: absolute;
+  height: 100px;
+  width: 100px;
+  left: 10px;
+  bottom: -10px;
+  
+  border: 1px solid #fff;
+  box-shadow: 2px 5px 5px 2px rgb(0 0 0 / 25%);
+  border-radius: 12px;    
+}
+
+.descriptionRow {
+  margin: 0.5rem 0;	
+}
+
+.categoryHeader  {
+  color: #14161b;
+  font-family: 'Londrina Solid';
+}
+
+.itemRow {
   border: 1px solid #e2e3e8;
   margin: 0.5rem 0;
   border-radius: 12px;  
@@ -29,8 +80,12 @@
   border-radius: 12px;  
 }
 
+.marginBottom {
+  margin-bottom: 0rem;
+}
+
 .itemGroup {
-  margin-bottom: 2rem;
+  margin-bottom: 0rem;
   text-align: center;
   /* 
   margin: 0.5rem;
@@ -70,8 +125,7 @@
 
 .cardTitle {
     margin-bottom: 0;
-    font-size: 1.25rem;
-    font-weight: bold;
+    font-size: 1rem;
 }
 
 .cardText {
@@ -79,35 +133,48 @@
 }
 
 .primaryBtnItem {
-  margin-top: 10px;
-  font-size: small;
+  width: 50%;
+  height: 2rem;
 }
 
-.primaryBtnItem, .primaryBtnCollection {
-  width: 50%;
-  max-width: 100px;
+.primaryBtnSearch {
+  width: 100%;
+  height: 3rem;
+}
+
+.primaryBtnUploader {
+  max-width: 200px;
+}
+
+
+.primaryBtn, .primaryBtnItem, .primaryBtnUploader {
   font-weight: bold;
+  margin-bottom: 0.5rem;
   border-radius: 12px;
   background-color: var(--brand-dark-red);
   border: var(--brand-dark-red);
 }
-
+.primaryBtn:focus,
+.primaryBtn:hover,
 .primaryBtnItem:focus,
 .primaryBtnItem:hover,
-.primaryBtnCollection:focus,
-.primaryBtnCollection:hover 
+.primaryBtnUploader:focus,
+.primaryBtnUploader:hover 
+
 {
   background-color: var(--brand-dark-red) !important;
   box-shadow: 0 0 0 0.2rem rgb(214, 60, 94, 0.75);
 }
 
+.primaryBtn:active,
 .primaryBtnItem:active,
-.primaryBtnCollection:active {
+.primaryBtnUploader:active {
   background-color: var(--brand-dark-red) !important;
 }
 
+.primaryBtn:disabled,
 .primaryBtnItem:disabled,
-.primaryBtnCollection:disabled {
+.primaryBtnUploader:disabled {
   color: var(--brand-gray-dark-text) !important;
   background-color: var(--brand-gray-background) !important;
   border-color: var(--brand-gray-border) !important;  

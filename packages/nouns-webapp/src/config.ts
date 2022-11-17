@@ -225,7 +225,8 @@ const config = {
 	  host: process.env.REACT_APP_DATABASE_HOST,
 	  username: process.env.REACT_APP_DATABASE_USERNAME,
 	  password: process.env.REACT_APP_DATABASE_PASSWORD
-  	}
+  },
+  logger: false
 };
 
 export default config;

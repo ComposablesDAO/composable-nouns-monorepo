@@ -20,6 +20,7 @@ import NotFoundPage from './pages/NotFound';
 import Playground from './pages/Playground';
 import CollectionsPage from './pages/Collections';
 import CollectionPage from './pages/Collection';
+import ProfilePage from './pages/Profile';
 import ComposerPage from './pages/Composer';
 import MarketPage from './pages/Market';
 
@@ -78,6 +79,9 @@ function App() {
             />
             <Route exact path="/collection/:address/:id"
               render={props => <CollectionPage collectionAddress={props.match.params.address} tokenId={Number(props.match.params.id)} />}
+            />
+            <Route exact path="/profile/:address"
+              render={props => <ProfilePage walletAddress={props.match.params.address} />}
             />
             <Route exact path="/composer" component={ComposerPage} />
             <Route exact path="/market" component={MarketPage} />

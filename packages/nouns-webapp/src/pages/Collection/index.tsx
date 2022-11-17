@@ -459,7 +459,7 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
 					Owner:
 		        </Col>
 		        <Col sm={11} lg={11}>
-					<ShortAddress address={collection.owner} avatar={true} />		        
+					<ShortAddress address={collection.owner} avatar={true} link={true} />
 		        </Col>
 		        <Col lg={12} className={classes.descriptionRow}>
 					{description}
