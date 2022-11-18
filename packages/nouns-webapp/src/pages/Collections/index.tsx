@@ -7,7 +7,7 @@ import { ComposableItemCollectionRows } from '../../components/ComposableItemCol
 import CollectionForm from './CollectionForm';
 	
 import { ComposableItemCollection, getComposableItemCollections, ComposableItem, getComposableItemsBatch,
-	ComposablesMarketListing, getComposablesMarketListings } from '../../utils/composables/composablesWrapper';
+	ComposablesMarketListing, getComposablesMarketListings, getCollectionInfoBatch } from '../../utils/composables/composablesWrapper';
 
 import { useAppSelector } from '../../hooks';
 
@@ -19,6 +19,7 @@ const CollectionsPage = () => {
   const [collections, setCollections] = useState<ComposableItemCollection[] | undefined>(undefined);
   const [collectionItems, setCollectionItems] = useState<ComposableItem[] | undefined>(undefined);
   const [listings, setListings] = useState<ComposablesMarketListing[]>();
+  const [collectionInfos, setCollectionInfos] = useState<Record<string, any>[] | undefined>(undefined);
   const [displayCollectionForm, setDisplayCollectionForm] = useState<boolean>(false);
   
   const [redirectTokenAddress, setRedirectTokenAddress] = useState<string>();
@@ -33,9 +34,11 @@ const CollectionsPage = () => {
 	  if (collections === undefined) {
 	  	setCollections([]);
 	  } else {
-	  	setCollections(collections.reverse());
+	  	setCollections(collections.filter(collection => collection.itemCount > 0).reverse());
 	  }
-
+	  
+	  const collectionInfos = await getCollectionInfoBatch(0);
+	  setCollectionInfos(collectionInfos);
     };
     
     if (initLoad) {
@@ -105,7 +108,7 @@ const CollectionsPage = () => {
         </Row>
         <Row>
           <Col lg={12}>
-          	<ComposableItemCollectionRows collections={collections} collectionItems={collectionItems} listings={listings} />
+          	<ComposableItemCollectionRows collections={collections} collectionItems={collectionItems} listings={listings} collectionInfos={collectionInfos} />
           </Col>
         </Row>
       </Container>

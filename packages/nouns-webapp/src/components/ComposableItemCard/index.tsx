@@ -12,6 +12,11 @@ import ComposableItemModal from '../ComposableItemModal';
 
 import { ComposableItem, ComposablesMarketListing, filterComposableItemMarketListing } from '../../utils/composables/composablesWrapper';
 
+const parseShortItemName = (itemName: string) => {
+  return (itemName.length > 20) ? itemName.substr(0, 20) + "..." : itemName;
+};
+
+
 interface ComposableItemCardProps {
   composableItem: ComposableItem;
   listing?: ComposablesMarketListing;
@@ -52,7 +57,7 @@ export const ComposableItemCard: React.FC<ComposableItemCardProps> = props => {
 	      <Card.Img variant="top" src={`data:image/svg+xml;base64,${btoa(svg)}`} />
 	  </div>
       <Card.Title className={classes.cardTitle}>
-      	{itemName}
+      	{parseShortItemName(itemName)}
       </Card.Title>
       {!onlyThumbnail && (
 	      <Card.Text style={{ paddingTop: '0rem', fontSize: 'small' }}>	       

@@ -11,7 +11,7 @@ import { ComposableItemCollectionRows } from '../../components/ComposableItemCol
 import CollectionForm from '../Collections/CollectionForm';
 	
 import { ComposableItemCollection, getComposableItemCollections, ComposableItem, getComposableItemsBatch,
-	ComposablesMarketListing, getComposablesMarketListings } from '../../utils/composables/composablesWrapper';
+	ComposablesMarketListing, getComposablesMarketListings, getCollectionInfoBatch } from '../../utils/composables/composablesWrapper';
 
 import { getProfileInfo } from '../../utils/composables/composablesIndexer';
 
@@ -32,6 +32,7 @@ const ProfilePage: React.FC<{ walletAddress: string }> = props => {
   const [collections, setCollections] = useState<ComposableItemCollection[] | undefined>(undefined);
   const [collectionItems, setCollectionItems] = useState<ComposableItem[] | undefined>(undefined);
   const [listings, setListings] = useState<ComposablesMarketListing[]>();
+  const [collectionInfos, setCollectionInfos] = useState<Record<string, any>[] | undefined>(undefined);
   const [toggleLoad, setToggleLoad] = useState<boolean>(true);
   const [profileInfo, setProfileInfo] = useState<Record<string, any>>();  
 
@@ -52,7 +53,7 @@ const ProfilePage: React.FC<{ walletAddress: string }> = props => {
 	    	setProfileInfo(profileInfo);
 	    };
 	    
-	    loadProfileInfo();	    
+	    loadProfileInfo();
     }    
 
   }, [walletAddress, toggleLoad]);
@@ -68,6 +69,8 @@ const ProfilePage: React.FC<{ walletAddress: string }> = props => {
 	  	setCollections(collections.reverse());
 	  }
 
+	  const collectionInfos = await getCollectionInfoBatch(0);
+	  setCollectionInfos(collectionInfos);
     };
     
     if (initLoad) {
@@ -169,7 +172,7 @@ const ProfilePage: React.FC<{ walletAddress: string }> = props => {
         <Row>
           <Col lg={12}>
 	        {profileCollections && profileCollections.length > 0 ? (
-				<ComposableItemCollectionRows collections={profileCollections} collectionItems={collectionItems} listings={listings} />
+				<ComposableItemCollectionRows collections={profileCollections} collectionItems={collectionItems} listings={listings} collectionInfos={collectionInfos} />
 	        ) : (
 	        	<p style={{minHeight: '400px', textAlign: 'center', fontStyle: 'italic'}}>
 	        		None

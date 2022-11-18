@@ -143,12 +143,23 @@ export async function getCollectionItemMetaGenerated(collectionAddress: string, 
 
 export async function getCollectionInfo(tokenAddress: string): Promise<Record<string, any> | undefined> {
   	const conn = connect(configIndexer);
-	const results = await conn.execute('SELECT id, description, thumbnailImage, bannerImage FROM collections WHERE tokenAddress = ?', [tokenAddress]);
+	const results = await conn.execute('SELECT tokenAddress, description, thumbnailImage, bannerImage FROM collections WHERE tokenAddress = ?', [tokenAddress]);
 
 	if (results.rows.length > 0) {
 		const row: Record<string, any> = results.rows[0];
 		return row;
 	}
+}
+
+export async function getCollectionInfoBatch(limit: number): Promise<Record<string, any>[]> {
+  	const conn = connect(configIndexer);
+	const results = (limit > 0) ? 
+		await conn.execute('SELECT tokenAddress, description, thumbnailImage, bannerImage FROM collections ORDER BY id DESC limit ?', [limit]) :
+		await conn.execute('SELECT tokenAddress, description, thumbnailImage, bannerImage FROM collections ORDER BY id DESC');
+
+	const rows: Record<string, any>[] = results.rows.map(row => ({...row}) as Record<string, any> );
+
+	return rows;
 }
 
 export async function getProfileInfo(walletAddress: string): Promise<Record<string, any> | undefined> {

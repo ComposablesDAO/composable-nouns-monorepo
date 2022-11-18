@@ -93,6 +93,15 @@ export const filterComposableItemByAddress = (collectionItems: ComposableItem[] 
 	}
 }
 
+export const filterCollectionInfoByAddress = (collectionInfos: Record<string, any>[] | undefined, tokenAddress: string) : Record<string, any> | undefined => {
+	if (collectionInfos === undefined) {
+  		return undefined;	
+  	} else {
+		const match = collectionInfos.find(item => (item.tokenAddress === tokenAddress));
+		return match;
+	}
+}
+
 export async function indexComposableItemCollections(): Promise<boolean> {
 	return (isIndexer) ? indexer.indexComposableItemCollections() : false;
 }
@@ -103,6 +112,10 @@ export async function indexComposableItems(tokenAddress: string): Promise<boolea
 
 export async function indexComposablesMarketListings(): Promise<boolean> {
 	return (isIndexer) ? indexer.indexComposablesMarketListings() : false;
+}
+
+export async function getCollectionInfoBatch(limit: number): Promise<Record<string, any>[] | undefined> {
+	return (isIndexer) ? indexer.getCollectionInfoBatch(limit) : undefined;
 }
 
 export async function getComposableItemCollections(full: boolean): Promise<ComposableItemCollection[]> {
