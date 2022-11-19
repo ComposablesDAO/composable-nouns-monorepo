@@ -9,6 +9,7 @@ import {
   Form,
   Spinner
 } from 'react-bootstrap';
+import {Helmet} from 'react-helmet';
 
 import { PNGCollectionEncoder } from '@nouns/sdk';
 
@@ -387,12 +388,19 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
 
   const isDisabled = addItemsState.status === 'Mining' || !activeAccount;
   
+  const collectionName = (collection) ? collection.name : '';
   const bannerImage = (collectionInfo && collectionInfo.bannerImage && collectionInfo.bannerImage !== '' ) ? `data:image/png;base64,${collectionInfo.bannerImage}` : lightGrayImage;
   const thumbnailImage = (collectionInfo && collectionInfo.thumbnailImage && collectionInfo.thumbnailImage !== '') ? `data:image/png;base64,${collectionInfo.thumbnailImage}` : lightGrayImage;
   const description = (collectionInfo && collectionInfo.description && collectionInfo.description !== '') ? collectionInfo.description : 'Explore this collection';
 
   return (
   	<>
+	  <Helmet>
+	    <title>{collectionName}</title>
+		<meta property="og:title" content={collectionName} />
+		<meta property="og:image" content={bannerImage} />
+		<meta name="description" content={description} />
+	  </Helmet>
       {displayEditCollection && collectionAddress && collectionInfo && (
         <EditCollection
           tokenAddress={collectionAddress}
