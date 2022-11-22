@@ -6,6 +6,7 @@ import {
   Button,
   Row
 } from 'react-bootstrap';
+import {Helmet} from 'react-helmet';
 
 import { ComposableItemCollectionRows } from '../../components/ComposableItemCollectionRow';
 import CollectionForm from '../Collections/CollectionForm';
@@ -17,7 +18,7 @@ import { getProfileInfo } from '../../utils/composables/composablesIndexer';
 
 import { useAppSelector } from '../../hooks';
 
-import ShortAddress from '../../components/ShortAddress';
+import ShortAddress, { useShortAddressText } from '../../components/ShortAddress';
 import lightGrayImage from '../../assets/light-gray.png';
 
 import EditProfile from './EditProfile';
@@ -103,9 +104,23 @@ const ProfilePage: React.FC<{ walletAddress: string }> = props => {
   const bannerImage = (profileInfo && profileInfo.bannerImage && profileInfo.bannerImage !== '' ) ? `data:image/png;base64,${profileInfo.bannerImage}` : lightGrayImage;
   const thumbnailImage = (profileInfo && profileInfo.thumbnailImage && profileInfo.thumbnailImage !== '') ? `data:image/png;base64,${profileInfo.thumbnailImage}` : lightGrayImage;
   const description = (profileInfo && profileInfo.description && profileInfo.description !== '') ? profileInfo.description : '';
+  
+  const profileName = useShortAddressText(walletAddress);
 
   return (
   	<>
+	  <Helmet>
+	    <title>{profileName}</title>
+		<meta name="description" content={description} />
+
+		<meta property="og:title" content={profileName} />
+		<meta property="og:description" content={description} />
+
+		<meta name="twitter:title" content={profileName} />
+		<meta name="twitter:description" content={description} />
+
+	  </Helmet>
+	  
       {displayCollectionForm && (
         <CollectionForm
           onComplete={(tokenAddress: string | undefined) => {

@@ -397,10 +397,16 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
   	<>
 	  <Helmet>
 	    <title>{collectionName}</title>
-		<meta property="og:title" content={collectionName} />
-		<meta property="og:image" content={bannerImage} />
 		<meta name="description" content={description} />
+
+		<meta property="og:title" content={collectionName} />
+		<meta property="og:description" content={description} />
+
+		<meta name="twitter:title" content={collectionName} />
+		<meta name="twitter:description" content={description} />
+
 	  </Helmet>
+
       {displayEditCollection && collectionAddress && collectionInfo && (
         <EditCollection
           tokenAddress={collectionAddress}

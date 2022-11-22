@@ -7,6 +7,17 @@ import { useShortAddress } from '../../utils/addressAndENSDisplayUtils';
 import React from 'react';
 import Identicon from '../Identicon';
 
+
+export const useShortAddressText = (address: string): string => {
+  const ens = useReverseENSLookUp(address) || resolveNounContractAddress(address);
+  const ensMatchesBlocklistRegex = containsBlockedText(ens || '', 'en');
+  const shortAddress = useShortAddress(address);
+
+  const txtAddress = (ens && !ensMatchesBlocklistRegex) ? ens : shortAddress;
+  
+  return txtAddress;
+};
+
 const ShortAddress: React.FC<{ address: string; avatar?: boolean; size?: number; link?: boolean; }> = props => {
   const { address, avatar, size = 24, link } = props;
   const { library: provider } = useEthers();
