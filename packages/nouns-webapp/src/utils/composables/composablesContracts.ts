@@ -43,6 +43,9 @@ export interface ListingCreatedEvent {
 }
 
 export interface ListingFilledEvent {
+  	blockNumber: number;
+  	blockHash: string;
+
 	listingId: EthersBN;
 
     buyer: string;
@@ -393,7 +396,7 @@ export async function getListingCreatedEvents(): Promise<ListingCreatedEvent[]> 
 	return listingsCreated;
 }
 
-export async function getListingFilledEvents(buyer?: string): Promise<ListingFilledEvent[]> {
+export async function getListingFilledEvents(buyer?: string, tokenAddress?: string): Promise<ListingFilledEvent[]> {
 	
   	const jsonRpcProvider = new providers.JsonRpcProvider(config.app.jsonRpcUri);
 
@@ -403,10 +406,12 @@ export async function getListingFilledEvents(buyer?: string): Promise<ListingFil
 		jsonRpcProvider,
 	);
 
-	const eventFilter = (buyer) ? composablesMarketContract.filters.ListingFilled(null, buyer, null, null) : composablesMarketContract.filters.ListingFilled();
+	const eventFilter = (buyer) ? composablesMarketContract.filters.ListingFilled(null, buyer, null, null) : 
+		(tokenAddress) ? composablesMarketContract.filters.ListingFilled(null, null, tokenAddress, null) : 
+		composablesMarketContract.filters.ListingFilled();
   	const events = await composablesMarketContract.queryFilter(eventFilter);
   	  	
-  	const listingsFilled: ListingFilledEvent[] = events.map(({ args }) => ({...args}) as ListingFilledEvent );
+  	const listingsFilled: ListingFilledEvent[] = events.map(item => ({blockNumber: item.blockNumber, blockHash: item.blockHash, ...item.args}) as ListingFilledEvent );
   
 	return listingsFilled;
 }
@@ -427,4 +432,18 @@ export async function getListingDeletedEvents(): Promise<ListingDeletedEvent[]> 
   	const listingsDeleted: ListingDeletedEvent[] = events.map(item => ({blockNumber: item.blockNumber, blockHash: item.blockHash, ...item.args}) as ListingDeletedEvent );
 
 	return listingsDeleted;
+}
+
+export async function getSellerBalance(sellerAddress: string): Promise<EthersBN> {
+	
+  	const jsonRpcProvider = new providers.JsonRpcProvider(config.app.jsonRpcUri);
+
+	const composablesMarketContract = new Contract(
+		composablesMarketAddress,
+		composablesMarketABI,
+		jsonRpcProvider,
+	);
+
+  	const balance = await composablesMarketContract.balances(sellerAddress);
+  	return balance;
 }

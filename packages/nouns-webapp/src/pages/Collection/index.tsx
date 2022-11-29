@@ -40,6 +40,7 @@ import lightGrayImage from '../../assets/light-gray.png';
 
 import ListingForm from './ListingForm';
 import EditCollection from './EditCollection';
+import ListingHistory from './ListingHistory';
 
 const composableItemABI = new utils.Interface(ComposableItemABI);
 
@@ -75,6 +76,7 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
 
   const [displayListingForm, setDisplayListingForm] = useState<boolean>(false);
   const [displayEditCollection, setDisplayEditCollection] = useState<boolean>(false);
+  const [displayListingHistory, setDisplayListingHistory] = useState<boolean>(false);
   const [selectedItems, setSelectedItems] = useState<ComposableItem[]>([]);
   const [selectedListing, setSelectedListing] = useState<ComposablesMarketListing>();
 
@@ -191,8 +193,8 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
 	    loadCollectionItems();
     }    
 
-  }, [collection]);  
-
+  }, [collection]);
+  
   const resetTraitFileUpload = () => {
     if (customTraitFileRef.current) {
       customTraitFileRef.current.value = '';
@@ -421,6 +423,20 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
           }}
         />
       )}
+      {displayListingHistory && collectionAddress && collectionInfo && collectionItems && (
+        <ListingHistory
+          tokenAddress={collectionAddress}
+          collectionItems={collectionItems}
+          onComplete={(updated: boolean) => {
+
+	        if (updated) {
+          		//setToggleLoad(!toggleLoad);
+	        }
+
+            setDisplayListingHistory(false);
+          }}
+        />
+      )}
       {displayListingForm && selectedItems && (
         <ListingForm
           composableItems={selectedItems}
@@ -453,14 +469,18 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
           </Col>
             {collection && (
             	<>
-          		<Col sm={10} lg={10} className={classes.headerRow}>
+          		<Col sm={8} lg={8} className={classes.headerRow}>
 		            <h1>
 		              {collection.name}
 		            </h1>
 		        </Col>
-				<Col sm={2} lg={2} className={classes.headerRow} style={{textAlign: 'right'}}>
+				<Col sm={4} lg={4} className={classes.headerRow} style={{textAlign: 'right'}}>
 		        {isOwner && (
+		        	<>
 					<Button className={classes.primaryBtn} onClick={() => setDisplayEditCollection(true)}>Edit Info</Button>
+					&nbsp;
+					<Button className={classes.primaryBtn} onClick={() => setDisplayListingHistory(true)}>Sale History</Button>
+					</>
 		        )}
 			    </Col>
 		        <Col sm={1} lg={1}>

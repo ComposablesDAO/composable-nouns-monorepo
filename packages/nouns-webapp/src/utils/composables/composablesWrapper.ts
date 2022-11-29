@@ -293,6 +293,27 @@ export async function getComposablesMarketListings(): Promise<ComposablesMarketL
 	return listings;
 }
 
+export async function getComposablesMarketListingsFilled(buyer?: string, tokenAddress?: string): Promise<ComposablesMarketListing[]> {
+	
+	const listingsFilled = await contracts.getListingFilledEvents(buyer, tokenAddress);
+
+  	const listings: ComposablesMarketListing[] = listingsFilled.map(item => ({
+  		listingId: new BigNumber(item.listingId.toString()),
+
+  		seller: item.seller, 
+  		tokenAddress: item.tokenAddress, 
+  		tokenId: new BigNumber(item.tokenId.toString()), 
+
+		price: new BigNumber(item.price.toString()), 
+		quantity: new BigNumber(item.quantity.toString()), 
+		maxPerAddress: new BigNumber(0) //placeholder here
+		
+  		}) as ComposablesMarketListing );
+  
+	return listings;
+}
+
+
 export async function getComposedChildBatch(composerProxyAddress: string, tokenId: string, position1Start: number, position1End: number): Promise<TokenItem[]> {
 
 	const children = await contracts.getComposedChildBatch(composerProxyAddress, tokenId, position1Start, position1End);

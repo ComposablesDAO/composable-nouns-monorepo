@@ -1,0 +1,139 @@
+.modal {
+  position: fixed;
+  top: 10vh;
+  z-index: 100;
+  padding: 1rem;
+  border-radius: 12px;
+  left: calc(50% - 15rem);
+  width: 35rem;
+  
+  height: 500px;
+  background: white;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.modal .title {
+  font-family: 'Londrina Solid';
+  display: flex;
+  flex-direction: column;
+}
+
+.modal .title h2 {
+  font-size: 24px;
+  margin-top: 0.5rem;
+  color: rgba(140, 141, 146, 1);
+}
+
+.modal .title h1 {
+  line-height: 25px;
+  height: 2rem;
+  font-size: 42px;
+}
+
+.formSection {
+	/*margin: 5px;*/
+}
+
+.itemRows {
+  border: 1px solid #e2e3e8;
+  margin: 0.5rem 0;
+  border-radius: 12px;  
+  padding: 0.5rem;
+}
+
+.itemRows img {
+  border: 1px solid #000;
+  border-radius: 12px;  
+}
+
+.itemGroup {
+  text-align: center;
+}
+
+.imageSection img {
+  border: 1px solid #000;
+  box-shadow: 2px 5px 5px 2px rgb(0 0 0 / 25%);
+  border-radius: 12px;  
+}
+
+
+.primaryBtn {
+  width: 50%;
+}
+
+.primaryBtn {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  border-radius: 12px;
+  background-color: var(--brand-dark-red);
+  border: var(--brand-dark-red);
+}
+.primaryBtn:focus,
+.primaryBtn:hover
+{
+  background-color: var(--brand-dark-red) !important;
+  box-shadow: 0 0 0 0.2rem rgb(214, 60, 94, 0.75);
+}
+
+.primaryBtn:active {
+  background-color: var(--brand-dark-red) !important;
+}
+
+.primaryBtn:disabled {
+  color: var(--brand-gray-dark-text) !important;
+  background-color: var(--brand-gray-background) !important;
+  border-color: var(--brand-gray-border) !important;  
+  border-style: solid;
+}
+
+
+.displayNounFooter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.displayNounFooter span {
+  color: white;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+.displayNounFooter button {
+  width: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  border: none;
+}
+
+.displayNounFooter button:hover,
+.displayNounFooter button:active,
+.displayNounFooter button:focus {
+  background: rgba(255, 255, 255, 0.4) !important;
+  box-shadow: none !important;
+}
+
+.nounContainer {
+  margin-top: 10px;
+}
+
+.nounImg {
+  border-radius: 16px;
+}
+.nounWrapper {
+  margin-bottom: 0.1rem;
+}
+.nounOuterWrapper {
+  font-size: small;
+  margin-bottom: 0.5rem;
+}
+
+.nounImg:hover {
+  cursor: pointer;
+  transform: scale(1.01);
+}
+
+@media (max-width: 992px) {
+  .modal {
+    width: 80% !important;
+    left: 10% !important;
+  }
+}
