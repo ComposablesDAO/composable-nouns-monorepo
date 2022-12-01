@@ -10,7 +10,7 @@ const Footer = () => {
   const twitterURL = externalURL(ExternalURL.twitter);
   const discordURL = externalURL(ExternalURL.discord);
   const etherscanURL = buildEtherscanAddressLink(config.addresses.nounsToken);
-  const discourseURL = externalURL(ExternalURL.discourse);
+  //const discourseURL = externalURL(ExternalURL.discourse);
 
   return (
     <div className={classes.wrapper}>
@@ -19,7 +19,6 @@ const Footer = () => {
           <Link text={<Trans>Discord</Trans>} url={discordURL} leavesPage={true} />
           <Link text={<Trans>Twitter</Trans>} url={twitterURL} leavesPage={true} />
           <Link text={<Trans>Etherscan</Trans>} url={etherscanURL} leavesPage={true} />
-          <Link text={<Trans>Forums</Trans>} url={discourseURL} leavesPage={false} />
         </footer>
       </Container>
     </div>

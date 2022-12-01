@@ -101,16 +101,16 @@ const NounderNounContent: React.FC<{
                 ` ${nounContentClasses.bidRow}`
               }
             >
-              <Trans>All Noun auction proceeds are sent to the</Trans>{' '}
+              <Trans>All CX Noun auction proceeds are sent to the</Trans>{' '}
               <Link to="/vote" className={nounContentClasses.link}>
-                <Trans>Nouns DAO</Trans>
+                <Trans>Composables DAO</Trans>
               </Link>
               .{' '}
               <Trans>
-                For this reason, we, the project's founders (‘Nounders’) have chosen to compensate
-                ourselves with Nouns. Every 10th Noun for the first 5 years of the project will be
-                sent to our multisig (5/10), where it will be vested and distributed to individual
-                Nounders.
+                For this reason, we, the project's founders (‘CX Nounders’) have chosen to compensate
+                ourselves with CX Nouns. Every 10th CX Noun for the first 5 years of the project will be
+                sent to our multisig, where it will be vested and distributed to individual
+                CX Nounders.
               </Trans>
             </li>
           </ul>
@@ -122,6 +122,7 @@ const NounderNounContent: React.FC<{
             <Link
               to="/nounders"
               className={isCool ? bidBtnClasses.bidHistoryCool : bidBtnClasses.bidHistoryWarm}
+              style={{display: 'none', visibility: 'hidden'}}
             >
               <Trans>Learn more</Trans> →
             </Link>

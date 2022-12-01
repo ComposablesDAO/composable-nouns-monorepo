@@ -42,7 +42,7 @@ const Documentation = () => {
               <br /><br />
               The Composables DAO is the main governing body of the Composables ecosystem.              
               The Composables DAO treasury receives 100% of ETH proceeds from the daily CX Noun auctions, 
-              as well as listing fees from the Composables Marketplace.
+              as well as a 5% listing fee from the Composables Marketplace.
           </p>
         </div>
         <Accordion flush>
@@ -127,7 +127,7 @@ const Documentation = () => {
             <Accordion.Body>
                 Composables DAO utilizes a fork of {compoundGovLink} and is the main governing body of the
                 Composables ecosystem. The Composables DAO treasury receives 100% of ETH proceeds from daily
-                CX Noun auctions, as well as listing fees from the Composables Marketplace. 
+                CX Noun auctions, as well as a 5% listing fee from the Composables Marketplace. 
                 Each CX Noun is an irrevocable member of Composables DAO and entitled to one
                 vote in all governance matters. CX Noun votes are non-transferable (if you sell your
                 CX Noun the vote goes with it) but delegatable, which means you can assign your vote to
@@ -266,7 +266,7 @@ const Documentation = () => {
             <Accordion.Body>
               <p>
                 <Trans>
-                  'CX Nounders' are the group of ten builders that initiated CX Nouns. Here are the
+                  'CX Nounders' are a group of builders that initiated CX Nouns. Here are the
                   CX Nounders:
                 </Trans>
               </p>

@@ -105,6 +105,7 @@ const NavBar = () => {
               target="_blank"
               rel="noreferrer"
               onClick={closeNav}
+              style={{display: 'none', visibility: 'hidden'}}
             >
               <NavBarButton
                 buttonText={<Trans>Docs</Trans>}
@@ -137,15 +138,14 @@ const NavBar = () => {
               />
             </Nav.Link>
             <Nav.Link
-              href={externalURL(ExternalURL.discourse)}
+              href={externalURL(ExternalURL.discord)}
               className={classes.nounsNavLink}
               target="_blank"
               rel="noreferrer"
               onClick={closeNav}
-              style={{display: 'none', visibility: 'hidden'}}
             >
               <NavBarButton
-                buttonText={<Trans>Discourse</Trans>}
+                buttonText={<Trans>Discord</Trans>}
                 buttonIcon={<FontAwesomeIcon icon={faComments} />}
                 buttonStyle={nonWalletButtonStyle}
               />
