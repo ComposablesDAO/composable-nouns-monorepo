@@ -17,9 +17,8 @@ import { ComposableItemCollection, getComposableItemCollection,
 	ComposableEncodedImage, ComposableItem, getComposableItemsBatch,
 	filterComposableItemByAddress,
 	ComposablesMarketListing, getComposablesMarketListings,
-	filterComposableItemMarketListing } from '../../utils/composables/composablesWrapper';
+	filterComposableItemMarketListing, getCollectionInfo } from '../../utils/composables/composablesWrapper';
 import { indexComposableItemCollections, indexComposableItems, indexComposablesMarketListings } from '../../utils/composables/composablesWrapper';
-import { getCollectionInfo } from '../../utils/composables/composablesIndexer';
 import BigNumber from 'bignumber.js';
 
 import { dataToDescriptorInput } from '../../utils/composables/nounsContracts';
@@ -423,7 +422,7 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
           }}
         />
       )}
-      {displayListingHistory && collectionAddress && collectionInfo && collectionItems && (
+      {displayListingHistory && collectionAddress && collectionItems && (
         <ListingHistory
           tokenAddress={collectionAddress}
           collectionItems={collectionItems}

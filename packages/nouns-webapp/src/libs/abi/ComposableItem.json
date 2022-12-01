@@ -2,11 +2,6 @@
   {
     "inputs": [
       {
-        "internalType": "contract IProxyRegistry",
-        "name": "_proxyRegistry",
-        "type": "address"
-      },
-      {
         "internalType": "contract ISVGRenderer",
         "name": "_renderer",
         "type": "address"
@@ -745,12 +740,12 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "_owner",
+        "name": "account",
         "type": "address"
       },
       {
         "internalType": "address",
-        "name": "_operator",
+        "name": "operator",
         "type": "address"
       }
     ],
@@ -904,19 +899,6 @@
     "outputs": [
       {
         "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "proxyRegistry",
-    "outputs": [
-      {
-        "internalType": "contract IProxyRegistry",
         "name": "",
         "type": "address"
       }

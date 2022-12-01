@@ -21,7 +21,7 @@
       {
         "indexed": true,
         "internalType": "address",
-        "name": "collectionContract",
+        "name": "tokenAddress",
         "type": "address"
       },
       {
@@ -131,7 +131,7 @@
     "outputs": [
       {
         "internalType": "address",
-        "name": "collectionAddress",
+        "name": "tokenAddress",
         "type": "address"
       }
     ],

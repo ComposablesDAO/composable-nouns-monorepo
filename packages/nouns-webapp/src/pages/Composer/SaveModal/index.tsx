@@ -73,7 +73,7 @@ const SaveModal: React.FC<{ tokenAddress: string, tokenId: number, composerProxy
 		//check if item is in a different position than before
 		const token: TokenItem = previousComposedChildTokens[i];
 		if (!(token != null && token.tokenAddress === itemTokenAddress && token.tokenId.isEqualTo(itemTokenId))) {
-			tokenPositionParams.push({tokenAddress: itemTokenAddress, tokenId: itemTokenId.toString(), position1: i+1});			
+			tokenPositionParams.push({tokenAddress: itemTokenAddress, tokenId: itemTokenId.toString(), position1: i+1, boundTop1: 0, boundLeft1: 0});
 			tokenInstructions.push({item: item, type: 'position', movement: 0, position: i+1});		
 		}
 	}		
@@ -90,7 +90,7 @@ const SaveModal: React.FC<{ tokenAddress: string, tokenId: number, composerProxy
   	
   	const index = composedItems.filter(item => item != null && item.image).findIndex(item => (item.tokenAddress === childTokenAddress && item.tokenId.isEqualTo(childTokenId)));
   	if (index === -1) {
-		tokenPositionParams.push({tokenAddress: childTokenAddress, tokenId: childTokenId.toString(), position1: 0});
+		tokenPositionParams.push({tokenAddress: childTokenAddress, tokenId: childTokenId.toString(), position1: 0, boundTop1: 0, boundLeft1: 0});
 		tokenInstructions.push({item: child, type: 'position', movement: 0, position: 0});		
   	}
   }  

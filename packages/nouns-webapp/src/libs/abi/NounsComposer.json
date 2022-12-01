@@ -96,9 +96,21 @@
       },
       {
         "indexed": false,
-        "internalType": "uint256",
+        "internalType": "uint16",
         "name": "position1",
-        "type": "uint256"
+        "type": "uint16"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint8",
+        "name": "boundTop1",
+        "type": "uint8"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint8",
+        "name": "boundLeft1",
+        "type": "uint8"
       }
     ],
     "name": "CompositionAdded",
@@ -127,9 +139,9 @@
       },
       {
         "indexed": false,
-        "internalType": "uint256",
+        "internalType": "uint16",
         "name": "position1",
-        "type": "uint256"
+        "type": "uint16"
       }
     ],
     "name": "CompositionRemoved",
@@ -253,18 +265,28 @@
     "outputs": [
       {
         "internalType": "uint256",
-        "name": "index",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
         "name": "balance",
         "type": "uint256"
       },
       {
-        "internalType": "uint256",
+        "internalType": "uint64",
+        "name": "index",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint16",
         "name": "position1",
-        "type": "uint256"
+        "type": "uint16"
+      },
+      {
+        "internalType": "uint8",
+        "name": "boundTop1",
+        "type": "uint8"
+      },
+      {
+        "internalType": "uint8",
+        "name": "boundLeft1",
+        "type": "uint8"
       }
     ],
     "stateMutability": "view",
@@ -319,9 +341,19 @@
             "type": "uint256"
           },
           {
-            "internalType": "uint256",
+            "internalType": "uint16",
             "name": "position1",
-            "type": "uint256"
+            "type": "uint16"
+          },
+          {
+            "internalType": "uint8",
+            "name": "boundTop1",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint8",
+            "name": "boundLeft1",
+            "type": "uint8"
           }
         ],
         "internalType": "struct INounsComposer.TokenPositionParams",
@@ -354,9 +386,19 @@
             "type": "uint256"
           },
           {
-            "internalType": "uint256",
+            "internalType": "uint16",
             "name": "position1",
-            "type": "uint256"
+            "type": "uint16"
+          },
+          {
+            "internalType": "uint8",
+            "name": "boundTop1",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint8",
+            "name": "boundLeft1",
+            "type": "uint8"
           }
         ],
         "internalType": "struct INounsComposer.TokenPositionParams[]",
@@ -377,9 +419,9 @@
         "type": "uint256"
       },
       {
-        "internalType": "uint256",
+        "internalType": "uint16",
         "name": "",
-        "type": "uint256"
+        "type": "uint16"
       }
     ],
     "name": "composedChildTokens",
@@ -484,23 +526,89 @@
         "components": [
           {
             "internalType": "uint256",
-            "name": "index",
+            "name": "balance",
             "type": "uint256"
           },
+          {
+            "internalType": "uint64",
+            "name": "index",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint16",
+            "name": "position1",
+            "type": "uint16"
+          },
+          {
+            "internalType": "uint8",
+            "name": "boundTop1",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint8",
+            "name": "boundLeft1",
+            "type": "uint8"
+          }
+        ],
+        "internalType": "struct INounsComposer.ChildTokenState",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_tokenId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address[]",
+        "name": "_childTokenAddresses",
+        "type": "address[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "_childTokenIds",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "getChildTokenStateBatch",
+    "outputs": [
+      {
+        "components": [
           {
             "internalType": "uint256",
             "name": "balance",
             "type": "uint256"
           },
           {
-            "internalType": "uint256",
+            "internalType": "uint64",
+            "name": "index",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint16",
             "name": "position1",
-            "type": "uint256"
+            "type": "uint16"
+          },
+          {
+            "internalType": "uint8",
+            "name": "boundTop1",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint8",
+            "name": "boundLeft1",
+            "type": "uint8"
           }
         ],
-        "internalType": "struct INounsComposer.ChildTokenState",
+        "internalType": "struct INounsComposer.ChildTokenState[]",
         "name": "",
-        "type": "tuple"
+        "type": "tuple[]"
       }
     ],
     "stateMutability": "view",
@@ -538,9 +646,9 @@
         "type": "uint256"
       },
       {
-        "internalType": "uint256",
+        "internalType": "uint16",
         "name": "_position1",
-        "type": "uint256"
+        "type": "uint16"
       }
     ],
     "name": "getComposedChild",
@@ -574,14 +682,14 @@
         "type": "uint256"
       },
       {
-        "internalType": "uint256",
+        "internalType": "uint16",
         "name": "_position1Start",
-        "type": "uint256"
+        "type": "uint16"
       },
       {
-        "internalType": "uint256",
+        "internalType": "uint16",
         "name": "_position1End",
-        "type": "uint256"
+        "type": "uint16"
       }
     ],
     "name": "getComposedChildBatch",
@@ -799,9 +907,19 @@
             "type": "uint256"
           },
           {
-            "internalType": "uint256",
+            "internalType": "uint16",
             "name": "position1",
-            "type": "uint256"
+            "type": "uint16"
+          },
+          {
+            "internalType": "uint8",
+            "name": "boundTop1",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint8",
+            "name": "boundLeft1",
+            "type": "uint8"
           }
         ],
         "internalType": "struct INounsComposer.TokenFullParams",
@@ -839,9 +957,19 @@
             "type": "uint256"
           },
           {
-            "internalType": "uint256",
+            "internalType": "uint16",
             "name": "position1",
-            "type": "uint256"
+            "type": "uint16"
+          },
+          {
+            "internalType": "uint8",
+            "name": "boundTop1",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint8",
+            "name": "boundLeft1",
+            "type": "uint8"
           }
         ],
         "internalType": "struct INounsComposer.TokenFullParams[]",
@@ -896,9 +1024,19 @@
             "type": "uint256"
           },
           {
-            "internalType": "uint256",
+            "internalType": "uint16",
             "name": "position1",
-            "type": "uint256"
+            "type": "uint16"
+          },
+          {
+            "internalType": "uint8",
+            "name": "boundTop1",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint8",
+            "name": "boundLeft1",
+            "type": "uint8"
           }
         ],
         "internalType": "struct INounsComposer.TokenPositionParams[]",
@@ -989,9 +1127,9 @@
         "type": "uint256"
       },
       {
-        "internalType": "uint256",
+        "internalType": "uint16",
         "name": "_position1",
-        "type": "uint256"
+        "type": "uint16"
       }
     ],
     "name": "removeComposedChild",
@@ -1007,9 +1145,9 @@
         "type": "uint256"
       },
       {
-        "internalType": "uint256[]",
+        "internalType": "uint16[]",
         "name": "_position1s",
-        "type": "uint256[]"
+        "type": "uint16[]"
       }
     ],
     "name": "removeComposedChildBatch",

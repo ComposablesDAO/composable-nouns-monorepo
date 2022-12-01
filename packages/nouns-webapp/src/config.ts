@@ -81,7 +81,7 @@ const app: Record<SupportedChains, AppConfig> = {
     jsonRpcUri: createNetworkHttpUrl('mainnet'),
     wsRpcUri: createNetworkWsUrl('mainnet'),
     nftApiUri: createNetworkApiUrl('mainnet'),
-    subgraphApiUri: 'https://api.thegraph.com/subgraphs/name/nounsdao/nouns-subgraph',
+    subgraphApiUri: 'https://api.thegraph.com/subgraphs/name/composablesdao/mainnet',
     enableHistory: process.env.REACT_APP_ENABLE_HISTORY === 'true',
   },
   [ChainId.Hardhat]: {
@@ -157,6 +157,12 @@ const composableTokens: Record<SupportedChains, any> = {
 	    	imageData: undefined,
 	    },
 	    {
+	    	name: 'CX Nouns',
+	    	tokenAddress: '0xd6f748f54CC179201fc9747D2427f1b0C1D13581',
+	    	imageDataUri: '/image-data/image-data.json',
+	    	imageData: undefined,
+	    },
+	    {
 	    	name: 'LilNoun',
 	    	tokenAddress: '0x4b10701Bfd7BFEdc47d50562b76b436fbB5BdB3B',
 	    	imageDataUri: '/image-data/image-data-lilnouns.json',
@@ -185,8 +191,11 @@ const composableTokens: Record<SupportedChains, any> = {
 	    	tokenAddress: '0xF5331380e1d19757388A6E6198BF3BDc93D8b07a',
 	    	imageDataUri: '/image-data/image-data-foodnouns.json',
 	    	imageData: undefined,
-	    },	    
-	    
+	    },	    	    
+	],
+	composablesMarketProxy: '0x7779FB5ae7996870701B811322e6b631C3dC5a9b',
+	composableItemFactory: '0x5BD71469a144A6EF5D8b998490e6B58b6761694B',
+  	items: [
 	]
   },
   [ChainId.Hardhat]: {

@@ -114,6 +114,10 @@ export async function indexComposablesMarketListings(): Promise<boolean> {
 	return (isIndexer) ? indexer.indexComposablesMarketListings() : false;
 }
 
+export async function getCollectionInfo(tokenAddress: string): Promise<Record<string, any> | undefined> {
+	return (isIndexer) ? indexer.getCollectionInfo(tokenAddress) : undefined;
+}
+
 export async function getCollectionInfoBatch(limit: number): Promise<Record<string, any>[] | undefined> {
 	return (isIndexer) ? indexer.getCollectionInfoBatch(limit) : undefined;
 }
@@ -126,7 +130,7 @@ export async function getComposableItemCollections(full: boolean): Promise<Compo
 	
 	const collectionsCreated = await contracts.getCollectionCreatedEvents();
 
-  	const collections: ComposableItemCollection[] = collectionsCreated.map(item => ({tokenAddress: item.collectionContract, owner: item.creator, name: item.name, symbol: item.symbol, itemCount: -1}) as ComposableItemCollection );
+  	const collections: ComposableItemCollection[] = collectionsCreated.map(item => ({tokenAddress: item.tokenAddress, owner: item.creator, name: item.name, symbol: item.symbol, itemCount: -1}) as ComposableItemCollection );
   	
   	if (full) {
     	for (let i = 0; i < collections.length; i++) {

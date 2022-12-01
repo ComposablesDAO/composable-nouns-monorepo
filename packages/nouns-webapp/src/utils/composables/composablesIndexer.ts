@@ -209,16 +209,16 @@ export async function indexComposableItemCollections(): Promise<boolean> {
 	
 	const collectionCreatedEvents = await contracts.getCollectionCreatedEvents();
 
-	const results = await conn.execute('SELECT collectionContract FROM events_collection_created');
+	const results = await conn.execute('SELECT tokenAddress FROM events_collection_created');
 	const rows: Record<string, any>[] = results.rows.map(row => ({...row}) as Record<string, any> );
-	const collections: string[] = rows.map(row => (row.collectionContract) as string );	
+	const collections: string[] = rows.map(row => (row.tokenAddress) as string );
 
 	for (let i = 0; i < collectionCreatedEvents.length; i++) {
 		const event = collectionCreatedEvents[i];
 
-		if (collections.indexOf(event.collectionContract) === -1) {
-			const insert = await conn.execute('INSERT INTO events_collection_created (blockNumber, blockHash, collectionContract, creator, version, name, symbol, nonce) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [event.blockNumber, event.blockHash, event.collectionContract, event.creator, event.version, event.name, event.symbol, event.nonce]);
-			const insert2 = await conn.execute('INSERT INTO collections (tokenAddress, owner, name, symbol) VALUES (?, ?, ?, ?)', [event.collectionContract, event.creator, event.name, event.symbol]);
+		if (collections.indexOf(event.tokenAddress) === -1) {
+			const insert = await conn.execute('INSERT INTO events_collection_created (blockNumber, blockHash, tokenAddress, creator, version, name, symbol, nonce) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [event.blockNumber, event.blockHash, event.tokenAddress, event.creator, event.version, event.name, event.symbol, event.nonce]);
+			const insert2 = await conn.execute('INSERT INTO collections (tokenAddress, owner, name, symbol) VALUES (?, ?, ?, ?)', [event.tokenAddress, event.creator, event.name, event.symbol]);
 			//rows affected
 			if (logger) console.log('index collection', insert, insert2);
 		}
