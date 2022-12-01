@@ -767,7 +767,7 @@ const ComposerPage = () => {
         <Row>
           <Col lg={12} className={classes.headerRow}>
             <span>
-              <Trans>Pre-Alpha</Trans>
+              <Trans>Explore</Trans>
             </span>
             <h1>
               <Trans>Composer</Trans>
