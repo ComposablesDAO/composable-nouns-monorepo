@@ -159,6 +159,7 @@ const composableTokens: Record<SupportedChains, any> = {
 	    {
 	    	name: 'CX Nouns',
 	    	tokenAddress: '0xd6f748f54CC179201fc9747D2427f1b0C1D13581',
+	    	composerProxy: '0x306748345C14432eEF311d231b4bD98594def9Ee',
 	    	imageDataUri: '/image-data/image-data.json',
 	    	imageData: undefined,
 	    },
