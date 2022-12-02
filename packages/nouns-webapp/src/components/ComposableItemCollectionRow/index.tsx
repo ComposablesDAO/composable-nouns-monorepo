@@ -24,7 +24,7 @@ export const ComposableItemCollectionRows: React.FC<{collections: ComposableItem
 			</div>
         ) : (
 			collections.map(collection => (
-				<Col xs={6} md={6} lg={6}>
+				<Col xs={12} md={6} lg={6}>
 			        <Row className={classes.collectionRow}>
 			          <ComposableItemCollectionRow 
 			          	collection={collection} 

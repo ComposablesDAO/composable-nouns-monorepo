@@ -5,6 +5,8 @@
 
 .bannerSection {
   padding: 0 !important;
+  display: none;
+  visibility: hidden;
 }
 
 .bannerSection div {

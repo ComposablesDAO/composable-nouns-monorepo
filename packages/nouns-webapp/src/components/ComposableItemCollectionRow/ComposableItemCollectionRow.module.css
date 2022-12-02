@@ -160,3 +160,14 @@
   justify-content: center;
   color: var(--brand-gray-light-text);
 }
+
+@media (max-width: 992px) {
+  .collectionRow {
+  	min-height: 235px;
+  }
+
+  .collectionRowItems {
+    display: none;
+    visibility: hidden;
+  }
+}
