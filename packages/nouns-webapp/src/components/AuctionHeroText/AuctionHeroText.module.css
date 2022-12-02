@@ -1,0 +1,163 @@
+.wrapper {
+  padding: 1rem 1rem;
+  color: var(--brand-black);
+  align-self: flex-start !important;
+}
+
+h1 {
+  font-family: 'Londrina Solid';
+  font-size: 56px; /*68px*/
+  margin-bottom: 5px; /*10px*/
+  line-height: 1;
+}
+
+.bidBtn {
+  font-family: 'PT Root UI';
+  border-radius: 12px !important;
+  margin-left: 0.6rem !important;
+  margin-top: 3px;
+  width: auto;
+  padding: 10px 16px;
+  height: 3rem;
+  color: white;
+  border: transparent;
+  background-color: var(--brand-black);
+  font-weight: bold;
+  letter-spacing: normal;
+  font-size: 19px;
+  transition: all 0.2s ease-in-out;
+}
+
+.bidBtn:disabled {
+  cursor: not-allowed;
+}
+
+.bidBtn:hover,
+.bidBtn:active,
+.bidBtn:focus .bidBtn:disabled {
+  outline: none !important;
+  box-shadow: none !important;
+  background-color: #2125298a;
+}
+
+.bidBtn:disabled {
+  background-color: gray !important;
+}
+
+
+
+.informationRow {
+  margin-bottom: 0.5rem;
+}
+
+.activityRow {
+  margin-bottom: 0rem;
+}
+
+h2 {
+  font-size: 2.5rem;
+}
+
+h4 {
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.modalHeader {
+  border-bottom: none;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.modalTitleWrapper {
+  color: var(--brand-black);
+}
+
+.modalTitleWrapper h1 {
+  font-size: xx-large;
+  margin-left: 2rem;
+}
+
+.modalHeader button {
+  align-self: flex-start;
+}
+
+.modalHeaderNounImgWrapper {
+  width: 150px;
+  height: 150px;
+}
+
+.currentBidCol {
+  border-right: 1px solid #79809c49;
+  margin-left: 6px;
+  margin-top: 6px;
+}
+
+.auctionTimerCol {
+  padding-left: 0rem;
+}
+
+.section h4 {
+  font-family: 'PT Root UI';
+  font-size: 17px;
+  line-height: 25px;
+}
+
+.section h2 {
+  font-family: 'PT Root UI';
+  font-weight: bold;
+  font-size: 32px;
+}
+
+@media (max-width: 992px) {
+  h1 {
+    padding-top: 12px;
+  }
+
+  .wrapper {
+    padding: 1rem;
+  }
+
+  .auctionTimerCol {
+    margin-left: 6px;
+    margin-top: 6px;
+    padding-left: 0rem;
+  }
+
+  .currentBidCol {
+    border-right: 0px;
+    padding-left: 0rem;
+  }
+
+  .fomoNounsLink {
+    padding-left: 14px;
+  }
+}
+
+@media (max-width: 400px) {
+  .fomoNounsLink {
+    font-size: 14px;
+  }
+}
+
+/* Fix Firefox navigation arrow alignment issues */
+@-moz-document url-prefix() {
+  .colAlignCenter {
+    display: flex;
+    align-items: center;
+  }
+}
+
+.subTagline {
+  margin-top: 0rem;
+  margin-bottom: 1rem;
+  transition: 0.2s ease-in-out;
+
+  font-size: 18px;
+  font-family: 'PT Root UI', sans-serif;
+  font-weight: 500;
+  text-decoration: none;
+  opacity: 1;
+  color: rgb(95, 95, 95);
+
+}
