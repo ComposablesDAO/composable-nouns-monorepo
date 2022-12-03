@@ -3,10 +3,25 @@
   font-size: 5rem;
 }
 
+.bannerSection h4 {
+  font-family: 'PT Root UI';
+  font-weight: bold;
+  font-size: 18px;
+  opacity: 1;
+  color: rgb(95, 95, 95);  
+}
+
+.bannerSection h2 {
+  font-family: 'Londrina Solid';
+  font-weight: bold;
+  font-size: 32px;
+  margin-bottom: 0px !important;
+  margin-top: 3px;
+}
+
 .bannerSection {
   padding: 0 !important;
-  display: none;
-  visibility: hidden;
+  margin-top: 10px;
 }
 
 .bannerSection div {
@@ -26,6 +41,14 @@
   font-weight: bold;
 }
 
+.bannerLeft {
+	text-align: right;
+}
+
+.bannerRight {
+	text-align: left;
+}
+
 @media (max-width: 992px) {
   .wrapper {
     padding: 2rem;
@@ -33,12 +56,16 @@
 
   .wrapper h1 {
     font-size: 3.75rem;
-  }
+  }  
 }
 
 @media (min-width: 992px) {
   .wrapper h1 {
     font-size: 6rem;
     margin-left: 2rem;
+  }
+  
+  .homeSection {
+  	padding: 0 !important;
   }
 }

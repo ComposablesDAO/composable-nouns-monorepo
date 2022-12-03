@@ -4,10 +4,10 @@ import { Row, Col } from 'react-bootstrap';
 
 import { useEffect, useState } from 'react';
 import { ComposableItemCollection, getComposableItemCollections, 
-	ComposableItem, getComposableItemsBatch, ComposablesMarketListing, getComposablesMarketListings, getCollectionInfoBatch } from '../../utils/composables/composablesWrapper';
+	ComposableItem, getComposableItemsBatch, ComposablesMarketListing, getComposablesMarketListings, getCollectionInfoBatch,
+	getCountComposableItemCollections, getCountComposableItems } from '../../utils/composables/composablesWrapper';
 import { ComposableItemCollectionRows } from '../../components/ComposableItemCollectionRow';
 import Link from '../../components/Link';
-import banner_animation from '../../assets/Composer-Banner.gif';
 
 const Banner = () => {
 
@@ -17,6 +17,9 @@ const Banner = () => {
   const [collectionItems, setCollectionItems] = useState<ComposableItem[] | undefined>(undefined);
   const [listings, setListings] = useState<ComposablesMarketListing[]>();
   const [collectionInfos, setCollectionInfos] = useState<Record<string, any>[] | undefined>(undefined);
+
+  const [countCollections, setCountCollections] = useState<number>();
+  const [countCollectionItems, setCountCollectionItems] = useState<number>();
 
   useEffect(() => {
 
@@ -31,7 +34,12 @@ const Banner = () => {
 
 	  const collectionInfos = await getCollectionInfoBatch(0);
 	  setCollectionInfos(collectionInfos);
+	  
+	  const countCollections = await getCountComposableItemCollections();
+	  const countCollectionItems = await getCountComposableItems();
 
+	  setCountCollections(countCollections);
+	  setCountCollectionItems(countCollectionItems);
     };
     
     if (initLoad) {
@@ -62,7 +70,16 @@ const Banner = () => {
   	<>
   	
     <Section fullWidth={false} className={classes.bannerSection}>
-    	<img src={banner_animation} alt='Composables' />
+		<Row>
+	    	<Col xs={6} lg={6} className={classes.bannerLeft}>
+	    		<h4>Collections</h4>
+	    		<h2>{countCollections}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</h2>	    		
+	    	</Col>
+	    	<Col xs={6} lg={6} className={classes.bannerRight}>
+	    		<h4>Items</h4>
+	    		<h2>{countCollectionItems}</h2>
+	    	</Col>
+		</Row>
     </Section>
     
     <Section fullWidth={false} className={classes.homeSection}>

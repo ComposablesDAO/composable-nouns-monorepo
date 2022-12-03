@@ -69,6 +69,31 @@ export async function getComposableItemsRows(collections: ComposableItemCollecti
 	return rows;
 }
 
+export async function getCountComposableItemCollections(): Promise<number> {
+  	const conn = connect(configIndexer);
+	const results = await conn.execute('SELECT count(*) AS counter FROM collections');
+
+	if (results.rows.length > 0) {
+		const row: Record<string, any> = results.rows[0];
+		return row.counter;
+	}
+
+	return 0;
+}
+
+export async function getCountComposableItems(): Promise<number> {
+  	const conn = connect(configIndexer);
+	const results = await conn.execute('SELECT count(*) AS counter FROM collection_items');
+
+	if (results.rows.length > 0) {
+		const row: Record<string, any> = results.rows[0];
+		return row.counter;
+	}
+
+	return 0;
+}
+
+
 export async function getCollectionOwner(collectionAddress: string): Promise<string> {
 	const collection = await getCollection(collectionAddress);	
 

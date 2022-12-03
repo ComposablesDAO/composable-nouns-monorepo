@@ -122,6 +122,25 @@ export async function getCollectionInfoBatch(limit: number): Promise<Record<stri
 	return (isIndexer) ? indexer.getCollectionInfoBatch(limit) : undefined;
 }
 
+export async function getCountComposableItemCollections(): Promise<number> {
+	
+	if (isIndexer) {
+		return indexer.getCountComposableItemCollections();
+	}
+	
+	return 0;
+}
+
+export async function getCountComposableItems(): Promise<number> {
+	
+	if (isIndexer) {
+		return indexer.getCountComposableItems();
+	}
+	
+	return 0;
+}
+
+
 export async function getComposableItemCollections(full: boolean): Promise<ComposableItemCollection[]> {
 	
 	if (isIndexer) {
