@@ -66,12 +66,12 @@ export const ComposableItemCollectionRow: React.FC<{
   return (
     <>
       <Col xs={12} md={12} lg={12} className={classes.collectionRowInfo}>
+		<a href={`/collection/${collectionAddress}`} style={{textDecoration: 'none', color: 'inherit'}}>
       	  <Card.Img variant="top" src={bannerImage} style={{height: '100px' }} />
 	      <Card.Title className={classes.cardTitle} style={{ paddingBottom: '0.25rem' }}>
-	      	<a href={`/collection/${collectionAddress}`} style={{textDecoration: 'none', color: 'inherit'}}>
 	      		{name}
-	      	</a>      
 	      </Card.Title>
+	    </a>
 	      <Card.Text style={{ paddingTop: '0rem', paddingBottom: '0rem' }}>
 	      	<ShortAddress address={ownerAddress} avatar={true} link={true} />
 	      	<span>{parseShortDescription(description)}</span>

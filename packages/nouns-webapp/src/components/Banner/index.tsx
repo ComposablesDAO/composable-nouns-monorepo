@@ -85,7 +85,7 @@ const Banner = () => {
     <Section fullWidth={false} className={classes.homeSection}>
 		<Row>
 	    	<Col lg={12} style={{textAlign: 'center'}}>
-	        	<span className={classes.sectionHeader}>Featured Collections</span>
+	        	<span className={classes.sectionHeader}>Featured</span>
 	        </Col>
 	    	<Col lg={12}>
 

@@ -43,7 +43,7 @@ const AuctionHeroText: React.FC<AuctionActivityProps> = (props: AuctionActivityP
           </Row>
         <Row className={classes.activityRow}>
           <Col lg={12}>
-          <Button href="/market" className={classes.bidBtn}>Explore</Button>
+          <Button href="/composer" className={classes.bidBtn}>Explore</Button>
           &nbsp;
           <Button onClick={() => onJoinClick()} className={classes.bidBtn}>Join the DAO</Button>
           </Col>
