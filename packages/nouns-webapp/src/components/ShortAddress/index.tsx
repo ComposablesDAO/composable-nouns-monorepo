@@ -31,7 +31,7 @@ const ShortAddress: React.FC<{ address: string; avatar?: boolean; size?: number;
 
   if (avatar) {
     return (
-      <div className={classes.shortAddress}>
+      <div className={(link) ? classes.shortAddressLink : classes.shortAddress}>
         {avatar && (
           <div key={address}>
             <Identicon size={size} address={address} provider={provider} />

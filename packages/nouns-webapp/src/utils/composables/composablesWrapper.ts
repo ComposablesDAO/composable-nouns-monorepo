@@ -141,10 +141,10 @@ export async function getCountComposableItems(): Promise<number> {
 }
 
 
-export async function getComposableItemCollections(full: boolean): Promise<ComposableItemCollection[]> {
+export async function getComposableItemCollections(full: boolean, featured?: boolean): Promise<ComposableItemCollection[]> {
 	
 	if (isIndexer) {
-		return indexer.getCollections();
+		return indexer.getCollections(featured);
 	}
 	
 	const collectionsCreated = await contracts.getCollectionCreatedEvents();

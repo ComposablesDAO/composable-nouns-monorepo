@@ -5,17 +5,26 @@
   align-items: center;
 }
 
+.shortAddressLink {
+  display: flex;
+  flex-flow: row nowrap;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+
 .shortAddress > div {
   padding-top: -2px;
 }
 
-.shortAddress span {
+.shortAddress, .shortAddressLink span {
   letter-spacing: 0.2px;
   font-family: 'PT Root UI';
   font-weight: bold;
 }
 
-.shortAddress a {
+.shortAddress, .shortAddressLink a {
   text-decoration: none;
   color: inherit;
 }

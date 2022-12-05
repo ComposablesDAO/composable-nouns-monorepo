@@ -33,7 +33,11 @@
 }
 
 .sectionHeader {
+  font-family: 'PT Root UI';
   font-weight: bold;
+  font-size: 18px;
+  opacity: 1;
+  color: rgb(95, 95, 95);  
 }
 
 .sectionFooter a {

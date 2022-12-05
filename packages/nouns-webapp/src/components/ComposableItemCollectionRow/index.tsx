@@ -72,9 +72,9 @@ export const ComposableItemCollectionRow: React.FC<{
 	      		{name}
 	      	</a>      
 	      </Card.Title>
-	      <Card.Text style={{ paddingTop: '0rem', paddingBottom: '1rem' }}>
+	      <Card.Text style={{ paddingTop: '0rem', paddingBottom: '0rem' }}>
 	      	<ShortAddress address={ownerAddress} avatar={true} link={true} />
-	      	{parseShortDescription(description)}&nbsp;
+	      	<span>{parseShortDescription(description)}</span>
 	      </Card.Text>
       </Col>
       <Col xs={12} md={12} lg={12} className={classes.collectionRowItems}>

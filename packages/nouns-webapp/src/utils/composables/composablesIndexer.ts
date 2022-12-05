@@ -43,9 +43,12 @@ export async function getListingDeletedEvents(): Promise<ListingDeletedEvent[]> 
 	return listingsDeleted;
 }
 
-export async function getCollections(): Promise<ComposableItemCollection[]> {
+export async function getCollections(featured?: boolean): Promise<ComposableItemCollection[]> {
   	const conn = connect(configIndexer);
-	const results = await conn.execute('SELECT tokenAddress, owner, name, symbol, itemCount FROM collections');
+  	
+  	const orderBy = (featured) ? ' ORDER BY priority ASC' : '';
+  	const txtSQL = `SELECT tokenAddress, owner, name, symbol, itemCount FROM collections ${orderBy}`;
+	const results = await conn.execute(txtSQL);
 	
 	const collections: ComposableItemCollection[] = results.rows.map(row => ({...row}) as ComposableItemCollection );
 	

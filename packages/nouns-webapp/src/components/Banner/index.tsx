@@ -25,7 +25,7 @@ const Banner = () => {
 
     const loadCollections = async () => {
     	
-	  const collections: ComposableItemCollection[] = await getComposableItemCollections(true);
+	  const collections: ComposableItemCollection[] = await getComposableItemCollections(true, true);
 	  if (collections === undefined) {
 	  	return false;
 	  }
@@ -84,8 +84,10 @@ const Banner = () => {
     
     <Section fullWidth={false} className={classes.homeSection}>
 		<Row>
+	    	<Col lg={12} style={{textAlign: 'center'}}>
+	        	<span className={classes.sectionHeader}>Featured Collections</span>
+	        </Col>
 	    	<Col lg={12}>
-	        	<span className={classes.sectionHeader}>Latest Collections:</span>
 
 	          	<ComposableItemCollectionRows collections={collections} collectionItems={collectionItems} listings={listings} collectionInfos={collectionInfos} />
 
