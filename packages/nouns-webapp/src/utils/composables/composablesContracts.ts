@@ -45,6 +45,7 @@ export interface ListingCreatedEvent {
 export interface ListingFilledEvent {
   	blockNumber: number;
   	blockHash: string;
+  	transactionIndex: number;
 
 	listingId: EthersBN;
 
@@ -414,12 +415,8 @@ export async function getListingFilledEvents(buyer?: string, tokenAddress?: stri
 		(tokenAddress) ? composablesMarketContract.filters.ListingFilled(null, null, tokenAddress, null) : 
 		composablesMarketContract.filters.ListingFilled();
   	const events = await composablesMarketContract.queryFilter(eventFilter);
-  	
-  	console.log('events', events);
-  	  	
-  	const listingsFilled: ListingFilledEvent[] = events.map(item => ({blockNumber: item.blockNumber, blockHash: item.blockHash, ...item.args}) as ListingFilledEvent );
-  	
-  	console.log('listingsFilled', listingsFilled);
+
+  	const listingsFilled: ListingFilledEvent[] = events.map(item => ({blockNumber: item.blockNumber, blockHash: item.blockHash, transactionIndex: item.transactionIndex, ...item.args}) as ListingFilledEvent );  	
   
 	return listingsFilled;
 }

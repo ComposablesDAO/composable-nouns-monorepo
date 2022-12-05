@@ -114,6 +114,10 @@ export async function indexComposablesMarketListings(): Promise<boolean> {
 	return (isIndexer) ? indexer.indexComposablesMarketListings() : false;
 }
 
+export async function indexComposablesMarketListingsFilled(): Promise<boolean> {
+	return (isIndexer) ? indexer.indexComposablesMarketListingsFilled() : false;
+}
+
 export async function getCollectionInfo(tokenAddress: string): Promise<Record<string, any> | undefined> {
 	return (isIndexer) ? indexer.getCollectionInfo(tokenAddress) : undefined;
 }

@@ -18,7 +18,7 @@ import { ComposableItemCollection, getComposableItemCollection,
 	filterComposableItemByAddress,
 	ComposablesMarketListing, getComposablesMarketListings,
 	filterComposableItemMarketListing, getCollectionInfo } from '../../utils/composables/composablesWrapper';
-import { indexComposableItemCollections, indexComposableItems, indexComposablesMarketListings } from '../../utils/composables/composablesWrapper';
+import { indexComposableItemCollections, indexComposableItems, indexComposablesMarketListings, indexComposablesMarketListingsFilled } from '../../utils/composables/composablesWrapper';
 import BigNumber from 'bignumber.js';
 
 import { dataToDescriptorInput } from '../../utils/composables/nounsContracts';
@@ -157,10 +157,12 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
     if (collectionAddress) {
 
 	    const loadCollectionInfo = async () => {
-	    	//run the indexer
+
+	    	//run the indexer, this should be offloaded to an async process...
 	    	await indexComposableItemCollections();
 	    	await indexComposableItems(collectionAddress);
 	    	await indexComposablesMarketListings();
+	    	await indexComposablesMarketListingsFilled();
 	    	
 	    	const collection = await getComposableItemCollection(collectionAddress);
 	    	const collectionInfo = await getCollectionInfo(collectionAddress);

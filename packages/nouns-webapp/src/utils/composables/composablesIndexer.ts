@@ -261,7 +261,7 @@ export async function indexComposableItems(tokenAddress: string): Promise<boolea
   	const indexCount = await getCollectionItemCount(tokenAddress);
   	const contractCount = await contracts.getCollectionItemCount(tokenAddress);
 
-	const results = await conn.execute('SELECT tokenAddress, tokenId FROM collection_items');
+	const results = await conn.execute('SELECT tokenAddress, tokenId FROM collection_items where tokenAddress = ?', [tokenAddress]);
 	const rows: Record<string, any>[] = results.rows.map(row => ({...row}) as Record<string, any> );
   	
   	if (indexCount < contractCount) {
@@ -327,4 +327,24 @@ export async function indexComposablesMarketListings(): Promise<boolean> {
 	return true;
 }
 
+export async function indexComposablesMarketListingsFilled(): Promise<boolean> {
+  	const conn = connect(configIndexer);
+	
+	const listingsFilled = await contracts.getListingFilledEvents();
+
+	const resultsFilled = await conn.execute('SELECT blockNumber, transactionIndex FROM events_listing_filled');
+	const rows: Record<string, any>[] = resultsFilled.rows.map(row => ({...row}) as Record<string, any> );
+
+	for (let i = 0; i < listingsFilled.length; i++) {
+		const event = listingsFilled[i];
+
+		if (!rows.find(item => (item.blockNumber === event.blockNumber && item.transactionIndex === event.transactionIndex))) {
+			const insert = await conn.execute('INSERT INTO events_listing_filled (blockNumber, blockHash, transactionIndex, listingId, buyer, tokenAddress, tokenId, seller, price, quantity, sellerAmount, feeAmount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [event.blockNumber, event.blockHash, event.transactionIndex, event.listingId, event.buyer, event.tokenAddress, event.tokenId, event.seller, event.price, event.quantity, event.sellerAmount, event.feeAmount]);
+			//rows affected
+			if (logger) console.log('index listing filled', insert);
+		}
+	}
+
+	return true;
+}
 
