@@ -101,7 +101,7 @@ const ProfilePage: React.FC<{ walletAddress: string }> = props => {
   const isOwner = (activeAccount && walletAddress && activeAccount.toLowerCase() === walletAddress.toLowerCase());  
   const profileCollections = (collections && walletAddress) ? collections.filter(collection => collection.owner.toLowerCase() === walletAddress.toLowerCase()) : [];
   
-  const bannerImage = (profileInfo && profileInfo.bannerImage && profileInfo.bannerImage !== '' ) ? `data:image/png;base64,${profileInfo.bannerImage}` : lightGrayImage;
+  const bannerImage = (profileInfo && profileInfo.bannerImage && profileInfo.bannerImage !== '' ) ? `data:image/png;base64,${profileInfo.bannerImage}` : undefined;
   const thumbnailImage = (profileInfo && profileInfo.thumbnailImage && profileInfo.thumbnailImage !== '') ? `data:image/png;base64,${profileInfo.thumbnailImage}` : lightGrayImage;
   const description = (profileInfo && profileInfo.description && profileInfo.description !== '') ? profileInfo.description : '';
   
@@ -115,9 +115,15 @@ const ProfilePage: React.FC<{ walletAddress: string }> = props => {
 
 		<meta property="og:title" content={profileName} />
 		<meta property="og:description" content={description} />
+		{bannerImage && (
+			<meta property="og:image" content={`/.netlify/functions/v0-png-collection?address=${walletAddress}`} />
+		)}
 
 		<meta name="twitter:title" content={profileName} />
 		<meta name="twitter:description" content={description} />
+		{bannerImage && (
+			<meta name="twitter:image" content={`/.netlify/functions/v0-png-collection?address=${walletAddress}`} />
+		)}
 
 	  </Helmet>
 	  
@@ -155,7 +161,7 @@ const ProfilePage: React.FC<{ walletAddress: string }> = props => {
         <Row>
           <Col lg={12} className={classes.headerBannerRow}>
           		<div className={classes.bannerRow}>
-            	<img src={bannerImage} className={classes.bannerImage} alt='banner' />
+            	<img src={(bannerImage) ? bannerImage : lightGrayImage} className={classes.bannerImage} alt='banner' />
             	<img src={thumbnailImage} className={classes.thumbnailImage} alt='thumbnail' />
 				</div>
           </Col>

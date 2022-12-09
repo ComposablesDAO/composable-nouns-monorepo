@@ -392,7 +392,7 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
   const isDisabled = addItemsState.status === 'Mining' || !activeAccount;
   
   const collectionName = (collection) ? collection.name : '';
-  const bannerImage = (collectionInfo && collectionInfo.bannerImage && collectionInfo.bannerImage !== '' ) ? `data:image/png;base64,${collectionInfo.bannerImage}` : lightGrayImage;
+  const bannerImage = (collectionInfo && collectionInfo.bannerImage && collectionInfo.bannerImage !== '' ) ? `data:image/png;base64,${collectionInfo.bannerImage}` : undefined;
   const thumbnailImage = (collectionInfo && collectionInfo.thumbnailImage && collectionInfo.thumbnailImage !== '') ? `data:image/png;base64,${collectionInfo.thumbnailImage}` : lightGrayImage;
   const description = (collectionInfo && collectionInfo.description && collectionInfo.description !== '') ? collectionInfo.description : 'Explore this collection';
 
@@ -404,9 +404,15 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
 
 		<meta property="og:title" content={collectionName} />
 		<meta property="og:description" content={description} />
+		{bannerImage && (
+			<meta property="og:image" content={`/.netlify/functions/v0-png-collection?address=${collectionAddress}`} />
+		)}
 
 		<meta name="twitter:title" content={collectionName} />
 		<meta name="twitter:description" content={description} />
+		{bannerImage && (
+			<meta name="twitter:image" content={`/.netlify/functions/v0-png-collection?address=${collectionAddress}`} />
+		)}
 
 	  </Helmet>
 
@@ -464,7 +470,7 @@ const CollectionPage: React.FC<CollectionPageProps> = props => {
         <Row>
           <Col lg={12} className={classes.headerBannerRow}>
           		<div className={classes.bannerRow}>
-            	<img src={bannerImage} className={classes.bannerImage} alt='banner' />
+            	<img src={(bannerImage) ? bannerImage : lightGrayImage} className={classes.bannerImage} alt='banner' />
             	<img src={thumbnailImage} className={classes.thumbnailImage} alt='thumbnail' />
 				</div>
           </Col>
