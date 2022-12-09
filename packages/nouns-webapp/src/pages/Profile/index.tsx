@@ -116,13 +116,13 @@ const ProfilePage: React.FC<{ walletAddress: string }> = props => {
 		<meta property="og:title" content={profileName} />
 		<meta property="og:description" content={description} />
 		{bannerImage && (
-			<meta property="og:image" content={`/.netlify/functions/v0-png-collection?address=${walletAddress}`} />
+			<meta property="og:image" content={`/.netlify/functions/v0-png-profile?address=${walletAddress}`} />
 		)}
 
 		<meta name="twitter:title" content={profileName} />
 		<meta name="twitter:description" content={description} />
 		{bannerImage && (
-			<meta name="twitter:image" content={`/.netlify/functions/v0-png-collection?address=${walletAddress}`} />
+			<meta name="twitter:image" content={`/.netlify/functions/v0-png-profile?address=${walletAddress}`} />
 		)}
 
 	  </Helmet>
