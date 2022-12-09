@@ -69,10 +69,16 @@
   cursor: pointer;
 }
 
+.cardImage {
+	height: 100px;
+	object-fit: cover;
+}
+
 .cardTitle {
     margin-bottom: 0;
     font-size: 1.25rem;
     font-weight: bold;
+    padding-bottom: 0.25rem;
 }
 
 .cardText {

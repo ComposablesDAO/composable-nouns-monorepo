@@ -67,8 +67,8 @@ export const ComposableItemCollectionRow: React.FC<{
     <>
       <Col xs={12} md={12} lg={12} className={classes.collectionRowInfo}>
 		<a href={`/collection/${collectionAddress}`} style={{textDecoration: 'none', color: 'inherit'}}>
-      	  <Card.Img variant="top" src={bannerImage} style={{height: '100px' }} />
-	      <Card.Title className={classes.cardTitle} style={{ paddingBottom: '0.25rem' }}>
+      	  <Card.Img variant="top" src={bannerImage} className={classes.cardImage} />
+	      <Card.Title className={classes.cardTitle}>
 	      		{name}
 	      </Card.Title>
 	    </a>
