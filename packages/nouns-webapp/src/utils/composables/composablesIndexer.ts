@@ -96,6 +96,17 @@ export async function getCountComposableItems(): Promise<number> {
 	return 0;
 }
 
+export async function getSumMarketListingsFilled(): Promise<any> {
+  	const conn = connect(configIndexer);
+	const results = await conn.execute('SELECT sum(price * quantity) AS sumFilled FROM events_listing_filled');
+
+	if (results.rows.length > 0) {
+		const row: Record<string, any> = results.rows[0];
+		return row.sumFilled;
+	}
+
+	return 0;
+}
 
 export async function getCollectionOwner(collectionAddress: string): Promise<string> {
 	const collection = await getCollection(collectionAddress);	

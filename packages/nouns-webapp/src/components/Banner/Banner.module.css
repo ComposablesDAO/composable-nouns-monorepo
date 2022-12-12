@@ -6,30 +6,33 @@
 .bannerSection h4 {
   font-family: 'PT Root UI';
   font-weight: bold;
-  font-size: 18px;
+  font-size: 16px;
   opacity: 1;
   color: rgb(95, 95, 95);  
+  margin-bottom: 0px !important;
 }
 
 .bannerSection h2 {
-  font-family: 'Londrina Solid';
+  font-family: 'PT Root UI';
   font-weight: bold;
-  font-size: 32px;
+  font-size: 28px;
   margin-bottom: 0px !important;
-  margin-top: 3px;
 }
 
 .bannerSection {
   padding: 0 !important;
-  margin-top: 10px;
 }
 
-.bannerSection div {
+.homeSection {
+  padding: 0 !important;
+}
+
+.bannerRow {
   justify-content: center;
 }
 
 .bannerSection img {
-  width: auto;
+  /*width: auto;*/
 }
 
 .sectionHeader {
@@ -45,12 +48,9 @@
   font-weight: bold;
 }
 
-.bannerLeft {
-	text-align: right;
-}
-
-.bannerRight {
-	text-align: left;
+.bannerItems {
+	max-width: 150px;
+	text-align: center;
 }
 
 @media (max-width: 992px) {

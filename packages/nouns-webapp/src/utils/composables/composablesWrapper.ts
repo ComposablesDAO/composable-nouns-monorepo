@@ -127,23 +127,21 @@ export async function getCollectionInfoBatch(limit: number): Promise<Record<stri
 }
 
 export async function getCountComposableItemCollections(): Promise<number> {
-	
-	if (isIndexer) {
-		return indexer.getCountComposableItemCollections();
-	}
-	
-	return 0;
+	return (isIndexer) ? indexer.getCountComposableItemCollections() : 0;
 }
 
 export async function getCountComposableItems(): Promise<number> {
-	
-	if (isIndexer) {
-		return indexer.getCountComposableItems();
-	}
-	
-	return 0;
+	return (isIndexer) ? indexer.getCountComposableItems() : 0;	
 }
 
+export async function getSumMarketListingsFilled(): Promise<BigNumber> {
+	if (isIndexer) {
+		const sumFilled = await indexer.getSumMarketListingsFilled();
+		return new BigNumber(sumFilled.toString());
+	}
+	
+	return new BigNumber(0);
+}
 
 export async function getComposableItemCollections(full: boolean, featured?: boolean): Promise<ComposableItemCollection[]> {
 	

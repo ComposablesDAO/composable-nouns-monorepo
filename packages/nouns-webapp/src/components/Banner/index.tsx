@@ -5,9 +5,14 @@ import { Row, Col } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
 import { ComposableItemCollection, getComposableItemCollections, 
 	ComposableItem, getComposableItemsBatch, ComposablesMarketListing, getComposablesMarketListings, getCollectionInfoBatch,
-	getCountComposableItemCollections, getCountComposableItems } from '../../utils/composables/composablesWrapper';
+	getCountComposableItemCollections, getCountComposableItems, getSumMarketListingsFilled } from '../../utils/composables/composablesWrapper';
 import { ComposableItemCollectionRows } from '../../components/ComposableItemCollectionRow';
 import Link from '../../components/Link';
+import TruncatedAmount from '../TruncatedAmount';
+
+import config from '../../config';
+import { useEtherBalance } from '@usedapp/core';
+import { useAppSelector } from '../../hooks';
 
 const Banner = () => {
 
@@ -20,7 +25,11 @@ const Banner = () => {
 
   const [countCollections, setCountCollections] = useState<number>();
   const [countCollectionItems, setCountCollectionItems] = useState<number>();
+  const [sumMarketListingsFilled, setSumMarketListingsFilled] = useState<any>();
 
+  const ethBalance = useEtherBalance(config.addresses.nounsDaoExecutor);
+  const lastNounId = useAppSelector(state => state.onDisplayAuction.lastAuctionNounId);
+  
   useEffect(() => {
 
     const loadCollections = async () => {
@@ -35,18 +44,25 @@ const Banner = () => {
 	  const collectionInfos = await getCollectionInfoBatch(0);
 	  setCollectionInfos(collectionInfos);
 	  
-	  const countCollections = await getCountComposableItemCollections();
+	  const countCollections: number = await getCountComposableItemCollections();
 	  const countCollectionItems = await getCountComposableItems();
+	  const sumMarketListingsFilled = await getSumMarketListingsFilled();
+	  
+	  const allCountCollections = countCollections && (parseInt(countCollections.toString()) + 1);
+	  const allCountCollectionItems = countCollectionItems && lastNounId && (parseInt(countCollectionItems.toString()) + 1 + lastNounId);
+	  const allFilled = ethBalance && ethBalance.add(sumMarketListingsFilled.toString());
 
-	  setCountCollections(countCollections);
-	  setCountCollectionItems(countCollectionItems);
+	  setCountCollections(allCountCollections);
+	  setCountCollectionItems(allCountCollectionItems);
+	  setSumMarketListingsFilled(allFilled);
     };
     
-    if (initLoad) {
+    if (initLoad && ethBalance) {
     	loadCollections();
     	setInitLoad(false);
-    }	
-  }, [initLoad]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initLoad, ethBalance]);
 
   useEffect(() => {
 
@@ -71,21 +87,34 @@ const Banner = () => {
   	
     <Section fullWidth={false} className={classes.bannerSection}>
 		<Row>
-	    	<Col xs={6} lg={6} className={classes.bannerLeft}>
-	    		<h4>Collections</h4>
-	    		<h2>{countCollections}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</h2>	    		
-	    	</Col>
-	    	<Col xs={6} lg={6} className={classes.bannerRight}>
-	    		<h4>Items</h4>
-	    		<h2>{countCollectionItems}</h2>
-	    	</Col>
+	    	<Col lg={12} style={{textAlign: 'center'}}>
+	        	<span className={classes.sectionHeader}>Market</span>
+	        </Col>
+	    	<Col lg={12}>
+	    		<Row className={classes.bannerRow}>	
+			    	<Col className={classes.bannerItems}>
+			    		<h4>Collections</h4>
+			    		<h2>{countCollections}</h2>	    		
+			    	</Col>
+			    	<Col className={classes.bannerItems}>
+			    		<h4>Items</h4>
+			    		<h2>{countCollectionItems}</h2>
+			    	</Col>
+			    	<Col className={classes.bannerItems} style={{display: 'none', visibility: 'hidden'}}>
+			    		<h4>Sales</h4>
+			    		{sumMarketListingsFilled && (
+							<h2><TruncatedAmount amount={sumMarketListingsFilled.toString()} /></h2>			    			
+			    		)}
+			    	</Col>
+			    </Row>
+		    </Col>
 		</Row>
     </Section>
     
-    <Section fullWidth={false} className={classes.homeSection}>
+    <Section fullWidth={false} className={classes.bannerSection}>
 		<Row>
-	    	<Col lg={12} style={{textAlign: 'center'}}>
-	        	<span className={classes.sectionHeader}>Featured</span>
+	    	<Col lg={12} style={{textAlign: 'center', marginTop: '5px'}}>
+	        	<span className={classes.sectionHeader}>Featured Collections</span>
 	        </Col>
 	    	<Col lg={12}>
 
