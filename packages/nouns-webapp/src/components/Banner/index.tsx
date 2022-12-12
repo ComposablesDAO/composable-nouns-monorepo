@@ -39,7 +39,7 @@ const Banner = () => {
 	  	return false;
 	  }
 	  
-	  setCollections(collections.filter(collection => collection.itemCount > 0).reverse().slice(0, 6));	
+	  setCollections(collections.filter(collection => collection.itemCount > 0).reverse().slice(0, 10));
 
 	  const collectionInfos = await getCollectionInfoBatch(0);
 	  setCollectionInfos(collectionInfos);
