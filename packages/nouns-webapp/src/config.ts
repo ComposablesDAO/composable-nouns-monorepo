@@ -164,6 +164,12 @@ const composableTokens: Record<SupportedChains, any> = {
 	    	imageData: undefined,
 	    },
 	    {
+	    	name: 'NounBR',
+	    	tokenAddress: '0x36b2AA1795d8cdEf4B784Fe34045fAdC45d61e8c',
+	    	imageDataUri: '/image-data/image-data-nounsbr.json',
+	    	imageData: undefined,
+	    },
+	    {
 	    	name: 'LilNoun',
 	    	tokenAddress: '0x4b10701Bfd7BFEdc47d50562b76b436fbB5BdB3B',
 	    	imageDataUri: '/image-data/image-data-lilnouns.json',
