@@ -98,9 +98,9 @@ const Banner = () => {
 			    	</Col>
 			    	<Col className={classes.bannerItems}>
 			    		<h4>Items</h4>
-			    		<h2>{countCollectionItems}</h2>
+			    		<h2>{countCollectionItems && countCollectionItems.toLocaleString()}</h2>
 			    	</Col>
-			    	<Col className={classes.bannerItems} style={{display: 'none', visibility: 'hidden'}}>
+			    	<Col className={classes.bannerItems}>
 			    		<h4>Sales</h4>
 			    		{sumMarketListingsFilled && (
 							<h2><TruncatedAmount amount={sumMarketListingsFilled.toString()} /></h2>			    			
