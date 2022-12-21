@@ -75,7 +75,8 @@ const getItemStyle = (isDragging: boolean, draggableStyle: any, isEmpty?: boolea
 
   // change background colour if dragging
   background: isDragging ? "lightgreen" : "lightgrey",
-  fontSize: 'small',
+  fontSize: 'medium',
+  fontWeight: 'bold',
 
   // styles we need to apply on draggables
   ...draggableStyle
@@ -171,6 +172,13 @@ const DraggableControl: React.FC<{ item: ComposableItem; index: number; holdings
   const hasItem = (item && item.meta && item.meta.name) || (isSpecialLayer(index));
   
   const temp: any = (item && !item.meta && isSpecialLayer(index)) ? item : null;
+
+  const getNounTrait = (filename: string) => {
+    const splitData: string[] = filename.split('-');
+    return {trait: splitData[0], value: splitData.slice(1).join(' ')}
+  }
+  
+  const capitalizeFirstLetter = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
     
   return (
         <Draggable 
@@ -193,10 +201,10 @@ const DraggableControl: React.FC<{ item: ComposableItem; index: number; holdings
     			{item && item.meta && item.meta.name && (
     				<ListGroup.Item>
 				        <Row>
-				          <Col lg={1} style={{color: 'lightgray', marginTop: '1rem'}} className={classes.droppableItemIcon}>
+				          <Col xs={6} md={1} lg={1} style={{color: 'lightgray', marginTop: '1rem'}} className={classes.droppableItemIcon}>
 	    					{layerIcon(index)}
     					  </Col>
-				          <Col lg={3} >
+				          <Col xs={6} md={3} lg={3} >
 							<Noun
 			                  imgPath={`data:image/svg+xml;base64,${btoa(getSVG(item.image.filename, item.image.data, item.image.palette))}`}
 			                  alt="Item"
@@ -204,10 +212,10 @@ const DraggableControl: React.FC<{ item: ComposableItem; index: number; holdings
 			                  wrapperClassName={classes.nounWrapperDragNew}
 			                />
     					  </Col>
-				          <Col lg={6} >
+				          <Col xs={6} md={6} lg={6} >
 							<p style={{textAlign: 'left', margin: 0, padding: 0}}>{item.meta.name}</p>
     					  </Col>
-				          <Col lg={2} style={{textAlign: 'right', marginTop: '1rem'}}>
+				          <Col xs={6} md={2} lg={2} style={{textAlign: 'right', marginTop: '1rem'}}>
 						
 	    					<Button onClick={() => onRemoveItemClick(index)} className={classes.primaryBtnSelecter} style={{width: 'initial'}}><FontAwesomeIcon icon={faTrash} /></Button>
 	    					
@@ -217,11 +225,11 @@ const DraggableControl: React.FC<{ item: ComposableItem; index: number; holdings
     			)}
     			{temp && (
     				<ListGroup.Item>
-				        <Row>
-				          <Col lg={1} style={{color: 'lightgray', marginTop: '1rem'}}>
+				        <Row style={{color: 'gray'}}>
+				          <Col xs={6} md={1} lg={1} style={{color: 'lightgray', marginTop: '1rem'}}>
 	    					{layerIcon(index)}
     					  </Col>
-				          <Col lg={3} >
+				          <Col xs={6} md={3} lg={3} >
 							<Noun
 			                  imgPath={`data:image/svg+xml;base64,${btoa(getSVG(temp.filename, temp.data, palette!))}`}
 			                  alt="Item"
@@ -229,10 +237,10 @@ const DraggableControl: React.FC<{ item: ComposableItem; index: number; holdings
 			                  wrapperClassName={classes.nounWrapperDragNew}
 			                />
     					  </Col>
-				          <Col lg={6} >
-				          	<p style={{textAlign: 'left', margin: 0, padding: 0}}>{temp.filename}</p>
+				          <Col xs={6} md={6} lg={6} >
+				          	<p style={{textAlign: 'left', margin: 0, padding: 0}}>{capitalizeFirstLetter(getNounTrait(temp.filename).value)}</p>
     					  </Col>
-				          <Col lg={2} >
+				          <Col xs={6} md={2} lg={2} >
 				          	&nbsp;
     					  </Col>
 				        </Row>
