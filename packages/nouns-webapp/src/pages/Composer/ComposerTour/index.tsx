@@ -44,7 +44,7 @@ const steps: ShepherdOptionsWithType[] = [
       enabled: true,
     },
     title: 'Customize your Noun',
-    text: ['Drag-and-drop the custom traits onto the empty boxes to see the changes take effect right away.'],
+    text: ['Click on the available traits to add them to your Noun. You can also move them around the canvas to get your desired look.'],
     when: {
       show: () => {
       },

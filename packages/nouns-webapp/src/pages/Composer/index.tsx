@@ -1,7 +1,7 @@
 //import React from 'react';
-import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
+import React, { ChangeEvent, useEffect, useRef, useState, ReactNode } from 'react';
 import classes from './Composer.module.css';
-import { Container, Row, Col, Button, Form, Spinner } from 'react-bootstrap';
+import { Container, Row, Col, Button, Form, Spinner, ListGroup } from 'react-bootstrap';
 import TooltipInfo from '../../components/TooltipInfo';
 
 import { ComposableItemCollection, getComposableItemCollections, 
@@ -28,11 +28,65 @@ import ComposerTour from './ComposerTour';
 import config from '../../config';
 
 import { Trans } from '@lingui/macro';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTrash } from '@fortawesome/free-solid-svg-icons';
 
 // @ts-ignore
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 /* start drag and drop */
+const iconGlasses = (
+	<svg width="48" height="48" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+		<path fill="currentColor" d="M13,11L13,9L7,9L7,11L4,11L4,14L5,14L5,12L7,12L7,15L13,15L13,12L14,12L14,15L20,15L20,9L14,9L14,11L13,11ZM15,10L15,14L17,14L17,10L15,10ZM8,10L8,14L10,14L10,10L8,10Z"></path>
+	</svg>	
+)
+
+const iconHead = (
+	<svg width="48" height="48" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+		<path fill="currentColor" d="M20,19L20,4L4,4L4,11L6,11L6,9L12,9L12,11L13,11L13,9L19,9L19,15L13,15L13,12L12,12L12,15L6,15L6,12L4,12L4,19L20,19ZM18,14L16,14L16,10L18,10L18,14ZM11,14L9,14L9,10L11,10L11,14Z"></path>
+	</svg>	
+)
+
+const iconAccessory = (
+	<svg width="48" height="48" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+		<path fill="currentColor" d="M10,18L10,20L8,20L8,16L12,16L12,18L10,18ZM12,20L12,18L14,18L14,16L16,16L16,20L12,20ZM12,14L12,10L14,10L14,12L16,12L16,10L18,10L18,14L12,14ZM6,14L6,10L10,10L10,14L6,14ZM12,6L10,6L10,8L8,8L8,4L12,4L12,6ZM16,8L12,8L12,6L14,6L14,4L16,4L16,8Z"></path>
+	</svg>	
+)
+
+const iconBody = (
+	<svg width="48" height="48" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+		<path fill="currentColor" d="M8,18L8,11L7,11L7,18L5,18L5,7L19,7L19,18L8,18Z"></path>
+	</svg>	
+)
+
+const iconLayer = (
+	<svg width="48" height="48" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+		<path fill="currentColor" d="M17,6L20,6L20,19L7,19L7,17L4,17L4,4L17,4L17,6ZM8,7L8,18L19,18L19,7L8,7Z"></path>
+	</svg>	
+)
+
+
+const grid = 8;
+const getItemStyle = (isDragging: boolean, draggableStyle: any, isEmpty?: boolean) => ({
+  // some basic styles to make the items look a bit nicer
+  userSelect: "none",
+  padding: isEmpty ? 1 : 1,
+  margin: `0 0 ${grid}px 0`,
+
+  // change background colour if dragging
+  background: isDragging ? "lightgreen" : "lightgrey",
+  fontSize: 'small',
+
+  // styles we need to apply on draggables
+  ...draggableStyle
+});
+
+const getListStyle = (isDraggingOver: boolean, styleJustify: string, styleOverflow: string) => ({
+  background: isDraggingOver ? "lightblue" : "#f0f0f0",
+  padding: grid,
+  width: '100%',
+  borderRadius: '16px',
+});
 
 //TODO: Move DND to its own component/file
 // a little function to help us with reordering the result
@@ -44,23 +98,7 @@ const reorder = (list: ComposableItem[], startIndex: any, endIndex: any) => {
   return result;
 };
 
-const move = (source: ComposableItem[], destination: ComposableItem[], droppableSource: any, droppableDestination: any) => {
-    const sourceClone = Array.from(source);
-    const destClone = Array.from(destination);
-    const [removed] = sourceClone.splice(droppableSource.index, 1);
-
-    destClone.splice(droppableDestination.index, 0, removed);
-
-    const result: any = {};
-    //result[droppableSource.droppableId] = sourceClone;
-    //result[droppableDestination.droppableId] = destClone;
-    result['source'] = sourceClone;
-    result['destination'] = destClone;
-
-    return result;
-};
-
-const getItemStyle = (isDragging: boolean, draggableStyle: any) => ({
+const getItemStyleOld = (isDragging: boolean, draggableStyle: any) => ({
   // some basic styles to make the items look a bit nicer
   userSelect: 'none',
   padding: 5,
@@ -77,7 +115,7 @@ const getItemStyle = (isDragging: boolean, draggableStyle: any) => ({
   ...draggableStyle,
 });
 
-const getListStyle = (isDraggingOver: boolean, styleJustify: string, styleOverflow: string) => ({
+const getListStyleOld = (isDraggingOver: boolean, styleJustify: string, styleOverflow: string) => ({
   background: isDraggingOver ? 'lightgreen' : '#f0f0f0',
 //    padding: grid,
 //    width: 250
@@ -90,8 +128,156 @@ const getListStyle = (isDraggingOver: boolean, styleJustify: string, styleOverfl
   borderRadius: '16px',
 });
 
-const DroppableControl: React.FC<{ droppableId: string; droppableItems: ComposableItem[]; itemLimit: number; holdings: TokenItem[] }> = props => {
-  const { droppableId, droppableItems, itemLimit, holdings } = props;
+const isSpecialLayer = (index: number): boolean => (ri(index) === 4 || ri(index) === 6 || ri(index) === 8 || ri(index) === 10);
+const ri = (index: number): number => 15 - index;
+
+/*
+const layerName = (index: number): string => {
+	const layerMap = new Map([
+  		[4, 'Body'],
+	    [6, 'Accessory'],
+	    [8, 'Head'],
+	    [10, 'Glasses'],
+	]);
+	
+	const layer = layerMap.get(ri(index));
+	return (layer!== undefined) ? layer : index.toString();
+};
+*/
+
+const layerIcon = (index: number): ReactNode => {
+  	const layerMap = new Map([
+  		[4, iconBody],
+	    [6, iconAccessory],
+	    [8, iconHead],
+	    [10, iconGlasses],
+	]);
+	
+	const layer = layerMap.get(ri(index));
+	return (layer!== undefined) ? layer : iconLayer;
+};
+
+
+const DraggableControl: React.FC<{ item: ComposableItem; index: number; holdings: TokenItem[]; palette?: string[]; onRemoveItemClick: (index: number) => void;}> = props => {
+  const { item, index, holdings, palette, onRemoveItemClick } = props;
+  
+  //const styleJustify = (itemLimit === 1) ? 'center' : 'left';
+  //const styleOverflow = (itemLimit > 10) ? 'auto' : 'hidden';
+  //const direction = (itemLimit > 10) ? 'vertical' : 'horizontal';
+  //const baseClassName = (itemLimit > 10) ? classes.dropList : '';
+  //const itemClassName = (filterTokenItem(holdings, encodedItem.tokenAddress, encodedItem.tokenId)) ? classes.nounImgDragNew : classes.nounImgDragHighlightNew;
+  //const isDropDisabled = false;//(droppableItems.length === itemLimit) ? true : false;
+  
+  const hasItem = (item && item.meta && item.meta.name) || (isSpecialLayer(index));
+  
+  const temp: any = (item && !item.meta && isSpecialLayer(index)) ? item : null;
+    
+  return (
+        <Draggable 
+		key={index.toString()}
+        draggableId={index.toString()}
+        index={index}
+        isDragDisabled={!(item && item.meta && item.meta.name)}
+        >
+          {(provided: any, snapshot: any) => (
+            <div
+              ref={provided.innerRef}
+              {...provided.draggableProps}
+              {...provided.dragHandleProps}
+              style={getItemStyle(
+                snapshot.isDragging,
+                provided.draggableProps.style,
+                !hasItem
+              )}
+            >
+    			{item && item.meta && item.meta.name && (
+    				<ListGroup.Item>
+				        <Row>
+				          <Col lg={1} style={{color: 'lightgray', marginTop: '1rem'}} className={classes.droppableItemIcon}>
+	    					{layerIcon(index)}
+    					  </Col>
+				          <Col lg={3} >
+							<Noun
+			                  imgPath={`data:image/svg+xml;base64,${btoa(getSVG(item.image.filename, item.image.data, item.image.palette))}`}
+			                  alt="Item"
+			                  className={(filterTokenItem(holdings, item.tokenAddress, item.tokenId)) ? classes.nounImgDragHighlightNew : classes.nounImgDragNew}
+			                  wrapperClassName={classes.nounWrapperDragNew}
+			                />
+    					  </Col>
+				          <Col lg={6} >
+							<p style={{textAlign: 'left', margin: 0, padding: 0}}>{item.meta.name}</p>
+    					  </Col>
+				          <Col lg={2} style={{textAlign: 'right', marginTop: '1rem'}}>
+						
+	    					<Button onClick={() => onRemoveItemClick(index)} className={classes.primaryBtnSelecter} style={{width: 'initial'}}><FontAwesomeIcon icon={faTrash} /></Button>
+	    					
+    					  </Col>
+				        </Row>
+    				</ListGroup.Item>
+    			)}
+    			{temp && (
+    				<ListGroup.Item>
+				        <Row>
+				          <Col lg={1} style={{color: 'lightgray', marginTop: '1rem'}}>
+	    					{layerIcon(index)}
+    					  </Col>
+				          <Col lg={3} >
+							<Noun
+			                  imgPath={`data:image/svg+xml;base64,${btoa(getSVG(temp.filename, temp.data, palette!))}`}
+			                  alt="Item"
+			                  className={classes.nounImgDragNew}
+			                  wrapperClassName={classes.nounWrapperDragNew}
+			                />
+    					  </Col>
+				          <Col lg={6} >
+				          	<p style={{textAlign: 'left', margin: 0, padding: 0}}>{temp.filename}</p>
+    					  </Col>
+				          <Col lg={2} >
+				          	&nbsp;
+    					  </Col>
+				        </Row>
+    				</ListGroup.Item>
+    			)}
+
+            </div>
+          )}
+        </Draggable>
+  );
+};
+
+const DroppableControlNew: React.FC<{ droppableId: string; droppableItems: ComposableItem[]; itemLimit: number; holdings: TokenItem[]; palette?: string[]; onItemClick?: (item: ComposableItem) => void; onRemoveItemClick: (index: number) => void }> = props => {
+  const { droppableItems, holdings, palette, onRemoveItemClick } = props;
+  
+  //const styleJustify = (itemLimit === 1) ? 'center' : 'left';
+  //const styleOverflow = (itemLimit > 10) ? 'auto' : 'hidden';
+  //const direction = (itemLimit > 10) ? 'vertical' : 'horizontal';
+  //const baseClassName = (itemLimit > 10) ? classes.dropList : '';
+  //const itemClassName = (filterTokenItem(holdings, encodedItem.tokenAddress, encodedItem.tokenId)) ? classes.nounImgDrag : classes.nounImgDragHighlight;
+  //const isDropDisabled = false;//(droppableItems.length === itemLimit) ? true : false;
+  const baseClassName = classes.dropListNew;
+
+  return (
+    <Droppable droppableId="droppable" isCombineEnabled={true}>
+    
+      {(provided: any, snapshot: any) => (
+        <div
+          {...provided.droppableProps}
+          ref={provided.innerRef}
+          className={baseClassName}
+          style={getListStyle(snapshot.isDraggingOver, '', '')}
+        >
+          {droppableItems && droppableItems.slice().reverse().map((item, index) => (
+            <DraggableControl item={item} index={index} holdings={holdings} palette={palette} onRemoveItemClick={onRemoveItemClick} />
+          ))}
+          {provided.placeholder}
+        </div>
+      )}
+    </Droppable>
+  );
+};      
+
+const DroppableControl: React.FC<{ droppableId: string; droppableItems: ComposableItem[]; itemLimit: number; holdings: TokenItem[]; onItemClick?: (item: ComposableItem) => void; }> = props => {
+  const { droppableId, droppableItems, itemLimit, holdings, onItemClick } = props;
   
   const styleJustify = (itemLimit === 1) ? 'center' : 'left';
   const styleOverflow = (itemLimit > 10) ? 'auto' : 'hidden';
@@ -106,27 +292,31 @@ const DroppableControl: React.FC<{ droppableId: string; droppableItems: Composab
             <div
                 ref={provided.innerRef}
                 className={baseClassName}
-                style={getListStyle(snapshot.isDraggingOver, styleJustify, styleOverflow)}>
+                style={getListStyleOld(snapshot.isDraggingOver, styleJustify, styleOverflow)}>
                 {droppableItems.map((item, index) => (
                     <Draggable
                         key={item.tokenAddress + "-" + item.tokenId}
                         draggableId={item.tokenAddress + "-" + item.tokenId}
-                        index={index}>
+                        index={index}
+                        isDragDisabled={true}
+                        >
                         {(provided: any, snapshot: any) => (
                             <div
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
-                                style={getItemStyle(
+                                style={getItemStyleOld(
                                     snapshot.isDragging,
                                     provided.draggableProps.style
                                 )}>
+                                <div onClick={() => { if (onItemClick) onItemClick(item) }} >
 								<Noun
 				                  imgPath={`data:image/svg+xml;base64,${btoa(getSVG(item.image.filename, item.image.data, item.image.palette))}`}
 				                  alt="Item"
 				                  className={(filterTokenItem(holdings, item.tokenAddress, item.tokenId)) ? classes.nounImgDragHighlight : classes.nounImgDrag}
 				                  wrapperClassName={classes.nounWrapperDrag}
-				                />		                                            
+				                />
+				                </div>
 				                <p style={{textAlign: 'center', margin: 0, padding: 0}}>{shortName(item.meta.name)}</p>
                             </div>
                         )}
@@ -184,6 +374,7 @@ const ComposerPage = () => {
   const [previousChildTokens, setPreviousChildTokens] = useState<TokenItem[]>([]);
   const [previousComposedChildTokens, setPreviousComposedChildTokens] = useState<TokenItem[]>([]);
     
+  const [stateItems, setStateItems] = useState<ComposableItem[]>([]);
   const [composedItems, setComposedItems] = useState<ComposableItem[]>([]);
   const [hasOwnedComposedItems, setHasOwnedComposedItems] = useState<boolean>(true);
   const [hasDifferentComposedItems, setHasDifferentComposedItems] = useState<boolean>(true);
@@ -272,6 +463,12 @@ const ComposerPage = () => {
 	        { id: "Background", items: [] },
 	    ]);	   		    
 
+	const stateItems: ComposableItem[] = [];
+	stateItems.length = 16;
+	
+	setStateItems(stateItems);
+
+
       setInitLoad(false);
     }
   }, [initLoad]);
@@ -305,14 +502,15 @@ const ComposerPage = () => {
 			        categoryNames.push(item.meta.attributes[0].value)
 			    }	    		
 	    	}
-
-			setCollectionItems(items);
+	    	
+	    	const tempItems = items.slice();//0, 10
+			setCollectionItems(tempItems);
 
 		    setStateItemsArray((stateItemsArray) => [
 		        ...stateItemsArray,
 		        {
 		            id: "Items",
-		            items: items
+		            items: tempItems
 		        },
 		    ]);
 	    };
@@ -343,36 +541,60 @@ const ComposerPage = () => {
   }, [activeAccount, collections]);
 
 
+  const getTopComposedItemsIndex = () => {
+  	
+  	let index = 15;
+	for (let i = composedItems.length - 1; i >= 0; i--) {
+  		const item = composedItems[i];
+  		if (item) {
+  			index = i;
+  			break;
+  		}
+	}
+
+	if (index < 15) {
+		index++;
+	}
+	
+	return index;
+  }
+  
+  const onItemClick = (item: ComposableItem) => {
+  	
+	const tempItems: ComposableItem[] = [...stateItems];
+
+	const index = getTopComposedItemsIndex();
+	tempItems[index] = item;
+
+  	setStateItems(tempItems);
+  }
   useEffect(() => {
   	if (!seed) {
   		return;
   	}
   	const imageData = getImageData(nounExtensionName);
   	const { parts, background } = getNounData(seed, imageData);
-  	  		
-	const itemsBackground = getList('Background');
-	const itemsBody = getList('Body');
-	const itemsAccessory = getList('Accessory');
-	const itemsHead = getList('Head');
-	const itemsGlasses = getList('Glasses');
-	const itemsForeground = getList('Foreground');
-	
+
   	const partsComposed: any[] = [];
 
-	partsComposed[0] = itemsBackground[0];
-	partsComposed[1] = itemsBackground[1];
-	partsComposed[2] = itemsBackground[2];
-	partsComposed[3] = itemsBackground[3];
+	partsComposed[0] = stateItems[0];
+	partsComposed[1] = stateItems[1];
+	partsComposed[2] = stateItems[2];
+	partsComposed[3] = stateItems[3];
 
-	partsComposed[4] = (itemsBody[0]) ? itemsBody[0] : parts[0];
-	partsComposed[6] = (itemsAccessory[0]) ? itemsAccessory[0] : parts[1];
-	partsComposed[8] = (itemsHead[0]) ? itemsHead[0] : parts[2];
-	partsComposed[10] = (itemsGlasses[0]) ? itemsGlasses[0] : parts[3];
+	partsComposed[4] = (stateItems[4]) ? stateItems[4] : parts[0];
+	partsComposed[5] = stateItems[5];
+	partsComposed[6] = (stateItems[6]) ? stateItems[6] : parts[1];
+	partsComposed[7] = stateItems[7];
+	partsComposed[8] = (stateItems[8]) ? stateItems[8] : parts[2];
+	partsComposed[9] = stateItems[9];
+	partsComposed[10] = (stateItems[10]) ? stateItems[10] : parts[3];
+	partsComposed[11] = stateItems[11];
 
-	partsComposed[12] = itemsForeground[0];
-	partsComposed[13] = itemsForeground[1];
-	partsComposed[14] = itemsForeground[2];
-	partsComposed[15] = itemsForeground[3];
+	partsComposed[12] = stateItems[12];
+	partsComposed[13] = stateItems[13];
+	partsComposed[14] = stateItems[14];
+	partsComposed[15] = stateItems[15];
 	
 	//const collections: ComposableItemCollection[] = collectionsCreated.map(item => ({tokenAddress: item.collectionContract, owner: item.creator, name: item.name, symbol: item.symbol, itemCount: -1}) as ComposableItemCollection );
 	
@@ -410,7 +632,7 @@ const ComposerPage = () => {
 	
 	
   	// eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [seed, stateItemsArray]);
+  }, [seed, stateItems, stateItemsArray]);
   
     
   const resetListsWithComposedChildTokens = (composedChildTokens: TokenItem[]) => {
@@ -481,94 +703,9 @@ const ComposerPage = () => {
   	
   	return items;
   }
-    
+       
   const onDragEnd = (results: any) => {  		
-        const { source, destination } = results;
-
-        // dropped outside the list
-        if (!destination) {
-            return;
-        }
-
-        if (source.droppableId === destination.droppableId) {
-            const items = reorder(
-                getList(source.droppableId),
-                source.index,
-                destination.index
-            );
-            
-			setStateItemsArray(
-	            stateItemsArray.map((droppables) =>
-	                droppables.id === source.droppableId
-	                    ? { ...droppables, items: items }
-	                    : { ...droppables }
-	            )
-	        );
-        } else {
-        	
-        	const sourceList = getList(source.droppableId);
-        	const destinationList = getList(destination.droppableId);
-        	
-        	//TODO: clean this up, make it configurable via params
-        	var itemLimit = 1000;
-        	if (destination.droppableId === "Background" || destination.droppableId === "Foreground") {
-        		itemLimit = 4;
-        	}
-        	if (destination.droppableId === "Body" || destination.droppableId === "Accessory" 
-        		|| destination.droppableId === "Head" || destination.droppableId === "Glasses") {
-        		itemLimit = 1;
-        	}
-
-  			const replace = (destinationList.length === itemLimit);
-        	
-        	var replacedItem = undefined;
-        	if (replace) {
-        		//remove an item from the array
-        		if (destination.index === itemLimit) {
-        			replacedItem = destinationList.shift();
-        		} else {
-        			replacedItem = destinationList.pop();		
-        		}
-        		        		
-        		//also subtract one from destination index
-        		if (destination.index > 0) {
-					//destination.index--;
-        		}
-        	}
-        	
-            const result = move(
-                sourceList,
-                destinationList,
-                source,
-                destination
-            );
-			
-            var tempItems = stateItemsArray.map((droppables) =>
-                droppables.id === source.droppableId
-                    ? { ...droppables, items: result.source }
-                    : { ...droppables }
-           	);
-           	
-           	if (replace && replacedItem !== undefined) {           		
-           		const droppableId = 'Items';
-		      	const items = (source.droppableId === droppableId) ? result.source : getList(droppableId);
-      			items.unshift(replacedItem);
-           		
-           		tempItems = tempItems.map((droppables) =>
-	                droppables.id === droppableId
-	                    ? { ...droppables, items: items }
-	                    : { ...droppables }
-	           );
-           	}
-
-			setStateItemsArray(
-	            tempItems.map((droppables) =>
-	                droppables.id === destination.droppableId
-	                    ? { ...droppables, items: result.destination }
-	                    : { ...droppables }
-	            )
-	        );			
-        }
+		//deleted
     };  
 
   const resetTraitFileUpload = () => {
@@ -696,6 +833,8 @@ const ComposerPage = () => {
   };
   
   var encodedItems: ComposableItem[] = getList('Items');
+  //remove the items already in the composer layers
+  encodedItems = encodedItems.filter(encodedItem => !filterTokenItem(composedItems.filter(part => part != null && part.tokenAddress != null), encodedItem.tokenAddress, encodedItem.tokenId));
   
   if (true) {
 	  if (selectedOwned === true) {
@@ -707,6 +846,52 @@ const ComposerPage = () => {
   
   const saveEnabled = (nounTokenAddress !== undefined && nounTokenId !== undefined && composerProxyAddress !== undefined) && (hasOwnedComposedItems) && (hasDifferentComposedItems);
 
+  const onRemoveItemClick = (index: number) => {
+	var items: ComposableItem[] = [];
+	
+	const tempItems: ComposableItem[] = [...stateItems];
+	const rItems = tempItems.slice().reverse();
+	
+	rItems[index] = items[0];	
+	
+  	setStateItems(rItems.slice().reverse());
+  }
+  
+  const onDragEndSimple = (results: any) => {
+  	const { source, destination, combine } = results;
+  	
+  	const tempItems: ComposableItem[] = [...stateItems];
+  	
+  	//if drop into combined
+  	if (combine) {
+  		const items = reorder(
+  			tempItems.slice().reverse(),
+  			source.index,
+  			combine.draggableId
+  		);
+  		
+  		setStateItems(items.slice().reverse());  		
+  	}
+  	
+  	//regular drop flow
+  	
+  	// dropped outside the list
+  	if (!destination) {
+  		return;
+  	}
+  	
+  	
+  	if (source.droppableId === destination.droppableId) {
+  		const items = reorder(
+  			tempItems.slice().reverse(),
+  			source.index,
+  			destination.index
+  		);
+  		
+  		setStateItems(items.slice().reverse());
+  	}
+  };
+    
   return (
     <>
       {displayNounModal && nounSVG && (
@@ -802,6 +987,7 @@ const ComposerPage = () => {
 		)}		        
         
 		<Row className="composer-selecter">
+		
 		<DragDropContext onDragEnd={(results: any) => {onDragEnd(results);}}>
         {nounSVG && (
         	<>
@@ -822,14 +1008,31 @@ const ComposerPage = () => {
 				)}
 			  </Col>
 		      <Col lg={6} xs={12}>
-		
 					<Row style={{marginBottom: 25}}>
+						<Col lg={12} xs={12}>
+						      <DragDropContext onDragEnd={(results: any) => {onDragEndSimple(results);}}>
+						
+								<DroppableControlNew droppableId="Foreground" droppableItems={composedItems} holdings={mergedHoldings} itemLimit={16} palette={getImageData(nounExtensionName).palette} onRemoveItemClick={onRemoveItemClick} />
+						
+						      </DragDropContext>
+
+						</Col>
+					</Row>
+
+					<Row style={{marginBottom: 25, display: 'none', visibility: 'hidden'}} >
+						<Col lg={12} xs={12}>
+							<strong>Layers</strong>
+							<DroppableControl droppableId="Foreground" droppableItems={getList('Foreground')} holdings={mergedHoldings} itemLimit={10} />
+						</Col>
+					</Row>
+		
+					<Row style={{marginBottom: 25, display: 'none', visibility: 'hidden'}} >
 						<Col lg={12} xs={12}>
 							<strong>Foreground</strong>
 							<DroppableControl droppableId="Foreground" droppableItems={getList('Foreground')} holdings={mergedHoldings} itemLimit={4} />
 						</Col>
 					</Row>
-					<Row style={{marginBottom: 25}}>
+					<Row style={{marginBottom: 25, display: 'none', visibility: 'hidden'}}>
 						<Col lg={3} xs={3}>
 							<strong>Body</strong>
 							<DroppableControl droppableId="Body" droppableItems={getList('Body')} holdings={mergedHoldings} itemLimit={1} />
@@ -847,7 +1050,7 @@ const ComposerPage = () => {
 							<DroppableControl droppableId="Glasses" droppableItems={getList('Glasses')} holdings={mergedHoldings} itemLimit={1} />
 						</Col>
 					</Row>
-					<Row>
+					<Row style={{marginBottom: 25, display: 'none', visibility: 'hidden'}}>
 						<Col lg={12} xs={12}>
 							<strong>Background</strong>
 							<DroppableControl droppableId="Background" droppableItems={getList('Background')} holdings={mergedHoldings} itemLimit={4} />
@@ -870,7 +1073,7 @@ const ComposerPage = () => {
       		</Col>
 
 	  	  	<Col lg={12}>	    	
-				<DroppableControl droppableId="Items" droppableItems={encodedItems} holdings={mergedHoldings} itemLimit={1000} />          					
+				<DroppableControl droppableId="Items" droppableItems={encodedItems} holdings={mergedHoldings} itemLimit={1000} onItemClick={onItemClick} />          					
 	  	  	</Col>		
         	</>
 		)}
@@ -887,7 +1090,7 @@ const ComposerPage = () => {
 		            <Button className={classes.primaryBtnSaver} onClick={() => setDisplaySaveModal(true)} disabled={!saveEnabled}>
 		              Save On-Chain
 		            </Button>			
-        			<TooltipInfo tooltipText={"You can only save your changes on-chain when you are the owner of the base NFT, AND the owner of all of the parts you're trying to compose inside of it."} />
+        			<TooltipInfo tooltipText={"You can only save your changes on-chain when you are the owner of the Noun AND the custom traits you're trying to compose inside of it."} />
 	         	</Col>
 	        </Row>
 		)}
