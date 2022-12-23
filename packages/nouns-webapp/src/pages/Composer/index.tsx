@@ -1,14 +1,19 @@
 //import React from 'react';
 import React, { ChangeEvent, useEffect, useRef, useState, ReactNode } from 'react';
 import classes from './Composer.module.css';
-import { Container, Row, Col, Button, Form, Spinner, ListGroup } from 'react-bootstrap';
+import { Container, Row, Col, Button, FloatingLabel, Form, Spinner, ListGroup, InputGroup } from 'react-bootstrap';
+import Link from '../../components/Link';
 import TooltipInfo from '../../components/TooltipInfo';
+import Pagination from '../../components/Pagination';
 
 import { ComposableItemCollection, getComposableItemCollections, 
 	TokenItem, getTokenHoldings, filterComposableItem, filterTokenItem,
-	ComposableEncodedImage, ComposableItem, getComposableItemsBatch } from '../../utils/composables/composablesWrapper';
+	ComposableEncodedImage, ComposableItem, getComposableItemsBatch,
+	getComposableItemsSearch, getComposableItemsSearchCount } from '../../utils/composables/composablesWrapper';
 //	ComposablesMarketListing, getComposablesMarketListings,
+import { isIndexerEnabled, indexComposableItemsSearchFilters, getComposableItemsSearchFilters } from '../../utils/composables/composablesIndexer';
 import BigNumber from 'bignumber.js';
+
 	
 import { useAppSelector } from '../../hooks';
 
@@ -127,6 +132,7 @@ const getListStyleOld = (isDraggingOver: boolean, styleJustify: string, styleOve
   maxHeight: '400px',
   justifyContent: styleJustify,
   borderRadius: '16px',
+  marginBottom: '0.5rem',
 });
 
 const isSpecialLayer = (index: number): boolean => (ri(index) === 4 || ri(index) === 6 || ri(index) === 8 || ri(index) === 10);
@@ -161,14 +167,7 @@ const layerIcon = (index: number): ReactNode => {
 
 const DraggableControl: React.FC<{ item: ComposableItem; index: number; holdings: TokenItem[]; palette?: string[]; onRemoveItemClick: (index: number) => void;}> = props => {
   const { item, index, holdings, palette, onRemoveItemClick } = props;
-  
-  //const styleJustify = (itemLimit === 1) ? 'center' : 'left';
-  //const styleOverflow = (itemLimit > 10) ? 'auto' : 'hidden';
-  //const direction = (itemLimit > 10) ? 'vertical' : 'horizontal';
-  //const baseClassName = (itemLimit > 10) ? classes.dropList : '';
-  //const itemClassName = (filterTokenItem(holdings, encodedItem.tokenAddress, encodedItem.tokenId)) ? classes.nounImgDragNew : classes.nounImgDragHighlightNew;
-  //const isDropDisabled = false;//(droppableItems.length === itemLimit) ? true : false;
-  
+
   const hasItem = (item && item.meta && item.meta.name) || (isSpecialLayer(index));
   
   const temp: any = (item && !item.meta && isSpecialLayer(index)) ? item : null;
@@ -256,12 +255,6 @@ const DraggableControl: React.FC<{ item: ComposableItem; index: number; holdings
 const DroppableControlNew: React.FC<{ droppableId: string; droppableItems: ComposableItem[]; itemLimit: number; holdings: TokenItem[]; palette?: string[]; onItemClick?: (item: ComposableItem) => void; onRemoveItemClick: (index: number) => void }> = props => {
   const { droppableItems, holdings, palette, onRemoveItemClick } = props;
   
-  //const styleJustify = (itemLimit === 1) ? 'center' : 'left';
-  //const styleOverflow = (itemLimit > 10) ? 'auto' : 'hidden';
-  //const direction = (itemLimit > 10) ? 'vertical' : 'horizontal';
-  //const baseClassName = (itemLimit > 10) ? classes.dropList : '';
-  //const itemClassName = (filterTokenItem(holdings, encodedItem.tokenAddress, encodedItem.tokenId)) ? classes.nounImgDrag : classes.nounImgDragHighlight;
-  //const isDropDisabled = false;//(droppableItems.length === itemLimit) ? true : false;
   const baseClassName = classes.dropListNew;
 
   return (
@@ -287,7 +280,7 @@ const DroppableControlNew: React.FC<{ droppableId: string; droppableItems: Compo
 const DroppableControl: React.FC<{ droppableId: string; droppableItems: ComposableItem[]; itemLimit: number; holdings: TokenItem[]; onItemClick?: (item: ComposableItem) => void; }> = props => {
   const { droppableId, droppableItems, itemLimit, holdings, onItemClick } = props;
   
-  const styleJustify = (itemLimit === 1) ? 'center' : 'left';
+  const styleJustify = (itemLimit === 1) ? 'center' : 'center';
   const styleOverflow = (itemLimit > 10) ? 'auto' : 'hidden';
   const direction = (itemLimit > 10) ? 'vertical' : 'horizontal';
   const baseClassName = (itemLimit > 10) ? classes.dropList : '';
@@ -369,7 +362,13 @@ interface PendingCustomTrait {
   filename: string;
 }
 
+interface Filter {
+  title: string;
+  filterNames: string[];
+}
+
 const DEFAULT_TRAIT_TYPE = 'heads';
+const PageSize = 40;
 
 const ComposerPage = () => {
 
@@ -403,6 +402,15 @@ const ComposerPage = () => {
   const [holdings, setHoldings] = useState<TokenItem[]>([]);  
   
   const [selectedOwned, setSelectedOwned] = useState<boolean>(true);
+
+
+  const [filters, setFilters] = useState<Filter[]>();
+  const [searchToggle, setSearchToggle] = useState<boolean>(true);
+  const [selectIndexes, setSelectIndexes] = useState<Record<string, number>>({});
+  const [collectionItemsCount, setCollectionItemsCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  
+  const searchInputRef = useRef<HTMLInputElement>(null);
     
   const activeAccount = useAppSelector(state => state.account.activeAccount);
 
@@ -469,15 +477,21 @@ const ComposerPage = () => {
 	        { id: "Accessory", items: [] },
 	        { id: "Body", items: [] },
 	        { id: "Background", items: [] },
-	    ]);	   		    
+	    ]);
 
-	const stateItems: ComposableItem[] = [];
-	stateItems.length = 16;
-	
-	setStateItems(stateItems);
+    	setFilters([
+	    	{title: 'Category', filterNames: []},
+	    	{title: 'Collection', filterNames: []}, 
+	    	{title: 'Creator', filterNames: []}
+		  	//{title: 'Status', filterNames: []}
+		]);
 
+		const stateItems: ComposableItem[] = [];
+		stateItems.length = 16;
+		
+		setStateItems(stateItems);
 
-      setInitLoad(false);
+		setInitLoad(false);
     }
   }, [initLoad]);
 
@@ -491,28 +505,65 @@ const ComposerPage = () => {
 	    	const creatorNames: string[] = [];
 			const categoryNames: string[] = [];
 			    
-			//all of the items from the collections
-			const items = await getComposableItemsBatch(collections);
-	    	
-	    	for (let i = 0; i < items.length; i++) {
-				
-				const item = items[i];
+			if (isIndexerEnabled()) {
+				//run the indexer, this should be offloaded to an async process...
+				await indexComposableItemsSearchFilters();
+				//all of the items from the collections
+				const rows: Record<string, any>[] = await getComposableItemsSearchFilters();
+		    	
+				for (let i = 0; i < rows.length; i++) {
+					const row: Record<string, any> = rows[i];
+						
+				    if (collectionNames.indexOf(row.collectionName) === -1) {
+				        collectionNames.push(row.collectionName)
+				    }
 
-			    if (collectionNames.indexOf(item.collection) === -1) {
-			        collectionNames.push(item.collection)
-			    }
-				
-			    if (creatorNames.indexOf(item.meta.attributes[1].value) === -1) {
-			        creatorNames.push(item.meta.attributes[1].value)
-			    }
+				    if (categoryNames.indexOf(row.parsedCategoryName) === -1) {
+				        categoryNames.push(row.parsedCategoryName)
+				    }
 
-			    if (categoryNames.indexOf(item.meta.attributes[0].value) === -1) {
-			        categoryNames.push(item.meta.attributes[0].value)
-			    }	    		
-	    	}
+				    if (creatorNames.indexOf(row.parsedCreatorName) === -1) {
+				        creatorNames.push(row.parsedCreatorName)
+				    }	
+		    	}
+	
+				const itemsCount = await getComposableItemsSearchCount(undefined, undefined, undefined, undefined);
+				const items = await getComposableItemsSearch(0, PageSize, undefined, undefined, undefined, undefined);
+
+				setCollectionItemsCount(itemsCount);
+				setCollectionItems(items);
+			} else {
+				//all of the items from the collections
+				const items = await getComposableItemsBatch(collections);
+		    	
+		    	for (let i = 0; i < items.length; i++) {
+					
+					const item = items[i];
+	
+				    if (collectionNames.indexOf(item.collection) === -1) {
+				        collectionNames.push(item.collection)
+				    }
+					
+				    if (creatorNames.indexOf(item.meta.attributes[1].value) === -1) {
+				        creatorNames.push(item.meta.attributes[1].value)
+				    }
+	
+				    if (categoryNames.indexOf(item.meta.attributes[0].value) === -1) {
+				        categoryNames.push(item.meta.attributes[0].value)
+				    }	    		
+		    	}
+	
+				setCollectionItems(items);				
+			}
+
+		    setFilters([
+		    	{title: 'Category', filterNames: categoryNames.sort((a, b) => a.toLowerCase() > b.toLowerCase() ? 1 : -1)},
+		    	{title: 'Collection', filterNames: collectionNames.sort((a, b) => a.toLowerCase() > b.toLowerCase() ? 1 : -1)}, 
+		    	{title: 'Creator', filterNames: creatorNames.sort((a, b) => a.toLowerCase() > b.toLowerCase() ? 1 : -1)}
+		    	//{title: 'Status', filterNames: ['Listed Sale']}
+		    ]);
 	    	
-	    	const tempItems = items.slice();//0, 10
-			setCollectionItems(tempItems);
+	    	const tempItems:any[] = [];
 
 		    setStateItemsArray((stateItemsArray) => [
 		        ...stateItemsArray,
@@ -527,6 +578,35 @@ const ComposerPage = () => {
     }    
 
   }, [collections]);
+
+  useEffect(() => {
+
+    if (collections && filters) {
+
+	    const loadCollectionItems = async () => {
+	    	
+			if (isIndexerEnabled()) {
+				const selectedCategory = filters[0].filterNames[selectIndexes?.['Category']] ?? undefined;
+				const selectedCollection = filters[1].filterNames[selectIndexes?.['Collection']] ?? undefined;
+				const selectedCreator = filters[2].filterNames[selectIndexes?.['Creator']] ?? undefined;
+				const searchText = (!searchInputRef.current || !searchInputRef.current.value || !searchInputRef.current.value.trim()) ? undefined : searchInputRef.current?.value.trim();
+
+			    const firstPageIndex = (currentPage - 1) * PageSize;
+			    const lastPageIndex = firstPageIndex + PageSize;
+
+				const itemsCount = await getComposableItemsSearchCount(selectedCollection, selectedCategory, selectedCreator, searchText);
+				const items = await getComposableItemsSearch(firstPageIndex, lastPageIndex, selectedCollection, selectedCategory, selectedCreator, searchText);
+
+				setCollectionItemsCount(itemsCount);
+				setCollectionItems(items);
+			}
+	    };
+	    
+	    loadCollectionItems();
+    }
+
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchToggle, currentPage]);
 
   useEffect(() => {
 
@@ -548,7 +628,28 @@ const ComposerPage = () => {
     }
   }, [activeAccount, collections]);
 
+  const filterOptions = (filter: Filter) => {
+    return Array.from(Array(filter.filterNames.length + 1)).map((_, index) => {
+      const filterName = filter.filterNames[index - 1];
+      const parsedTitle = index === 0 ? `Any` : filterName;
+      return (
+        <option key={index} value={filterName}>
+          {parsedTitle}
+        </option>
+      );
+    });
+  };
 
+  const filterButtonHandler = (filter: Filter, filterIndex: number) => {
+  	setCurrentPage(1);
+	setSearchToggle(!searchToggle);
+  };
+
+  const onSearchButtonClick = () => {
+  	setCurrentPage(1);
+	setSearchToggle(!searchToggle);
+  }
+  
   const getTopComposedItemsIndex = () => {
   	
   	let index = 15;
@@ -691,26 +792,6 @@ const ComposerPage = () => {
 
 	setStateItemsArray(resetStateItemsArray);
   }
-
-  const getList = (listId: string) => {
-  	var items: ComposableItem[] = [];
-  	
-	stateItemsArray.forEach(droppableItem => {
-	    if (droppableItem.id === listId) {
-	    	items = droppableItem.items;
-	    }
-	});
-	  
-	if (listId === 'Items' && selectedOwned === true) {
-		const uploadedItems = items.filter(encodedItem => encodedItem.collection === 'UPLOADED');
-
-		items = items.filter(encodedItem => filterTokenItem(holdings, encodedItem.tokenAddress, encodedItem.tokenId));
-		
-		items = items.concat(uploadedItems);
-	}
-  	
-  	return items;
-  }
        
   const onDragEnd = (results: any) => {  		
 		//deleted
@@ -840,9 +921,11 @@ const ComposerPage = () => {
     setSelectedOwned(current => !current);
   };
   
-  var encodedItems: ComposableItem[] = getList('Items');
+  var encodedItems = collectionItems;//getList('Items');
   //remove the items already in the composer layers
-  encodedItems = encodedItems.filter(encodedItem => !filterTokenItem(composedItems.filter(part => part != null && part.tokenAddress != null), encodedItem.tokenAddress, encodedItem.tokenId));
+  if (encodedItems) {
+	  encodedItems = encodedItems.filter(encodedItem => !filterTokenItem(composedItems.filter(part => part != null && part.tokenAddress != null), encodedItem.tokenAddress, encodedItem.tokenId));
+  }
   
   if (true) {
 	  if (selectedOwned === true) {
@@ -966,7 +1049,7 @@ const ComposerPage = () => {
               <Trans>Composer</Trans>
             </h1>
             <p>
-            	Composables allow for the Nouns community to expand their digital identity in new and creative ways.
+            	Expand your digital identity in new and creative ways.
 
             	More than just a Playground, you can now personalize your Noun on-chain and make it your own.
                 Add unique visual layers to enhance your avatar, 
@@ -977,15 +1060,28 @@ const ComposerPage = () => {
                 To start, please select a Noun from your wallet, or generate a random Noun:
             </p>
           </Col>
-          <Col lg={6}>
+          <Col md={6} lg={6}>
             <Button onClick={() => setDisplayNounPicker(true)} className={classes.primaryBtnSelecter}>
               Select Noun
             </Button>			
 			&nbsp;&nbsp;&nbsp;
             <Button onClick={() => generateRandomSeed()} className={classes.primaryBtnSelecter}>
               Random Noun
-            </Button>			
-        			
+            </Button>			        			
+          </Col>
+          <Col md={6} lg={6} style={{textAlign: 'right'}}>
+	        {nounSVG && (
+        		<div className="composer-saver">
+		            <Button className={classes.primaryBtnSaver} onClick={() => setDisplayNounModal(true)}>
+		              Download
+		            </Button>			
+					&nbsp;&nbsp;&nbsp;
+		            <Button className={classes.primaryBtnSaver} onClick={() => setDisplaySaveModal(true)} disabled={!saveEnabled}>
+		              Save On-Chain
+		            </Button>			
+        			<TooltipInfo tooltipText={"You can only save your changes on-chain when you are the owner of the Noun AND the custom traits you're trying to compose inside of it."} />
+	         	</div>
+			)}
           </Col>
         </Row>
     	{collectionItems === undefined && (
@@ -1016,7 +1112,7 @@ const ComposerPage = () => {
 				)}
 			  </Col>
 		      <Col lg={6} xs={12}>
-					<Row style={{marginBottom: 25}}>
+					<Row style={{marginBottom: '10px'}}>
 						<Col lg={12} xs={12}>
 						      <DragDropContext onDragEnd={(results: any) => {onDragEndSimple(results);}}>
 						
@@ -1025,54 +1121,16 @@ const ComposerPage = () => {
 						      </DragDropContext>
 
 						</Col>
-					</Row>
-
-					<Row style={{marginBottom: 25, display: 'none', visibility: 'hidden'}} >
-						<Col lg={12} xs={12}>
-							<strong>Layers</strong>
-							<DroppableControl droppableId="Foreground" droppableItems={getList('Foreground')} holdings={mergedHoldings} itemLimit={10} />
-						</Col>
-					</Row>
-		
-					<Row style={{marginBottom: 25, display: 'none', visibility: 'hidden'}} >
-						<Col lg={12} xs={12}>
-							<strong>Foreground</strong>
-							<DroppableControl droppableId="Foreground" droppableItems={getList('Foreground')} holdings={mergedHoldings} itemLimit={4} />
-						</Col>
-					</Row>
-					<Row style={{marginBottom: 25, display: 'none', visibility: 'hidden'}}>
-						<Col lg={3} xs={3}>
-							<strong>Body</strong>
-							<DroppableControl droppableId="Body" droppableItems={getList('Body')} holdings={mergedHoldings} itemLimit={1} />
-						</Col>
-						<Col lg={3} xs={3}>
-							<strong>Accessory</strong>
-							<DroppableControl droppableId="Accessory" droppableItems={getList('Accessory')} holdings={mergedHoldings} itemLimit={1} />
-						</Col>
-						<Col lg={3} xs={3}>
-							<strong>Head</strong>
-							<DroppableControl droppableId="Head" droppableItems={getList('Head')} holdings={mergedHoldings} itemLimit={1} />
-						</Col>
-						<Col lg={3} xs={3}>
-							<strong>Glasses</strong>
-							<DroppableControl droppableId="Glasses" droppableItems={getList('Glasses')} holdings={mergedHoldings} itemLimit={1} />
-						</Col>
-					</Row>
-					<Row style={{marginBottom: 25, display: 'none', visibility: 'hidden'}}>
-						<Col lg={12} xs={12}>
-							<strong>Background</strong>
-							<DroppableControl droppableId="Background" droppableItems={getList('Background')} holdings={mergedHoldings} itemLimit={4} />
-						</Col>
-					</Row>
+					</Row>		
 			  </Col>
         	</>
 		)}
-        {(activeAccount || nounSVG) && (
+        {(nounSVG) && (
         	<>
-        	<Col lg={1}>
+        	<Col lg={1} style={{display: 'none', visibility: 'hidden'}}>
 	    		<strong>Items</strong>
 	    	</Col>
-      		<Col lg={11}>
+      		<Col lg={11} style={{display: 'none', visibility: 'hidden'}}>
       			<Form.Check type="switch" id="custom-switch" 
       			defaultChecked={selectedOwned}
       			value={selectedOwned.toString()}
@@ -1080,46 +1138,104 @@ const ComposerPage = () => {
       			label="Only show items I own" />
       		</Col>
 
-	  	  	<Col lg={12}>	    	
-				<DroppableControl droppableId="Items" droppableItems={encodedItems} holdings={mergedHoldings} itemLimit={1000} onItemClick={onItemClick} />          					
-	  	  	</Col>		
+	  	  	<Col lg={12}>
+
+
+		        <Row>
+		          <Col lg={3}>
+		            <Col lg={12}>
+		      <InputGroup>
+						<Form.Control 
+						id="txtSearch"
+						type="text" 
+						placeholder="Search" 
+						maxLength={100} 
+						className={classes.primaryTxtSearch}
+						ref={searchInputRef} 
+						/>
+						<Button className={classes.primaryBtnSearch} onClick={() => onSearchButtonClick()}>Search</Button>
+		      </InputGroup>				
+										
+		            </Col>
+		            <Row>
+		              {filters &&
+		                filters.map((filter, index) => {
+		                  return (
+		                    <Col lg={12} xs={6}>
+		                      <Form className={classes.traitForm}>
+		                        <FloatingLabel
+		                          controlId="floatingSelect"
+		                          label={filter.title}
+		                          key={index}
+		                          className={classes.floatingLabel}
+		                        >
+		                          <Form.Select
+		                            aria-label="Floating label select example"
+		                            className={classes.traitFormBtn}
+		                            value={filter.filterNames[selectIndexes?.[filter.title]] ?? -1}
+		                            onChange={e => {
+		                              let index = e.currentTarget.selectedIndex;
+		                              filterButtonHandler(filter, index - 1); // - 1 to account for 'any'
+		                              setSelectIndexes({
+		                                ...selectIndexes,
+		                                [filter.title]: index - 1,
+		                              });
+		                            }}
+		                          >
+		                            {filterOptions(filter)}
+		                          </Form.Select>
+		                        </FloatingLabel>
+		                      </Form>
+		                    </Col>
+		                  );
+		                })}
+		            </Row>            
+		          </Col>
+		          <Col lg={9}>
+		            <Row>
+				        <Row style={{ margin: '0' }}>
+				        	{encodedItems === undefined ? (
+								<div className={classes.spinner}>
+									<Spinner animation="border" />
+								</div>
+							) : (
+								<>		
+								<DroppableControl droppableId="Items" droppableItems={encodedItems} holdings={mergedHoldings} itemLimit={1000} onItemClick={onItemClick} />
+								
+								<Pagination
+							        currentPage={currentPage}
+							        totalCount={collectionItemsCount}
+							        pageSize={PageSize}
+							        onPageChange={page => setCurrentPage(page)}
+							    />
+							    </>
+							)}		        
+				        </Row>
+		            </Row>
+		          </Col>
+		        </Row>
+	  	  	</Col>
         	</>
 		)}
 		</DragDropContext>
 		</Row>
-		<Row className="composer-saver">
-        {nounSVG && (
-        	<Row>
-        		<Col lg={12}>
-		            <Button className={classes.primaryBtnSaver} onClick={() => setDisplayNounModal(true)}>
-		              Download
-		            </Button>			
-					&nbsp;&nbsp;&nbsp;
-		            <Button className={classes.primaryBtnSaver} onClick={() => setDisplaySaveModal(true)} disabled={!saveEnabled}>
-		              Save On-Chain
-		            </Button>			
-        			<TooltipInfo tooltipText={"You can only save your changes on-chain when you are the owner of the Noun AND the custom traits you're trying to compose inside of it."} />
-	         	</Col>
-	        </Row>
-		)}
-		</Row>		
 		<Row className="composer-uploader">
         {nounSVG && (
         	<Row>
 	          	  <Col lg={12}>					
 					<hr style={{ marginBottom: 0 }} />
 
-	          	  	<span>
+	          	  	<span className={classes.spanFooter}>
 	          	  	You can also upload your own art into the Composer to experiment with adding new custom traits. 
 	          	  	<br /><br />
-	          	  	When you're ready, you can then mint and sell your creations on the Collection pages. <a href="/collections/" style={{ textDecoration: 'none', fontWeight: 'bold'}}>Learn more →</a>
+	          	  	When you're ready, you can then mint and sell your creations on the Collection pages. <Link text={"Learn more →"} url="/collections" leavesPage={false} />
 	          	  	</span>
 
 	          	  </Col>
 	
 	          	  <Col lg={3}>	
 		            <label style={{ margin: '1rem 0 .25rem 0' }} htmlFor="custom-trait-upload">
-		              <Trans>Upload Custom Trait</Trans>
+		              <span style={{fontWeight: 'bold'}}>Upload Custom Trait</span>
 		              <TooltipInfo tooltipText={"Only 32x32 PNG images are accepted."} />
 		            </label>
 		            <Form.Control

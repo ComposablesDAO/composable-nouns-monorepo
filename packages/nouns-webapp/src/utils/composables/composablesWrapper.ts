@@ -2,7 +2,7 @@ import * as contracts from './composablesContracts';
 import * as indexer from './composablesIndexer';
 
 import BigNumber from 'bignumber.js';
-const isIndexer = indexer.isEnabled();
+const isIndexer = indexer.isIndexerEnabled();
 const router = (isIndexer) ? indexer : contracts;
 
 export interface ComposableEncodedImage {
@@ -209,6 +209,37 @@ export async function getComposableItemsBatch(collections: ComposableItemCollect
 	}
 	
 	return items;
+}
+
+export async function getComposableItemsSearchCount(collectionName?: string, categoryName?: string, creatorName?: string, itemSearch?: string): Promise<number> {
+	if (isIndexer) {
+		const itemCount = await indexer.getComposableItemsSearchRowsCount(collectionName, categoryName, creatorName, itemSearch);
+		return itemCount;
+	}
+		
+	return 0;
+}
+
+
+export async function getComposableItemsSearch(firstPageIndex: number, lastPageIndex: number, collectionName?: string, categoryName?: string, creatorName?: string, itemSearch?: string): Promise<ComposableItem[]> {
+
+	let items: ComposableItem[] = [];
+
+	if (isIndexer) {
+		const rows: Record<string, any>[] = await indexer.getComposableItemsSearchRows(firstPageIndex, lastPageIndex, collectionName, categoryName, creatorName, itemSearch);
+
+		for (let i = 0; i < rows.length; i++) {
+			const row: Record<string, any> = rows[i];
+			if (row.paletteRaw) {
+				const item = prepareComposableItem(row.tokenAddress, row.tokenId, row.collectionName, row.paletteRaw, row.imageBytes, row.metaGenerated);
+				items.push(item);
+			}
+		}
+		
+		return items;
+	}
+		
+	return [];
 }
 
 //get collection name out of here...

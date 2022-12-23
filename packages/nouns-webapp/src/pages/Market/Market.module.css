@@ -42,6 +42,11 @@
   border-radius: 12px;  
 }
 
+.searchFooter a {
+  text-decoration: none;
+  font-weight: bold;
+}
+
 .marginBottom {
   margin-bottom: 0rem;
 }
@@ -99,14 +104,21 @@
   height: 2rem;
 }
 
+.primaryTxtSearch {
+  width: 67%;
+  max-width: 200px;
+  border-radius: 12px;
+}
+
 .primaryBtnSearch {
-  width: 100%;
+  width: 33%;
+  max-width: 100px;
+  border-radius: 12px;
 }
 
 .primaryBtn, .primaryBtnItem, .primaryBtnSearch {
   font-weight: bold;
-  margin-bottom: 0.5rem;
-  border-radius: 12px;
+  margin-bottom: 0rem;
   background-color: var(--brand-dark-red);
   border: var(--brand-dark-red);
 }

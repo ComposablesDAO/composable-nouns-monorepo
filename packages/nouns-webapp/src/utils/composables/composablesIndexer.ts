@@ -8,7 +8,7 @@ import { connect } from '@planetscale/database'
 const configIndexer = config.indexer;
 const logger = config.logger;
 
-export const isEnabled = () : boolean => {
+export const isIndexerEnabled = () : boolean => {
 	return (configIndexer.host !== undefined);
 }
 
@@ -179,6 +179,117 @@ export async function getCollectionItemMetaGenerated(collectionAddress: string, 
 
 	return '';
 }
+
+/*
+ * Indexer search functions
+ */
+
+export async function getComposableItemsSearchRowsCount(collectionName?: string, categoryName?: string, creatorName?: string, itemSearch?: string): Promise<number> {
+  	const conn = connect(configIndexer);
+  	
+	//add a status flag
+	var sqlFilters = 'WHERE 1=1';
+	var sqlParams: any[] = [];
+	
+	if (collectionName) {
+		sqlFilters = sqlFilters + ' AND C.name = ?';
+		sqlParams.push(collectionName);
+	}
+
+	if (categoryName) {
+		sqlFilters = sqlFilters + ' AND parsedCategoryName = ?';
+		sqlParams.push(categoryName);
+	}
+
+	if (creatorName) {
+		sqlFilters = sqlFilters + ' AND parsedCreatorName = ?';
+		sqlParams.push(creatorName);
+	}
+
+	if (itemSearch) {
+		sqlFilters = sqlFilters + ' AND parsedItemName LIKE ?';
+		sqlParams.push('%' + itemSearch + '%');
+	}
+		
+	const results = await conn.execute(`SELECT count(*) AS counter FROM collections C INNER JOIN collection_items I ON C.tokenAddress = I.tokenAddress ${sqlFilters}`, sqlParams);
+
+	if (results.rows.length > 0) {
+		const row: Record<string, any> = results.rows[0];
+		return row.counter;
+	}		
+		
+	return 0;
+}
+
+export async function getComposableItemsSearchRows(firstPageIndex: number, lastPageIndex: number, collectionName?: string, categoryName?: string, creatorName?: string, itemSearch?: string): Promise<Record<string, any>[]> {
+  	const conn = connect(configIndexer);
+  	
+	//add a status flag
+	var sqlFilters = 'WHERE 1=1';
+	var sqlParams: any[] = [];
+	
+	if (collectionName) {
+		sqlFilters = sqlFilters + ' AND C.name = ?';
+		sqlParams.push(collectionName);
+	}
+
+	if (categoryName) {
+		sqlFilters = sqlFilters + ' AND parsedCategoryName = ?';
+		sqlParams.push(categoryName);
+	}
+
+	if (creatorName) {
+		sqlFilters = sqlFilters + ' AND parsedCreatorName = ?';
+		sqlParams.push(creatorName);
+	}
+
+	if (itemSearch) {
+		sqlFilters = sqlFilters + ' AND parsedItemName LIKE ?';
+		sqlParams.push('%' + itemSearch + '%');
+	}
+		
+	const results = await conn.execute(`SELECT C.tokenAddress, I.tokenId, C.name AS collectionName, C.Palette AS paletteRaw, I.imageBytes, I.metaGenerated FROM collections C INNER JOIN collection_items I ON C.tokenAddress = I.tokenAddress ${sqlFilters} ORDER BY priority DESC LIMIT ${firstPageIndex}, ${lastPageIndex}`, sqlParams);
+	const rows: Record<string, any>[] = results.rows.map(row => ({...row}) as Record<string, any> );
+		
+	return rows;
+}
+
+
+export async function getComposableItemsSearchFilters(): Promise<Record<string, any>[]> {
+  	const conn = connect(configIndexer);
+	const results = await conn.execute('SELECT DISTINCT C.tokenAddress, C.name AS collectionName, I.parsedCategoryName, I.parsedCreatorName FROM collections C INNER JOIN collection_items I ON C.tokenAddress = I.tokenAddress');
+	const rows: Record<string, any>[] = results.rows.map(row => ({...row}) as Record<string, any> );
+		
+	return rows;
+}
+
+export async function indexComposableItemsSearchFilters(): Promise<boolean> {
+  	const conn = connect(configIndexer);
+	const results = await conn.execute('SELECT id, metaGenerated FROM collection_items WHERE parsedItemName IS NULL OR parsedCategoryName IS NULL OR parsedCreatorName IS NULL');
+	const rows: Record<string, any>[] = results.rows.map(row => ({...row}) as Record<string, any> );
+
+	for (let i = 0; i < rows.length; i++) {
+		const row: Record<string, any> = rows[i];
+
+		const json = JSON.parse("{" + row.metaGenerated + "}");
+	
+		//should check these and not just assume...	
+		const itemName = json.name;
+		const categoryName = json.attributes[0].value;
+		const creatorName = json.attributes[1].value;
+
+		const update = await conn.execute('UPDATE collection_items SET parsedItemName = ?, parsedCategoryName = ?, parsedCreatorName = ? WHERE id = ?', [itemName, categoryName, creatorName, row.id]);
+		if (logger) console.log('index composable item meta', update);
+	}
+
+	return true;
+}
+
+/*
+ * Indexer collection and profile info
+ * Move write calls to backend
+ */
+
 
 export async function getCollectionInfo(tokenAddress: string): Promise<Record<string, any> | undefined> {
   	const conn = connect(configIndexer);
